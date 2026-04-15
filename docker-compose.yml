@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: footoccitanie
+      POSTGRES_USER: footuser
+      POSTGRES_PASSWORD: footpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  web:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+      - redis
+
+  celery_worker:
+    build: ./backend
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+      - redis
+
+  celery_beat:
+    build: ./backend
+    command: celery -A config beat --loglevel=info
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+      - redis
+volumes:
+  postgres_data:

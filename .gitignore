@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+
+# Django
+db.sqlite3
+
+# Node
+node_modules/
+
+# Expo
+.expo/
+dist/
+
+# OS
+.DS_Store
