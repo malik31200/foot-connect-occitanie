@@ -482,10 +482,10 @@ Tous les services backend tournent sur un **VPS Ubuntu géré manuellement**. Le
 #### Source de données
 
 ```
-URL base   : https://api-dofa.prd-aws.fff.fr
-Token auth : récupéré depuis https://www.fff.fr/api/dofa/token
-Format     : JSON
-Région     : Occitanie
+URL base   : https://api-dofa.fff.fr
+Auth       : aucune (API publique, pas de token requis)
+Format     : JSON (API Hydra/JSON-LD)
+Région     : Occitanie (cg_no=77)
 Catégories : U14, U16, U18, Seniors
 ```
 
@@ -510,8 +510,8 @@ Le champ `is_locked` protège les données corrigées manuellement. L'admin peut
 #### Fréquence (Celery Beat)
 
 ```
-Lundi → Vendredi  : toutes les heures
-Samedi → Dimanche : toutes les 15 minutes (V1)
+Lundi → Vendredi  : une fois par jour (6h00)
+Samedi → Dimanche : 6 fois par jour (toutes les 4 heures)
 À la demande      : via back-office admin
 ```
 
@@ -805,10 +805,8 @@ FFF_REGION=Occitanie
 - Initialiser back-office React + Vite
 - Initialiser mobile React Native + Expo
 - Docker local (web, db, redis, celery_worker, celery_beat)
-- Configurer Cloudinary
 - Configurer `.env` (dev/staging/prod)
 - Repos GitHub + CI basique
-- Provisionner VPS Ubuntu (SSH, firewall, dépendances système)
 - Tester manuellement l'API FFF (token + premières requêtes)
 
 #### Sprint 1 — Authentification et base utilisateur
@@ -826,7 +824,7 @@ FFF_REGION=Occitanie
 - SYNC_LOG + enregistrement résultats
 - Endpoint `POST /api/scraper/sync` (forcer synchro manuelle)
 - Endpoint `GET /api/scraper/status` et `GET /api/scraper/logs`
-- Celery Beat : planning automatique (toutes les heures en semaine)
+- Celery Beat : planning automatique (1x/jour en semaine, 6x/jour le week-end)
 - Tests : synchro réussie, INSERT nouveau match, UPDATE non verrouillé, skip verrouillé (mock API FFF)
 
 #### Sprint 2b — Référentiel sportif (frontend admin + mobile)
@@ -849,6 +847,7 @@ FFF_REGION=Occitanie
 
 - Upload Cloudinary depuis mobile
 - Création post (match obligatoire + média)
+- Configurer Cloudinary
 - Feed mobile
 - Like (toggle)
 - Commentaire (create/update/delete)
@@ -870,6 +869,7 @@ FFF_REGION=Occitanie
     - Redis + Celery Worker + Celery Beat en production
     - Vérification scraper FFF en production
     - Tests de smoke
+    - Provisionner VPS Ubuntu (SSH, firewall, dépendances système)
 
 ---
 
@@ -1190,7 +1190,7 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     BEAT["Celery Beat\n(planificateur)"]
-    BEAT -->|"toutes les heures\n(15min week-end)"| TASK
+    BEAT -->|"1x/jour semaine\n(6x/jour week-end)"| TASK
 
     TASK["Tâche sync_fff\nCelery Worker"]
     TASK -->|"GET token"| TOKEN["www.fff.fr/api/dofa/token"]

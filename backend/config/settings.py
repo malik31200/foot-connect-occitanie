@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'users',
+    'clubs',
+    'teams',
+    'matches',
+    'scraper',
 ]
 
 MIDDLEWARE = [
@@ -144,4 +148,20 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Celery Beat -- automatic scheduling of FFF scraper
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    # Weekdays: once per day at 00am
+    "sync-fff-weekdays": {
+        "task": "scraper.tasks.sync_fff",
+        "schedule": crontab(hour=00, minute=0, day_of_week="1-5"),
+    },
+    # Weekends: 6 times per day
+    "sync-fff-weekends": {
+        "task": "scraper.tasks.sync_fff",
+        "schedule": crontab(minute=0, hour="14,16,18,20,22,00", day_of_week="6,0"),
+    },
 }
