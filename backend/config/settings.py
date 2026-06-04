@@ -40,6 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'users',
+    'clubs',
+    'teams',
+    'matches',
+    'scraper',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +128,44 @@ STATIC_URL = 'static/'
 # Celery
 CELERY_BROKER_URL = config('REDIS_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = config('REDIS_URL', default='redis://localhost:6379/0')
+
+# Custom User Model
+AUTH_USER_MODEL = 'users.User'
+
+# DRF
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+# JWT
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Celery Beat -- automatic scheduling of FFF scraper
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    # Weekdays: once per day at 00am
+    "sync-fff-weekdays": {
+        "task": "scraper.tasks.sync_fff",
+        "schedule": crontab(hour=00, minute=0, day_of_week="1-5"),
+    },
+    # Weekends: 6 times per day
+    "sync-fff-weekends": {
+        "task": "scraper.tasks.sync_fff",
+        "schedule": crontab(minute=0, hour="14,16,18,20,22,00", day_of_week="6,0"),
+    },
+}
+
+# FFF_API
+FFF_API_BASE_URL = config('FFF_API_BASE_URL', default='https://api-dofa.fff.fr')
+FFF_REGION_CODE = config('FFF_REGION_CODE', default='77')
