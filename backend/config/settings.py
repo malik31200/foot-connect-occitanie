@@ -165,3 +165,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute=0, hour="14,16,18,20,22,00", day_of_week="6,0"),
     },
 }
+
+# FFF_API
+FFF_API_BASE_URL = config('FFF_API_BASE_URL', default='https://api-dofa.fff.fr')
+FFF_REGION_CODE = config('FFF_REGION_CODE', default='77')

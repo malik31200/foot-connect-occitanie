@@ -15,7 +15,14 @@ def get_competitions():
     }
     response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
-    return response.json().get("hydra:member", [])
+    data = response.json()
+    # compet_light returns JSON-LD array format instead of {"hydra:member": [...]}
+    if isinstance(data, list):
+        for item in data:
+            if isinstance(item, list):
+                return item
+        return []
+    return data.get("hydra:member", [])
 
 
 def get_matches(cp_no, phase_number, poule_number):

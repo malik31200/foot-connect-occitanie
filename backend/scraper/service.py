@@ -1,3 +1,4 @@
+import time
 import logging
 from clubs.models import Club
 from teams.models import Team
@@ -25,7 +26,7 @@ def sync_matches():
 
         for phase in phases:
             phase_number = phase["number"]
-            poules = phase.get("poules", [])
+            poules = phase.get("groups", [])
 
             for poule in poules:
                 poule_number = poule["stage_number"]
@@ -33,6 +34,8 @@ def sync_matches():
                 try:
                     raw_matches = client.get_matches(cp_no, phase_number, poule_number)
 
+                    time.sleep(1) # avoid FFF API rate limiting
+                    
                 except Exception as e:
                     stats["errors_count"] += 1
                     stats["error_details"].append(str(e))
