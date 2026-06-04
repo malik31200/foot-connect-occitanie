@@ -23,6 +23,8 @@ Sprint 2a implémente la synchronisation automatique des données FFF. Sans ce s
 | GET | `/api/scraper/status` | Admin | Résumé de la dernière synchro |
 | GET | `/api/scraper/logs` | Admin | Historique des 30 dernières synchros |
 
+**Résultat en production :** 2236 matchs synchronisés lors du premier test.
+
 ---
 
 ## 2. Exploration de l'API FFF
@@ -45,6 +47,37 @@ GET /api/compets/{cp_no}/phases/{phase}/poules/{poule}/matchs
 
 **Pourquoi `competition_type=CH` et pas `CP` ?**
 `CH` = Championnat, `CP` = Coupe. On ne synchronise que les championnats.
+
+### Particularité du format JSON-LD
+
+Avec `groups[]=compet_light`, la FFF retourne un **tableau JSON** au lieu du format standard :
+
+```json
+// Format standard (hydra:member)
+{"hydra:member": [{...}, {...}]}
+
+// Format compet_light (tableau JSON-LD)
+["/api/contexts/Compet", "/api/compets", "hydra:Collection", [{...}, {...}]]
+```
+
+**Solution dans `client.py`** : détecter si la réponse est une liste et extraire le bon élément :
+```python
+if isinstance(data, list):
+    for item in data:
+        if isinstance(item, list):
+            return item
+    return []
+return data.get("hydra:member", [])
+```
+
+### Particularité des poules
+
+Dans la réponse `compet_light`, les poules s'appellent `"groups"` (pas `"poules"`) :
+```json
+"phases": [{"number": 1, "groups": [{"stage_number": 1, "name": "POULE A"}]}]
+```
+
+Dans `service.py` : `phase.get("groups", [])` et non `phase.get("poules", [])`.
 
 ### Structure d'un match FFF
 
@@ -86,7 +119,8 @@ backend/scraper/
 ├── tasks.py     ← Tâches Celery (sync_fff)
 ├── views.py     ← Endpoints API
 ├── urls.py      ← Routage
-└── admin.py     ← Interface admin Django
+├── admin.py     ← Interface admin Django (SyncLog)
+└── tests.py     ← 4 tests (INSERT, UPDATE, skip, SyncLog)
 ```
 
 **Chaîne d'appels :**
@@ -104,13 +138,16 @@ Celery Beat → tasks.py → service.py → client.py (requête FFF)
 ```python
 def get_competitions():
     # Retourne tous les championnats Occitanie (cg_no=77)
+    # Gère le format JSON-LD tableau retourné par compet_light
 
 def get_matches(cp_no, phase_number, poule_number):
     # Retourne tous les matchs d'une compétition / phase / poule
 ```
 
 **Pourquoi pas de try/except ici ?**
-`client.py` laisse les exceptions remonter volontairement. C'est `tasks.py` qui les attrape et les écrit dans `SyncLog`. Si on avalait les erreurs ici, le log ne saurait pas qu'une synchro a échoué.
+`client.py` laisse les exceptions remonter. C'est `tasks.py` qui les attrape et les écrit dans `SyncLog`.
+
+**Rate limiting FFF :** un `time.sleep(1)` dans `service.py` évite que la FFF refuse les connexions après trop de requêtes rapides.
 
 ---
 
@@ -127,9 +164,6 @@ def parse_match(raw):
     # Transforme un match brut FFF en dict propre pour la BDD
 ```
 
-**Pourquoi `parse_datetime` est nécessaire ?**
-La FFF envoie la date et l'heure dans deux champs séparés avec des formats différents. On ne peut pas les stocker tels quels dans notre champ `date_time`.
-
 ---
 
 ## 6. `service.py` — Logique métier
@@ -142,9 +176,7 @@ Orchestre toute la synchronisation :
 3. Pour chaque match → `_sync_single_match()`
 4. Retourne un dict `stats` avec les compteurs
 
-### `_sync_single_match(data, stats)`
-
-Applique la logique INSERT / UPDATE / skip :
+### Logique INSERT / UPDATE / skip
 
 ```
 fff_id inconnu en BDD         → INSERT  (source="fff")
@@ -159,10 +191,9 @@ club, created = Club.objects.get_or_create(
     defaults={"name": ...}  # crée avec ces valeurs si absent
 )
 ```
-Si le club existe → retourne l'existant. S'il n'existe pas → le crée.
 
 **Pourquoi `is_locked` ?**
-L'admin peut corriger manuellement un résultat via le back-office. Django met automatiquement `is_locked = True`. Le scraper ne peut plus écraser cette correction. L'admin peut déverrouiller via `PATCH /api/matches/{id}/unlock`.
+L'admin peut corriger manuellement un résultat. Django met `is_locked = True` automatiquement. Le scraper ne peut plus écraser cette correction. L'admin déverrouille via `PATCH /api/matches/{id}/unlock`.
 
 ---
 
@@ -174,13 +205,12 @@ def sync_fff():
     # 1. Crée un SyncLog avec status="partial" (avant de commencer)
     # 2. Appelle service.sync_matches()
     # 3. Met à jour le SyncLog avec le résultat
-    # 4. Retourne les stats
 ```
 
 **Pourquoi créer le SyncLog avant la synchro ?**
-Si Django crashe au milieu, l'entrée existe quand même avec `finished_at=None`. L'admin voit qu'une synchro a démarré mais ne s'est jamais terminée.
+Si Django crashe au milieu, l'entrée existe avec `finished_at=None`. L'admin voit qu'une synchro a démarré mais ne s'est jamais terminée.
 
-**Les trois statuts possibles :**
+**Les trois statuts :**
 - `"success"` → `errors_count == 0`
 - `"partial"` → synchro terminée mais avec des erreurs sur certains matchs
 - `"failure"` → `sync_matches()` a planté complètement
@@ -189,26 +219,11 @@ Si Django crashe au milieu, l'entrée existe quand même avec `finished_at=None`
 
 ## 8. `views.py` — Endpoints API
 
-### `POST /api/scraper/sync`
-```python
-task = sync_fff.delay()
-return Response({"task_id": task.id}, status=202)
-```
-`.delay()` envoie la tâche à Celery **sans attendre** la fin. Django répond `202 Accepted` immédiatement.
-
-### `GET /api/scraper/status`
-```python
-log = SyncLog.objects.order_by("-started_at").first()
-```
-Récupère le dernier SyncLog (tri décroissant par date).
-
-### `GET /api/scraper/logs`
-```python
-logs = SyncLog.objects.order_by("-started_at")[:30]
-```
-Les 30 dernières synchros. `[:30]` = `LIMIT 30` en SQL.
-
 **Sécurité :** tous les endpoints vérifient `user.role == "admin"` et retournent `403` sinon.
+
+- `POST /api/scraper/sync` → `.delay()` envoie la tâche à Celery sans attendre, répond `202`
+- `GET /api/scraper/status` → dernier SyncLog (`order_by("-started_at").first()`)
+- `GET /api/scraper/logs` → 30 derniers SyncLogs (`[:30]` = `LIMIT 30`)
 
 ---
 
@@ -234,45 +249,68 @@ CELERY_BEAT_SCHEDULE = {
 
 ---
 
-## 10. Lancer et tester
+## 10. Bugs rencontrés et corrections
+
+| Bug | Cause | Correction |
+|-----|-------|------------|
+| `ModuleNotFoundError: No module named 'requests'` | `requests` absent de `requirements.txt` | Ajouté `requests==2.32.3` |
+| `AttributeError: 'Settings' object has no attribute 'FFF_API_BASE_URL'` | Variables FFF non déclarées dans `settings.py` | Ajouté `FFF_API_BASE_URL` et `FFF_REGION_CODE` via `config()` |
+| `'list' object has no attribute 'get'` | `compet_light` retourne un tableau JSON-LD et non `{"hydra:member": [...]}` | Détection `isinstance(data, list)` dans `client.py` |
+| `'list' object has no attribute 'get'` (2e fois) | Celery worker utilisait l'ancien code (pas de hot-reload) | `docker compose restart celery_worker` |
+| Poules non trouvées | Clé `"poules"` incorrecte, l'API retourne `"groups"` | Corrigé dans `service.py` |
+| 92 erreurs de connexion refusée | Rate limiting FFF (trop de requêtes rapides) | `time.sleep(1)` entre chaque appel `get_matches` |
+
+---
+
+## 11. Tests
+
+4 tests passants :
+
+```
+test_insert_new_match            — nouveau fff_id → match créé en BDD
+test_update_unlocked_match       — is_locked=False → score mis à jour
+test_skip_locked_match           — is_locked=True → score préservé
+test_service_does_not_create_synclog — service.py ne crée pas de SyncLog (c'est tasks.py)
+```
+
+```bash
+docker compose exec web python manage.py test scraper
+```
+
+Résultat attendu :
+```
+Found 4 test(s).
+....
+Ran 4 tests in 6.1s
+OK
+```
+
+---
+
+## 12. Commandes utiles
 
 ```bash
 # Démarrer tous les services
 docker compose up --build
 
-# Forcer une synchro manuelle (dans un autre terminal)
-curl -X POST http://localhost:8000/api/scraper/sync \
-  -H "Authorization: Bearer <access_token>"
+# Lancer les migrations
+docker compose exec web python manage.py migrate
 
-# Vérifier le statut
-curl http://localhost:8000/api/scraper/status \
-  -H "Authorization: Bearer <access_token>"
+# Créer un superuser et lui donner le rôle admin
+docker compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py shell -c \
+  "from users.models import User; u = User.objects.get(email='admin@test.com'); u.role = 'admin'; u.save()"
 
-# Voir les logs
-curl http://localhost:8000/api/scraper/logs \
-  -H "Authorization: Bearer <access_token>"
+# Redémarrer le worker Celery (nécessaire après modification du code)
+docker compose restart celery_worker
+
+# Lancer les tests
+docker compose exec web python manage.py test scraper
 ```
 
 ---
 
-## 11. Structure des fichiers scraper
+## Prochaine étape : Sprint 2b — Frontend admin + mobile
 
-```
-backend/scraper/
-├── models.py       ← SyncLog (table SYNC_LOG)
-├── client.py       ← HTTP vers api-dofa.fff.fr
-├── parser.py       ← Nettoyage JSON FFF → dict propre
-├── service.py      ← INSERT / UPDATE / skip + compteurs
-├── tasks.py        ← @shared_task sync_fff
-├── views.py        ← sync_view, status_view, logs_view
-├── urls.py         ← /sync /status /logs
-└── admin.py        ← À faire (Sprint 2a suite)
-```
-
----
-
-## Prochaine étape : Suite Sprint 2a
-
-- Enregistrer `SyncLog` dans l'interface admin Django (`admin.py`)
-- Lancer Docker et tester la synchro FFF en conditions réelles
-- Écrire les tests : synchro réussie, INSERT nouveau match, UPDATE non verrouillé, skip verrouillé (mock API FFF)
+- CRUD clubs/équipes back-office (React + Vite)
+- Page Matchs mobile : liste avec filtres catégorie/poule/saison
