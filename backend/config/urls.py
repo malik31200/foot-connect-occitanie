@@ -21,4 +21,7 @@ urlpatterns = [
     path('django-admin/', admin.site.urls),
     path('api/auth/', include('users.urls')),
     path('api/scraper/', include('scraper.urls')),
+    path('api/', include('clubs.urls')),
+    path('api/', include('teams.urls')),
+    path('api/', include('matches.urls')),
 ]
