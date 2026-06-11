@@ -191,7 +191,28 @@ docker compose restart web
 
 ---
 
-## Prochaine étape : Fin Sprint 2b
+### `Matches.jsx`
 
-- Page `Matches.jsx` — liste avec filtres + saisie résultats
-- Sprint 3 — résultats, classements, onglets mobile
+- Liste tous les matchs avec 3 filtres combinables : `status`, `category`, `season`
+- Filtre par statut : Tous / À venir / Terminés
+- Saisie de score inline : clic "Saisir le score" → formulaire → PATCH `/api/matches/{id}/result/` → `is_locked = true` automatiquement
+- Déverrouillage : bouton "Déverrouiller" → PATCH `/api/matches/{id}/unlock/` → `is_locked = false`
+- Icône 🔒 sur les matchs verrouillés
+
+---
+
+## 7. Bugs rencontrés et corrections
+
+| Bug | Cause | Correction |
+|-----|-------|------------|
+| Matchs "scheduled" avec score | FFF utilise un code statut autre que "A" pour certains matchs | À corriger en Sprint 3 dans `parse_status` |
+| Dashboard vide après redémarrage Docker | Token JWT expiré, `fetchStatus` échoue silencieusement | Se déconnecter et se reconnecter |
+
+---
+
+## Prochaine étape : Sprint 3
+
+- Saisie résultats + recalcul classement (Celery)
+- Onglets mobile : À venir / Terminés / Classement / Calendrier
+- Correction `parse_status` pour gérer tous les codes FFF
+
