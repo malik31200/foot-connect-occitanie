@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'clubs',
     'teams',
     'matches',
+    'standings',
     'scraper',
 ]
 

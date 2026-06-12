@@ -27,7 +27,15 @@ def get_competitions():
 
 def get_matches(cp_no, phase_number, poule_number):
     # Returns all matches for a given competition / phase / group
+    # Fetches all pages of matches for a given competition / phase / group
     url = f"{FFF_BASE_URL}/api/compets/{cp_no}/phases/{phase_number}/poules/{poule_number}/matchs"
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    return response.json().get("hydra:member", [])
+    all_matches = []
+
+    while url:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        all_matches.extend(data.get("hydra:member", []))
+        next_page = data.get("hydra:view", {}).get("hydra:next")
+        url = f"{FFF_BASE_URL}{next_page}" if next_page else None
+    return all_matches

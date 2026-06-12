@@ -4,6 +4,7 @@ from clubs.models import Club
 from teams.models import Team
 from matches.models import Match
 from . import client, parser
+from standings.tasks import recalcul_standing
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,10 @@ def _sync_single_match(data, stats):
         stats["matches_synced"] += 1
         if data["home_score"] is not None:
             stats["results_synced"] +=1
+        
+            recalcul_standing.delay(data["category"], data["season"], data["group_name"])
+
+        
 
     elif not existing.is_locked:
         existing.status = data["status"]
@@ -130,6 +135,9 @@ def _sync_single_match(data, stats):
         stats["matches_synced"] += 1
         if data["home_score"] is not None:
             stats["results_synced"] += 1
+
+            recalcul_standing.delay(data["category"], data["season"], data["group_name"])
+
 
     else:
         logger.warning("Match %s is locked - skipping FFF update", data["fff_id"])

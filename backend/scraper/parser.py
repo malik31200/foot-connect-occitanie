@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 def parse_status(fff_status):
     if fff_status == "A":
         return "finished"
+    if fff_status in ("P", "postponed"):
+        return "postponed"
     return "scheduled"
 
 
@@ -41,7 +43,7 @@ def parse_match(raw):
         "matchday": raw["poule_journee"]["number"],
         "date_time": parse_datetime(raw["date"], raw["time"]),
         "venue": venue,
-        "status": parse_status(raw.get("status", "")),
+        "status": "finished" if (raw.get("home_score") is not None) else parse_status(raw.get("status", "")),
         "home_score": raw.get("home_score"),
         "away_score": raw.get("away_score"),
         "home_club": {

@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Match
 from .serializers import MatchSerializer
+from standings.tasks import recalcul_standing
 
 
 def is_admin(user):
@@ -67,6 +68,7 @@ class MatchViewSet(viewsets.ModelViewSet):
         match.status = request.data.get('status', match.status)
         match.is_locked = True
         match.save()
+        recalcul_standing.delay(match.category, match.season, match.group_name)
         return Response(MatchSerializer(match).data)
     
     @action(detail=True, methods=['patch'])
