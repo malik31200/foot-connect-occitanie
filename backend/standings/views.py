@@ -2,11 +2,13 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .models import Standing
 from .serializers import StandingSerializer
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+
 
 
 class StandingViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = StandingSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         # Filters: /api/standings/?category=X&season=Y&group_name=Z

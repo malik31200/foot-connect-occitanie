@@ -26,7 +26,6 @@ def get_competitions():
 
 
 def get_matches(cp_no, phase_number, poule_number):
-    # Returns all matches for a given competition / phase / group
     # Fetches all pages of matches for a given competition / phase / group
     url = f"{FFF_BASE_URL}/api/compets/{cp_no}/phases/{phase_number}/poules/{poule_number}/matchs"
     all_matches = []

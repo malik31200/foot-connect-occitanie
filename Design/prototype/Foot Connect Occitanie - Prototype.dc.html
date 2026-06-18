@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  .fco-scroll::-webkit-scrollbar{display:none;}
+  .fco-scroll{-ms-overflow-style:none;scrollbar-width:none;}
+  @keyframes fcoPulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#252019;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px;font-family:'Plus Jakarta Sans',sans-serif;gap:18px;">
+  <div style="width:382px;border-radius:48px;background:#0E0B0A;padding:12px;box-shadow:0 50px 90px -34px rgba(0,0,0,.7);">
+    <div style="position:relative;width:100%;height:786px;border-radius:38px;overflow:hidden;background:#F6F3EE;">
+
+      <!-- ============ LOGIN ============ -->
+      <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+        <div class="fco-scroll" style="position:absolute;inset:0;overflow-y:auto;background:radial-gradient(130% 100% at 75% 0%,#FF2A3C 0%,#E4002B 46%,#B80020 100%);">
+          <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(125deg,rgba(255,255,255,.05) 0 2px,transparent 2px 28px);"></div>
+          <div style="position:absolute;top:16px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:700 13px 'Plus Jakarta Sans';color:#fff;"><span>9:41</span><span style="width:17px;height:9px;border:1.5px solid #fff;border-radius:3px;display:inline-block;"></span></div>
+          <div style="position:relative;padding:78px 28px 0;display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <svg width="84" height="84" viewBox="0 0 120 120"><polygon points="47,47 38,20 82,20 73,47 100,38 100,82 73,73 82,100 38,100 47,73 20,82 20,38" fill="#F5C518"></polygon><g fill="#F5C518"><circle cx="38" cy="20" r="8"></circle><circle cx="82" cy="20" r="8"></circle><circle cx="100" cy="38" r="8"></circle><circle cx="100" cy="82" r="8"></circle><circle cx="82" cy="100" r="8"></circle><circle cx="38" cy="100" r="8"></circle><circle cx="20" cy="82" r="8"></circle><circle cx="20" cy="38" r="8"></circle><circle cx="60" cy="13" r="8"></circle><circle cx="107" cy="60" r="8"></circle><circle cx="60" cy="107" r="8"></circle><circle cx="13" cy="60" r="8"></circle></g></svg>
+            <div style="margin-top:18px;font-family:'Anton',sans-serif;font-size:42px;line-height:.86;color:#fff;text-transform:uppercase;">Foot Connect</div>
+            <div style="margin-top:8px;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.3em;color:#F5C518;text-transform:uppercase;">Occitanie</div>
+            <div style="margin-top:14px;font:600 11px 'Plus Jakarta Sans';letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.8);">Le réseau social du foot occitan</div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:32px 32px 0 0;padding:32px 28px;">
+            <div style="font-family:'Anton',sans-serif;font-size:26px;text-transform:uppercase;text-align:center;letter-spacing:.02em;">Connexion</div>
+            <div style="margin-top:22px;font:700 12px 'Plus Jakarta Sans';margin-bottom:7px;">Email</div>
+            <div style="height:50px;border-radius:14px;background:#F4F1EC;display:flex;align-items:center;padding:0 16px;gap:10px;color:#A8A29B;font:500 14px 'Plus Jakarta Sans';">✉ Ton adresse e-mail</div>
+            <div style="margin-top:16px;font:700 12px 'Plus Jakarta Sans';margin-bottom:7px;">Mot de passe</div>
+            <div style="height:50px;border-radius:14px;background:#F4F1EC;display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:#A8A29B;font:500 16px 'Plus Jakarta Sans';"><span>••••••••</span><span style="font-size:13px;">👁</span></div>
+            <div onClick="{{ goFeed }}" style="margin-top:22px;height:54px;border-radius:15px;background:linear-gradient(95deg,#E4002B,#FF5A1F);display:flex;align-items:center;justify-content:center;font:800 15px 'Plus Jakarta Sans';color:#fff;box-shadow:0 14px 26px -12px rgba(228,0,43,.7);cursor:pointer;">Se connecter</div>
+            <div style="display:flex;align-items:center;gap:12px;margin:20px 0;"><span style="flex:1;height:1px;background:#EAE6E0;"></span><span style="font:600 11px 'Plus Jakarta Sans';color:#C4BEB6;text-transform:uppercase;letter-spacing:.1em;">ou</span><span style="flex:1;height:1px;background:#EAE6E0;"></span></div>
+            <div onClick="{{ goSignup }}" style="text-align:center;font:700 13px 'Plus Jakarta Sans';color:#E4002B;cursor:pointer;">Pas encore de compte ? <span style="text-decoration:underline;">Inscris-toi</span></div>
+            <div onClick="{{ goFeed }}" style="margin-top:18px;height:50px;border-radius:15px;border:1.5px solid #F5C518;background:#FFFBEE;display:flex;align-items:center;justify-content:center;gap:8px;font:700 13px 'Plus Jakarta Sans';color:#9A7B00;cursor:pointer;">Continuer en mode démo →</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ SIGNUP ============ -->
+      <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
+        <div class="fco-scroll" style="position:absolute;inset:0;overflow-y:auto;background:#fff;">
+          <div style="position:relative;height:184px;background:radial-gradient(130% 110% at 75% 0%,#FF2A3C,#E4002B 48%,#B80020);overflow:hidden;">
+            <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(125deg,rgba(255,255,255,.05) 0 2px,transparent 2px 26px);"></div>
+            <div style="position:absolute;top:16px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:700 13px 'Plus Jakarta Sans';color:#fff;"><span onClick="{{ goLogin }}" style="cursor:pointer;">‹ Retour</span><span style="width:17px;height:9px;border:1.5px solid #fff;border-radius:3px;"></span></div>
+            <div style="position:relative;padding:50px 26px 0;text-align:center;">
+              <svg width="52" height="52" viewBox="0 0 120 120"><polygon points="47,47 38,20 82,20 73,47 100,38 100,82 73,73 82,100 38,100 47,73 20,82 20,38" fill="#F5C518"></polygon><g fill="#F5C518"><circle cx="38" cy="20" r="8"></circle><circle cx="82" cy="20" r="8"></circle><circle cx="100" cy="38" r="8"></circle><circle cx="100" cy="82" r="8"></circle><circle cx="82" cy="100" r="8"></circle><circle cx="38" cy="100" r="8"></circle><circle cx="20" cy="82" r="8"></circle><circle cx="20" cy="38" r="8"></circle><circle cx="60" cy="13" r="8"></circle><circle cx="107" cy="60" r="8"></circle><circle cx="60" cy="107" r="8"></circle><circle cx="13" cy="60" r="8"></circle></g></svg>
+              <div style="margin-top:12px;font-family:'Anton',sans-serif;font-size:30px;color:#fff;text-transform:uppercase;line-height:.9;">Inscription</div>
+              <div style="margin-top:6px;font:600 12px 'Plus Jakarta Sans';color:rgba(255,255,255,.85);">Rejoins le foot occitan 🔥</div>
+            </div>
+          </div>
+          <div style="position:relative;margin-top:-22px;background:#fff;border-radius:26px 26px 0 0;padding:24px 24px 32px;">
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;"><div style="font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Prénom</div><div style="height:46px;border-radius:13px;background:#F4F1EC;display:flex;align-items:center;padding:0 14px;font:500 13px 'Plus Jakarta Sans';color:#A8A29B;">Marc</div></div>
+              <div style="flex:1;"><div style="font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Nom</div><div style="height:46px;border-radius:13px;background:#F4F1EC;display:flex;align-items:center;padding:0 14px;font:500 13px 'Plus Jakarta Sans';color:#A8A29B;">Dupont</div></div>
+            </div>
+            <div style="margin-top:14px;font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Pseudo</div>
+            <div style="height:46px;border-radius:13px;background:#F4F1EC;display:flex;align-items:center;padding:0 14px;gap:9px;font:500 13px 'Plus Jakarta Sans';color:#A8A29B;"><span style="color:#C4BEB6;font-weight:700;">@</span>marc_dupont31</div>
+            <div style="margin-top:14px;font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Email</div>
+            <div style="height:46px;border-radius:13px;background:#F4F1EC;display:flex;align-items:center;padding:0 14px;gap:9px;font:500 13px 'Plus Jakarta Sans';color:#A8A29B;">✉ Ton adresse e-mail</div>
+            <div style="margin-top:14px;font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Mot de passe</div>
+            <div style="height:46px;border-radius:13px;background:#F4F1EC;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font:500 16px 'Plus Jakarta Sans';color:#A8A29B;"><span>••••••••</span><span style="font-size:13px;">👁</span></div>
+            <div style="margin-top:14px;font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Club favori</div>
+            <div style="height:46px;border-radius:13px;background:#F4F1EC;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font:500 13px 'Plus Jakarta Sans';color:#A8A29B;">Choisis ton club <span>⌄</span></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:16px;"><span style="width:20px;height:20px;border-radius:6px;background:#E4002B;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;">✓</span><span style="font:500 11px 'Plus Jakarta Sans';color:#5C564F;">J'accepte les conditions d'utilisation</span></div>
+            <div onClick="{{ goFeed }}" style="margin-top:18px;height:54px;border-radius:15px;background:linear-gradient(95deg,#E4002B,#FF5A1F);display:flex;align-items:center;justify-content:center;font:800 15px 'Plus Jakarta Sans';color:#fff;box-shadow:0 14px 26px -12px rgba(228,0,43,.7);cursor:pointer;">Créer mon compte</div>
+            <div onClick="{{ goLogin }}" style="margin-top:16px;text-align:center;font:700 13px 'Plus Jakarta Sans';color:#5C564F;cursor:pointer;">Déjà un compte ? <span style="color:#E4002B;text-decoration:underline;">Connecte-toi</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ FEED ============ -->
+      <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;background:#0E0B0A;">
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,#243042 0%,#11151D 100%);background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0 2px,transparent 2px 22px);"></div>
+          <div style="position:absolute;top:46%;left:0;right:0;text-align:center;font-family:monospace;font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.05em;">▶ vidéo · action de match</div>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,11,10,.55) 0%,transparent 22% 55%,rgba(14,11,10,.85) 100%);"></div>
+          <div style="position:absolute;top:16px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font:700 13px 'Plus Jakarta Sans';color:#fff;"><span>9:41</span><span style="width:17px;height:9px;border:1.5px solid #fff;border-radius:3px;"></span></div>
+          <div style="position:absolute;top:44px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <svg width="22" height="22" viewBox="0 0 120 120"><polygon points="47,47 38,20 82,20 73,47 100,38 100,82 73,73 82,100 38,100 47,73 20,82 20,38" fill="#F5C518"></polygon><g fill="#F5C518"><circle cx="38" cy="20" r="8"></circle><circle cx="82" cy="20" r="8"></circle><circle cx="100" cy="38" r="8"></circle><circle cx="100" cy="82" r="8"></circle><circle cx="82" cy="100" r="8"></circle><circle cx="38" cy="100" r="8"></circle><circle cx="20" cy="82" r="8"></circle><circle cx="20" cy="38" r="8"></circle><circle cx="60" cy="13" r="8"></circle><circle cx="107" cy="60" r="8"></circle><circle cx="60" cy="107" r="8"></circle><circle cx="13" cy="60" r="8"></circle></g></svg>
+            <span style="font-family:'Anton';font-size:15px;color:#fff;letter-spacing:.04em;text-transform:uppercase;">Foot Connect</span>
+            <span style="display:flex;align-items:center;gap:4px;background:#E4002B;border-radius:999px;padding:3px 8px;font:800 9px 'Plus Jakarta Sans';color:#fff;letter-spacing:.08em;"><span style="width:5px;height:5px;border-radius:50%;background:#fff;animation:fcoPulse 1.4s infinite;"></span>LIVE</span>
+          </div>
+          <div style="position:absolute;right:16px;bottom:170px;display:flex;flex-direction:column;align-items:center;gap:22px;color:#fff;">
+            <div onClick="{{ toggleLike }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;"><div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="{{ heartFill }}" stroke="#fff" stroke-width="1.6"><path d="M12 20.5S3.5 15.4 3.5 9.4C3.5 6.6 5.7 4.5 8.3 4.5c1.6 0 3 .8 3.7 2 .7-1.2 2.1-2 3.7-2 2.6 0 4.8 2.1 4.8 4.9 0 6-8.5 11.1-8.5 11.1z"></path></svg></div><span style="font:800 12px 'Plus Jakarta Sans';">{{ likes }}</span></div>
+            <div onClick="{{ openComments }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;"><div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;"><svg width="23" height="23" viewBox="0 0 24 24" fill="#fff"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path></svg></div><span style="font:800 12px 'Plus Jakarta Sans';">{{ commentTotal }}</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.4"></circle><circle cx="6" cy="12" r="2.4"></circle><circle cx="18" cy="19" r="2.4"></circle><path d="M8.1 10.8 15.9 6.2M8.1 13.2l7.8 4.6"></path></svg></div><span style="font:800 12px 'Plus Jakarta Sans';">8</span></div>
+          </div>
+          <div style="position:absolute;left:18px;right:80px;bottom:128px;color:#fff;">
+            <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;"><div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#FF5A1F,#E4002B);display:flex;align-items:center;justify-content:center;font:800 14px 'Plus Jakarta Sans';color:#fff;border:2px solid #F5C518;">MD</div><div><div style="font:800 14px 'Plus Jakarta Sans';">Marc Dupont</div><div style="font:600 11px 'Plus Jakarta Sans';color:rgba(255,255,255,.7);">@marc_dupont31</div></div></div>
+            <div style="font:500 13px 'Plus Jakarta Sans';line-height:1.4;color:rgba(255,255,255,.92);">Quelle frappe de Blagnac à la 87e ! 🔥 Ambiance de folie au stade.</div>
+            <div style="display:inline-flex;align-items:center;gap:7px;margin-top:11px;background:linear-gradient(95deg,#E4002B,#FF5A1F);border-radius:999px;padding:6px 13px;font:800 11px 'Plus Jakarta Sans';"><span style="background:rgba(255,255,255,.25);border-radius:6px;padding:2px 6px;">U17R</span> Blagnac 1–0 Fenouillet · sam. 8 nov.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ MATCHS ============ -->
+      <sc-if value="{{ isMatchs }}" hint-placeholder-val="{{ false }}">
+        <div class="fco-scroll" style="position:absolute;inset:0;overflow-y:auto;background:#F6F3EE;padding-bottom:88px;">
+          <div style="background:#fff;padding:16px 22px 0;position:sticky;top:0;z-index:5;">
+            <div style="display:flex;align-items:center;justify-content:space-between;font:700 13px 'Plus Jakarta Sans';"><span>9:41</span><span style="width:17px;height:9px;border:1.5px solid #1A1614;border-radius:3px;"></span></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-bottom:14px;"><svg width="24" height="24" viewBox="0 0 120 120"><rect width="120" height="120" rx="26" fill="#E4002B"></rect><polygon points="47,47 38,20 82,20 73,47 100,38 100,82 73,73 82,100 38,100 47,73 20,82 20,38" fill="#F5C518"></polygon><g fill="#F5C518"><circle cx="38" cy="20" r="8"></circle><circle cx="82" cy="20" r="8"></circle><circle cx="100" cy="38" r="8"></circle><circle cx="100" cy="82" r="8"></circle><circle cx="82" cy="100" r="8"></circle><circle cx="38" cy="100" r="8"></circle><circle cx="20" cy="82" r="8"></circle><circle cx="20" cy="38" r="8"></circle><circle cx="60" cy="13" r="8"></circle><circle cx="107" cy="60" r="8"></circle><circle cx="60" cy="107" r="8"></circle><circle cx="13" cy="60" r="8"></circle></g></svg><span style="font-family:'Anton';font-size:16px;color:#E4002B;letter-spacing:.03em;text-transform:uppercase;">Foot Connect Occitanie</span></div>
+          </div>
+          <div style="padding:16px 22px 0;">
+            <div style="font-family:'Anton';font-size:24px;text-transform:uppercase;">Calendrier des matchs</div>
+            <div style="font:800 10px 'Plus Jakarta Sans';color:#A8A29B;text-transform:uppercase;letter-spacing:.08em;margin-top:16px;margin-bottom:8px;">Catégorie</div>
+            <div style="display:flex;gap:8px;">
+              <span onClick="{{ setU16 }}" style="flex:1;text-align:center;background:{{ catU16.bg }};border:{{ catU16.border }};color:{{ catU16.col }};border-radius:999px;padding:9px 0;font:800 13px 'Plus Jakarta Sans';cursor:pointer;">U16</span>
+              <span onClick="{{ setU17 }}" style="flex:1;text-align:center;background:{{ catU17.bg }};border:{{ catU17.border }};color:{{ catU17.col }};border-radius:999px;padding:9px 0;font:800 13px 'Plus Jakarta Sans';cursor:pointer;">U17</span>
+              <span onClick="{{ setU18 }}" style="flex:1;text-align:center;background:{{ catU18.bg }};border:{{ catU18.border }};color:{{ catU18.col }};border-radius:999px;padding:9px 0;font:800 13px 'Plus Jakarta Sans';cursor:pointer;">U18</span>
+            </div>
+            <div style="font:800 10px 'Plus Jakarta Sans';color:#A8A29B;text-transform:uppercase;letter-spacing:.08em;margin-top:14px;margin-bottom:8px;">Poule</div>
+            <div style="display:flex;gap:8px;">
+              <span onClick="{{ setPouleAll }}" style="flex:1;text-align:center;background:{{ pouleAll.bg }};border:{{ pouleAll.border }};color:{{ pouleAll.col }};border-radius:999px;padding:8px 0;font:700 12px 'Plus Jakarta Sans';cursor:pointer;">Toutes</span>
+              <span onClick="{{ setPouleA }}" style="flex:1;text-align:center;background:{{ pouleA.bg }};border:{{ pouleA.border }};color:{{ pouleA.col }};border-radius:999px;padding:8px 0;font:700 12px 'Plus Jakarta Sans';cursor:pointer;">Poule A</span>
+              <span onClick="{{ setPouleB }}" style="flex:1;text-align:center;background:{{ pouleB.bg }};border:{{ pouleB.border }};color:{{ pouleB.col }};border-radius:999px;padding:8px 0;font:700 12px 'Plus Jakarta Sans';cursor:pointer;">Poule B</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:16px;background:#EDE9E2;border-radius:13px;padding:4px;">
+              <span onClick="{{ setAvenir }}" style="flex:1;text-align:center;border-radius:9px;padding:8px 0;font:700 10px 'Plus Jakarta Sans';cursor:pointer;background:{{ segAv.bg }};color:{{ segAv.col }};box-shadow:{{ segAv.sh }};">À venir</span>
+              <span onClick="{{ setTermines }}" style="flex:1;text-align:center;border-radius:9px;padding:8px 0;font:700 10px 'Plus Jakarta Sans';cursor:pointer;background:{{ segTe.bg }};color:{{ segTe.col }};box-shadow:{{ segTe.sh }};">Terminés</span>
+              <span onClick="{{ setClassement }}" style="flex:1;text-align:center;border-radius:9px;padding:8px 0;font:700 10px 'Plus Jakarta Sans';cursor:pointer;background:{{ segCl.bg }};color:{{ segCl.col }};box-shadow:{{ segCl.sh }};">Classement</span>
+              <span onClick="{{ setCalendrier }}" style="flex:1;text-align:center;border-radius:9px;padding:8px 0;font:700 10px 'Plus Jakarta Sans';cursor:pointer;background:{{ segCa.bg }};color:{{ segCa.col }};box-shadow:{{ segCa.sh }};">Calendrier</span>
+            </div>
+          </div>
+
+          <sc-if value="{{ isAvenir }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:14px 18px 0;display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ avenirList }}" as="m" hint-placeholder-count="2">
+                <div style="background:#fff;border-radius:18px;border:1px solid #EFEBE4;padding:15px 16px;box-shadow:0 10px 26px -24px rgba(0,0,0,.5);">
+                  <div style="display:flex;align-items:center;gap:6px;"><span style="background:#FBE9C7;color:#9A6B00;border-radius:7px;padding:3px 8px;font:800 10px 'Plus Jakarta Sans';">{{ m.catLabel }}</span><span style="background:#E3ECFF;color:#2A5FD0;border-radius:7px;padding:3px 8px;font:800 10px 'Plus Jakarta Sans';">{{ m.pouleLabel }}</span></div>
+                  <div style="font:600 10px 'Plus Jakarta Sans';color:#A8A29B;margin:5px 0 13px;">{{ m.league }}</div>
+                  <div style="display:flex;align-items:center;justify-content:center;gap:14px;font:800 16px 'Plus Jakarta Sans';">{{ m.home }} <span style="font:700 12px 'Plus Jakarta Sans';color:#C4BEB6;">vs</span> {{ m.away }}</div>
+                  <div style="display:flex;align-items:center;gap:7px;margin-top:14px;font:600 12px 'Plus Jakarta Sans';color:#5C564F;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E4002B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9h18M8 2.5v4M16 2.5v4"></path></svg>{{ m.date }}</div>
+                  <div style="display:flex;align-items:center;gap:7px;margin-top:7px;font:600 12px 'Plus Jakarta Sans';color:#8A847D;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A847D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>{{ m.venue }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ avenirEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="text-align:center;padding:40px 20px;color:#A8A29B;font:600 13px 'Plus Jakarta Sans';">Aucun match à venir pour cette poule.</div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isTermines }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px 18px 0;display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ terminesList }}" as="m" hint-placeholder-count="2">
+                <div style="background:#fff;border-radius:18px;border:1px solid #EFEBE4;padding:15px 16px;box-shadow:0 10px 26px -24px rgba(0,0,0,.5);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:6px;"><span style="background:#FBE9C7;color:#9A6B00;border-radius:7px;padding:3px 8px;font:800 10px 'Plus Jakarta Sans';">{{ m.catLabel }}</span><span style="background:#E3ECFF;color:#2A5FD0;border-radius:7px;padding:3px 8px;font:800 10px 'Plus Jakarta Sans';">{{ m.pouleLabel }}</span></div><span style="background:#DEF3E6;color:#1F8A4C;border-radius:999px;padding:4px 11px;font:800 10px 'Plus Jakarta Sans';">Terminé</span></div>
+                  <div style="font:600 10px 'Plus Jakarta Sans';color:#A8A29B;margin:6px 0 14px;">{{ m.league }}</div>
+                  <div style="display:flex;align-items:center;justify-content:center;gap:14px;"><span style="font:800 15px 'Plus Jakarta Sans';">{{ m.home }}</span><span style="background:#F4F1EC;border-radius:10px;padding:6px 14px;font-family:'Anton';font-size:18px;letter-spacing:.06em;">{{ m.score }}</span><span style="font:800 15px 'Plus Jakarta Sans';">{{ m.away }}</span></div>
+                  <div style="display:flex;align-items:center;gap:7px;margin-top:14px;font:600 12px 'Plus Jakarta Sans';color:#8A847D;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A847D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9h18M8 2.5v4M16 2.5v4"></path></svg>{{ m.date }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ terminesEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="text-align:center;padding:40px 20px;color:#A8A29B;font:600 13px 'Plus Jakarta Sans';">Aucun match terminé pour cette poule.</div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isClassement }}" hint-placeholder-val="{{ false }}">
+            <div style="margin:16px 18px 0;background:#fff;border-radius:20px;box-shadow:0 16px 36px -28px rgba(0,0,0,.4);overflow:hidden;">
+              <div style="display:flex;align-items:center;gap:8px;padding:16px 18px 12px;font-family:'Anton';font-size:16px;color:#E4002B;text-transform:uppercase;"><span>🏆</span> Classement · Régional 1</div>
+              <div style="display:grid;grid-template-columns:26px 1fr 30px 30px 30px;padding:0 18px 8px;font:700 10px 'Plus Jakarta Sans';color:#A8A29B;text-transform:uppercase;letter-spacing:.06em;"><span>#</span><span>Équipe</span><span style="text-align:center;">J</span><span style="text-align:center;">G</span><span style="text-align:center;">Pts</span></div>
+              <div style="display:grid;grid-template-columns:26px 1fr 30px 30px 30px;align-items:center;padding:11px 18px;background:linear-gradient(90deg,rgba(34,160,90,.12),transparent);border-left:3px solid #22A05A;font:700 13px 'Plus Jakarta Sans';"><span>1</span><span>Toulouse FC</span><span style="text-align:center;color:#8A847D;">6</span><span style="text-align:center;color:#8A847D;">6</span><span style="text-align:center;color:#22A05A;">19</span></div>
+              <div style="display:grid;grid-template-columns:26px 1fr 30px 30px 30px;align-items:center;padding:11px 18px;font:600 13px 'Plus Jakarta Sans';border-top:1px solid #F2EEE8;"><span>2</span><span>Colomiers</span><span style="text-align:center;color:#8A847D;">6</span><span style="text-align:center;color:#8A847D;">6</span><span style="text-align:center;">17</span></div>
+              <div style="display:grid;grid-template-columns:26px 1fr 30px 30px 30px;align-items:center;padding:11px 18px;font:600 13px 'Plus Jakarta Sans';border-top:1px solid #F2EEE8;"><span>3</span><span>Blagnac</span><span style="text-align:center;color:#8A847D;">7</span><span style="text-align:center;color:#8A847D;">6</span><span style="text-align:center;">13</span></div>
+              <div style="display:grid;grid-template-columns:26px 1fr 30px 30px 30px;align-items:center;padding:11px 18px;font:600 13px 'Plus Jakarta Sans';border-top:1px solid #F2EEE8;color:#5C564F;"><span>4</span><span>Balma</span><span style="text-align:center;color:#8A847D;">6</span><span style="text-align:center;color:#8A847D;">3</span><span style="text-align:center;">10</span></div>
+              <div style="display:grid;grid-template-columns:26px 1fr 30px 30px 30px;align-items:center;padding:11px 18px;font:600 13px 'Plus Jakarta Sans';border-top:1px solid #F2EEE8;color:#5C564F;"><span>5</span><span>Lourdes</span><span style="text-align:center;color:#8A847D;">6</span><span style="text-align:center;color:#8A847D;">2</span><span style="text-align:center;">8</span></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isCalendrier }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px 18px 0;">
+              <div style="background:#fff;border-radius:20px;border:1px solid #EFEBE4;padding:16px 18px;box-shadow:0 14px 30px -26px rgba(0,0,0,.5);">
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid #F2EEE8;padding-bottom:11px;"><span style="font-family:'Anton';font-size:17px;color:#E4002B;text-transform:uppercase;">Journée 1</span><span style="font:600 11px 'Plus Jakarta Sans';color:#A8A29B;">sam. 13 sept.</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid #F4F1EC;"><span style="flex:1;text-align:right;font:700 13px 'Plus Jakarta Sans';">Toulouse FC</span><span style="background:#F4F1EC;border-radius:8px;padding:4px 10px;font-family:'Anton';font-size:14px;letter-spacing:.05em;">3-1</span><span style="flex:1;font:700 13px 'Plus Jakarta Sans';">Rodez</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid #F4F1EC;"><span style="flex:1;text-align:right;font:700 13px 'Plus Jakarta Sans';">Albi</span><span style="background:#F4F1EC;border-radius:8px;padding:4px 10px;font-family:'Anton';font-size:14px;letter-spacing:.05em;">2-2</span><span style="flex:1;font:700 13px 'Plus Jakarta Sans';">Montauban</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:13px 0;"><span style="flex:1;text-align:right;font:700 13px 'Plus Jakarta Sans';">Lourdes</span><span style="background:#F4F1EC;border-radius:8px;padding:4px 10px;font-family:'Anton';font-size:14px;letter-spacing:.05em;">1-0</span><span style="flex:1;font:700 13px 'Plus Jakarta Sans';">L'Union</span></div>
+              </div>
+              <div style="margin-top:12px;background:#fff;border-radius:20px;border:1px solid #EFEBE4;padding:16px 18px;box-shadow:0 14px 30px -26px rgba(0,0,0,.5);">
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid #F2EEE8;padding-bottom:11px;"><span style="font-family:'Anton';font-size:17px;color:#E4002B;text-transform:uppercase;">Journée 2</span><span style="font:600 11px 'Plus Jakarta Sans';color:#A8A29B;">sam. 20 sept.</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:13px 0;"><span style="flex:1;text-align:right;font:700 13px 'Plus Jakarta Sans';">Rodez</span><span style="background:#FBE9C7;color:#9A6B00;border-radius:8px;padding:4px 10px;font:800 11px 'Plus Jakarta Sans';">16:00</span><span style="flex:1;font:700 13px 'Plus Jakarta Sans';">Albi</span></div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ============ PUBLIER ============ -->
+      <sc-if value="{{ isPublier }}" hint-placeholder-val="{{ false }}">
+        <div class="fco-scroll" style="position:absolute;inset:0;overflow-y:auto;background:#F6F3EE;padding-bottom:88px;">
+          <div style="background:#fff;padding:16px 22px 14px;"><div style="display:flex;align-items:center;justify-content:space-between;font:700 13px 'Plus Jakarta Sans';"><span>9:41</span><span style="width:17px;height:9px;border:1.5px solid #1A1614;border-radius:3px;"></span></div><div style="display:flex;align-items:center;gap:8px;margin-top:10px;"><svg width="24" height="24" viewBox="0 0 120 120"><rect width="120" height="120" rx="26" fill="#E4002B"></rect><polygon points="47,47 38,20 82,20 73,47 100,38 100,82 73,73 82,100 38,100 47,73 20,82 20,38" fill="#F5C518"></polygon><g fill="#F5C518"><circle cx="38" cy="20" r="8"></circle><circle cx="82" cy="20" r="8"></circle><circle cx="100" cy="38" r="8"></circle><circle cx="100" cy="82" r="8"></circle><circle cx="82" cy="100" r="8"></circle><circle cx="38" cy="100" r="8"></circle><circle cx="20" cy="82" r="8"></circle><circle cx="20" cy="38" r="8"></circle><circle cx="60" cy="13" r="8"></circle><circle cx="107" cy="60" r="8"></circle><circle cx="60" cy="107" r="8"></circle><circle cx="13" cy="60" r="8"></circle></g></svg><span style="font-family:'Anton';font-size:16px;color:#E4002B;letter-spacing:.03em;text-transform:uppercase;">Foot Connect Occitanie</span></div></div>
+          <div style="padding:20px 22px 0;">
+            <div style="font-family:'Anton';font-size:26px;text-transform:uppercase;">Créer une publication</div>
+            <div style="font:500 12px 'Plus Jakarta Sans';color:#8A847D;margin-top:2px;">Partage un moment du match 🔥</div>
+            <div style="margin-top:22px;font:800 12px 'Plus Jakarta Sans';margin-bottom:8px;">Match <span style="color:#E4002B;">*</span></div>
+            <div style="height:50px;border-radius:14px;background:#fff;border:1.5px solid #EAE6E0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:500 13px 'Plus Jakarta Sans';color:#A8A29B;">Sélectionne le match concerné <span>⌄</span></div>
+            <div style="margin-top:18px;font:800 12px 'Plus Jakarta Sans';margin-bottom:8px;">Photo ou vidéo <span style="color:#E4002B;">*</span></div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;height:104px;border-radius:16px;border:2px dashed #E4002B;background:#FFF4F2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E4002B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><circle cx="8.5" cy="10" r="1.6"></circle><path d="m21 17-5-5-7 7"></path></svg><span style="font:700 11px 'Plus Jakarta Sans';color:#E4002B;">Ajouter une photo</span></div>
+              <div style="flex:1;height:104px;border-radius:16px;border:2px dashed #F5C518;background:#FFFBEE;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C99700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2.5"></rect><path d="m16 10 5-3v10l-5-3z"></path></svg><span style="font:700 11px 'Plus Jakarta Sans';color:#C99700;">Ajouter une vidéo</span></div>
+            </div>
+            <div style="margin-top:18px;font:800 12px 'Plus Jakarta Sans';margin-bottom:8px;">Description <span style="color:#A8A29B;font-weight:600;">(optionnel)</span></div>
+            <div style="height:84px;border-radius:14px;background:#fff;border:1.5px solid #EAE6E0;padding:13px 16px;font:500 13px 'Plus Jakarta Sans';color:#A8A29B;">Raconte ce moment du match…</div>
+            <div onClick="{{ goFeed }}" style="margin-top:22px;height:54px;border-radius:15px;background:linear-gradient(95deg,#E4002B,#FF5A1F);display:flex;align-items:center;justify-content:center;gap:8px;font:800 15px 'Plus Jakarta Sans';color:#fff;box-shadow:0 14px 26px -12px rgba(228,0,43,.7);cursor:pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M5 12l7-7 7 7"></path></svg> Publier</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ MESSAGES ============ -->
+      <sc-if value="{{ isMessages }}" hint-placeholder-val="{{ false }}">
+        <div class="fco-scroll" style="position:absolute;inset:0;overflow-y:auto;background:#F6F3EE;padding-bottom:88px;">
+          <div style="background:#fff;padding:16px 22px 14px;"><div style="display:flex;align-items:center;justify-content:space-between;font:700 13px 'Plus Jakarta Sans';"><span>9:41</span><span style="width:17px;height:9px;border:1.5px solid #1A1614;border-radius:3px;"></span></div><div style="display:flex;align-items:center;gap:8px;margin-top:10px;"><svg width="24" height="24" viewBox="0 0 120 120"><rect width="120" height="120" rx="26" fill="#E4002B"></rect><polygon points="47,47 38,20 82,20 73,47 100,38 100,82 73,73 82,100 38,100 47,73 20,82 20,38" fill="#F5C518"></polygon><g fill="#F5C518"><circle cx="38" cy="20" r="8"></circle><circle cx="82" cy="20" r="8"></circle><circle cx="100" cy="38" r="8"></circle><circle cx="100" cy="82" r="8"></circle><circle cx="82" cy="100" r="8"></circle><circle cx="38" cy="100" r="8"></circle><circle cx="20" cy="82" r="8"></circle><circle cx="20" cy="38" r="8"></circle><circle cx="60" cy="13" r="8"></circle><circle cx="107" cy="60" r="8"></circle><circle cx="60" cy="107" r="8"></circle><circle cx="13" cy="60" r="8"></circle></g></svg><span style="font-family:'Anton';font-size:16px;color:#E4002B;letter-spacing:.03em;text-transform:uppercase;">Foot Connect Occitanie</span></div></div>
+          <div style="padding:20px 22px 0;">
+            <div style="font-family:'Anton';font-size:26px;text-transform:uppercase;">Messages</div>
+            <div style="font:500 12px 'Plus Jakarta Sans';color:#8A847D;margin-top:2px;">Discute avec les passionnés de foot</div>
+            <div style="margin-top:16px;height:46px;border-radius:14px;background:#fff;border:1.5px solid #EAE6E0;display:flex;align-items:center;gap:10px;padding:0 16px;color:#A8A29B;font:500 13px 'Plus Jakarta Sans';"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A8A29B" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg> Rechercher une conversation…</div>
+          </div>
+          <div style="padding:16px 18px 0;display:flex;flex-direction:column;gap:10px;">
+            <div style="background:#fff;border-radius:18px;padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 26px -22px rgba(0,0,0,.5);cursor:pointer;" onClick="{{ openChatMarc }}"><div style="position:relative;"><div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#4F8DF7,#2A5FD0);display:flex;align-items:center;justify-content:center;font:800 15px 'Plus Jakarta Sans';color:#fff;">MD</div><span style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#22A05A;border:2px solid #fff;"></span></div><div style="flex:1;min-width:0;"><div style="display:flex;justify-content:space-between;"><span style="font:800 14px 'Plus Jakarta Sans';">Marc Dupont</span><span style="font:600 11px 'Plus Jakarta Sans';color:#A8A29B;">14:30</span></div><div style="font:500 13px 'Plus Jakarta Sans';color:#8A847D;margin-top:2px;">Super match hier ! 💪</div></div><span style="background:#E4002B;color:#fff;border-radius:999px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font:800 11px 'Plus Jakarta Sans';padding:0 6px;">2</span></div>
+            <div style="background:#fff;border-radius:18px;padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 26px -22px rgba(0,0,0,.5);cursor:pointer;" onClick="{{ openChatJulie }}"><div style="position:relative;"><div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#F5C518,#F59B0B);display:flex;align-items:center;justify-content:center;font:800 15px 'Plus Jakarta Sans';color:#1A1614;">JM</div><span style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#22A05A;border:2px solid #fff;"></span></div><div style="flex:1;min-width:0;"><div style="display:flex;justify-content:space-between;"><span style="font:800 14px 'Plus Jakarta Sans';">Julie Martin</span><span style="font:600 11px 'Plus Jakarta Sans';color:#A8A29B;">12:15</span></div><div style="font:500 13px 'Plus Jakarta Sans';color:#8A847D;margin-top:2px;">Tu seras au prochain match ?</div></div></div>
+            <div style="background:#fff;border-radius:18px;padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 26px -22px rgba(0,0,0,.5);cursor:pointer;" onClick="{{ openChatThomas }}"><div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#E4002B,#FF5A1F);display:flex;align-items:center;justify-content:center;font:800 15px 'Plus Jakarta Sans';color:#fff;">TL</div><div style="flex:1;min-width:0;"><div style="display:flex;justify-content:space-between;"><span style="font:700 14px 'Plus Jakarta Sans';">Thomas Leroy</span><span style="font:600 11px 'Plus Jakarta Sans';color:#A8A29B;">Hier</span></div><div style="font:500 13px 'Plus Jakarta Sans';color:#8A847D;margin-top:2px;">Merci pour les photos !</div></div></div>
+            <div style="background:#fff;border-radius:18px;padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 26px -22px rgba(0,0,0,.5);cursor:pointer;" onClick="{{ openChatSophie }}"><div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#7C5CF5,#5634C9);display:flex;align-items:center;justify-content:center;font:800 15px 'Plus Jakarta Sans';color:#fff;">SD</div><div style="flex:1;min-width:0;"><div style="display:flex;justify-content:space-between;"><span style="font:800 14px 'Plus Jakarta Sans';">Sophie Dubois</span><span style="font:600 11px 'Plus Jakarta Sans';color:#A8A29B;">Hier</span></div><div style="font:500 13px 'Plus Jakarta Sans';color:#8A847D;margin-top:2px;">À quelle heure le match ?</div></div><span style="background:#E4002B;color:#fff;border-radius:999px;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font:800 11px 'Plus Jakarta Sans';">1</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ PROFIL ============ -->
+      <sc-if value="{{ isProfil }}" hint-placeholder-val="{{ false }}">
+        <div class="fco-scroll" style="position:absolute;inset:0;overflow-y:auto;background:#F6F3EE;padding-bottom:88px;">
+          <div style="position:relative;height:150px;background:radial-gradient(120% 130% at 80% 0%,#FF2A3C,#E4002B 55%,#B80020);overflow:hidden;">
+            <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(125deg,rgba(255,255,255,.06) 0 2px,transparent 2px 26px);"></div>
+            <div style="position:absolute;top:16px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font:700 13px 'Plus Jakarta Sans';color:#fff;"><span>9:41</span><svg width="22" height="22" viewBox="0 0 120 120"><polygon points="47,47 38,20 82,20 73,47 100,38 100,82 73,73 82,100 38,100 47,73 20,82 20,38" fill="#F5C518"></polygon><g fill="#F5C518"><circle cx="38" cy="20" r="8"></circle><circle cx="82" cy="20" r="8"></circle><circle cx="100" cy="38" r="8"></circle><circle cx="100" cy="82" r="8"></circle><circle cx="82" cy="100" r="8"></circle><circle cx="38" cy="100" r="8"></circle><circle cx="20" cy="82" r="8"></circle><circle cx="20" cy="38" r="8"></circle><circle cx="60" cy="13" r="8"></circle><circle cx="107" cy="60" r="8"></circle><circle cx="60" cy="107" r="8"></circle><circle cx="13" cy="60" r="8"></circle></g></svg></div>
+          </div>
+          <div style="padding:0 22px;margin-top:-46px;position:relative;">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+              <div style="display:flex;align-items:flex-end;gap:14px;">
+                <div style="width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#4F8DF7,#2A5FD0);border:4px solid #F6F3EE;display:flex;align-items:center;justify-content:center;font:800 30px 'Plus Jakarta Sans';color:#fff;">MD</div>
+                <div style="padding-bottom:8px;"><div style="font-family:'Anton';font-size:22px;text-transform:uppercase;line-height:1;">Marc Dupont</div><div style="font:600 12px 'Plus Jakarta Sans';color:#8A847D;">@marc_dupont31</div></div>
+              </div>
+              <div onClick="{{ goEdit }}" style="margin-bottom:8px;border:1.5px solid #E4002B;color:#E4002B;border-radius:999px;padding:7px 14px;font:800 11px 'Plus Jakarta Sans';cursor:pointer;">Modifier</div>
+            </div>
+            <div style="margin-top:12px;font:500 13px 'Plus Jakarta Sans';color:#5C564F;line-height:1.4;">Passionné de foot 🔥 · Supporter de Balma ⚽ · U17</div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+              <div style="flex:1;background:#fff;border-radius:16px;padding:13px;text-align:center;box-shadow:0 10px 24px -22px rgba(0,0,0,.5);"><div style="font-family:'Anton';font-size:22px;">12</div><div style="font:600 10px 'Plus Jakarta Sans';color:#8A847D;text-transform:uppercase;letter-spacing:.05em;">Posts</div></div>
+              <div style="flex:1;background:#fff;border-radius:16px;padding:13px;text-align:center;box-shadow:0 10px 24px -22px rgba(0,0,0,.5);"><div style="font-family:'Anton';font-size:22px;color:#E4002B;">1 247</div><div style="font:600 10px 'Plus Jakarta Sans';color:#8A847D;text-transform:uppercase;letter-spacing:.05em;">Abonnés</div></div>
+              <div style="flex:1;background:#fff;border-radius:16px;padding:13px;text-align:center;box-shadow:0 10px 24px -22px rgba(0,0,0,.5);"><div style="font-family:'Anton';font-size:22px;">318</div><div style="font:600 10px 'Plus Jakarta Sans';color:#8A847D;text-transform:uppercase;letter-spacing:.05em;">Abonnements</div></div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:16px;background:#EDE9E2;border-radius:13px;padding:4px;">
+              <span onClick="{{ setPhotos }}" style="flex:1;text-align:center;border-radius:10px;padding:9px 0;font:800 12px 'Plus Jakarta Sans';cursor:pointer;background:{{ segPh.bg }};color:{{ segPh.col }};box-shadow:{{ segPh.sh }};">▦ Photos</span>
+              <span onClick="{{ setVideos }}" style="flex:1;text-align:center;border-radius:10px;padding:9px 0;font:800 12px 'Plus Jakarta Sans';cursor:pointer;background:{{ segVi.bg }};color:{{ segVi.col }};box-shadow:{{ segVi.sh }};">▶ Vidéos</span>
+            </div>
+            <sc-if value="{{ isPhotos }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;">
+                <div style="aspect-ratio:1;border-radius:13px;background:linear-gradient(160deg,#2C3A4F,#141A24);position:relative;overflow:hidden;"><div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 16px);"></div><span style="position:absolute;bottom:6px;left:7px;font-family:monospace;font-size:9px;color:rgba(255,255,255,.55);">▶ 3.4k</span></div>
+                <div style="aspect-ratio:1;border-radius:13px;background:linear-gradient(160deg,#3A4A33,#1B2417);"></div>
+                <div style="aspect-ratio:1;border-radius:13px;background:linear-gradient(160deg,#4A3340,#241620);"></div>
+                <div style="aspect-ratio:1;border-radius:13px;background:linear-gradient(160deg,#33424A,#161F24);"></div>
+                <div style="aspect-ratio:1;border-radius:13px;background:linear-gradient(160deg,#4A4233,#241F16);"></div>
+                <div style="aspect-ratio:1;border-radius:13px;background:linear-gradient(160deg,#3A334A,#1B1624);"></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isVideos }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">
+                <div style="aspect-ratio:.72;border-radius:13px;background:linear-gradient(160deg,#2C3A4F,#141A24);position:relative;overflow:hidden;"><div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 16px);"></div><span style="position:absolute;bottom:7px;left:8px;font-family:monospace;font-size:9px;color:rgba(255,255,255,.55);">▶ 12k</span></div>
+                <div style="aspect-ratio:.72;border-radius:13px;background:linear-gradient(160deg,#4A3340,#241620);position:relative;overflow:hidden;"><span style="position:absolute;bottom:7px;left:8px;font-family:monospace;font-size:9px;color:rgba(255,255,255,.55);">▶ 5.1k</span></div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ EDIT PROFIL ============ -->
+      <sc-if value="{{ isEdit }}" hint-placeholder-val="{{ false }}">
+        <div class="fco-scroll" style="position:absolute;inset:0;overflow-y:auto;background:#F6F3EE;">
+          <div style="background:#fff;padding:16px 18px 0;border-bottom:1px solid #EFEBE4;">
+            <div style="display:flex;align-items:center;justify-content:space-between;font:700 13px 'Plus Jakarta Sans';"><span>9:41</span><span style="width:17px;height:9px;border:1.5px solid #1A1614;border-radius:3px;"></span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;"><span onClick="{{ goProfil }}" style="font:600 14px 'Plus Jakarta Sans';color:#8A847D;cursor:pointer;">Annuler</span><span style="font-family:'Anton';font-size:18px;text-transform:uppercase;">Modifier le profil</span><span onClick="{{ goProfil }}" style="font:800 14px 'Plus Jakarta Sans';color:#E4002B;cursor:pointer;">OK</span></div>
+          </div>
+          <div style="position:relative;height:104px;background:radial-gradient(120% 130% at 80% 0%,#FF2A3C,#E4002B 55%,#B80020);overflow:hidden;"><div style="position:absolute;inset:0;background-image:repeating-linear-gradient(125deg,rgba(255,255,255,.06) 0 2px,transparent 2px 26px);"></div><div style="position:absolute;bottom:10px;right:14px;display:flex;align-items:center;gap:6px;background:rgba(14,11,10,.45);border-radius:999px;padding:6px 12px;font:700 11px 'Plus Jakarta Sans';color:#fff;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2.5"></rect><circle cx="12" cy="13" r="3.2"></circle><path d="M8 6l1.5-2.5h5L16 6"></path></svg>Couverture</div></div>
+          <div style="display:flex;justify-content:center;margin-top:-44px;position:relative;"><div style="position:relative;cursor:pointer;"><div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#4F8DF7,#2A5FD0);border:4px solid #F6F3EE;display:flex;align-items:center;justify-content:center;font:800 30px 'Plus Jakarta Sans';color:#fff;">MD</div><div style="position:absolute;bottom:0;right:0;width:32px;height:32px;border-radius:50%;background:#E4002B;border:3px solid #F6F3EE;display:flex;align-items:center;justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2.5"></rect><circle cx="12" cy="13" r="3.2"></circle><path d="M8 6l1.5-2.5h5L16 6"></path></svg></div></div></div>
+          <div style="padding:18px 22px 30px;">
+            <div style="font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Nom complet</div><div style="height:46px;border-radius:13px;background:#fff;border:1.5px solid #EAE6E0;display:flex;align-items:center;padding:0 14px;font:600 13px 'Plus Jakarta Sans';color:#1A1614;">Marc Dupont</div>
+            <div style="margin-top:14px;font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Identifiant</div><div style="height:46px;border-radius:13px;background:#fff;border:1.5px solid #EAE6E0;display:flex;align-items:center;padding:0 14px;gap:8px;font:600 13px 'Plus Jakarta Sans';color:#1A1614;"><span style="color:#C4BEB6;font-weight:700;">@</span>marc_dupont31</div>
+            <div style="margin-top:14px;font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Bio</div><div style="height:72px;border-radius:13px;background:#fff;border:1.5px solid #EAE6E0;padding:11px 14px;font:500 13px 'Plus Jakarta Sans';color:#1A1614;line-height:1.4;">Passionné de foot 🔥 · Supporter de Balma ⚽ · U17</div>
+            <div style="display:flex;gap:12px;margin-top:14px;">
+              <div style="flex:1;"><div style="font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Club favori</div><div style="height:46px;border-radius:13px;background:#fff;border:1.5px solid #EAE6E0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font:600 13px 'Plus Jakarta Sans';color:#1A1614;">Balma SC <span style="color:#A8A29B;">⌄</span></div></div>
+              <div style="width:104px;"><div style="font:700 11px 'Plus Jakarta Sans';margin-bottom:6px;">Catégorie</div><div style="height:46px;border-radius:13px;background:#fff;border:1.5px solid #EAE6E0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font:600 13px 'Plus Jakarta Sans';color:#1A1614;">U17 <span style="color:#A8A29B;">⌄</span></div></div>
+            </div>
+            <div onClick="{{ goProfil }}" style="margin-top:20px;height:52px;border-radius:15px;background:linear-gradient(95deg,#E4002B,#FF5A1F);display:flex;align-items:center;justify-content:center;font:800 14px 'Plus Jakarta Sans';color:#fff;box-shadow:0 14px 26px -12px rgba(228,0,43,.7);cursor:pointer;">Enregistrer les modifications</div>
+            <div onClick="{{ goLogin }}" style="margin-top:13px;text-align:center;font:700 12px 'Plus Jakarta Sans';color:#B80020;cursor:pointer;">Se déconnecter</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ CONVERSATION ============ -->
+      <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;background:#F6F3EE;display:flex;flex-direction:column;">
+          <div style="background:#fff;padding:16px 16px 0;border-bottom:1px solid #EFEBE4;">
+            <div style="display:flex;align-items:center;justify-content:space-between;font:700 13px 'Plus Jakarta Sans';"><span>9:41</span><span style="width:17px;height:9px;border:1.5px solid #1A1614;border-radius:3px;"></span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 0;">
+              <span onClick="{{ goMessages }}" style="font-size:26px;color:#E4002B;cursor:pointer;line-height:.6;font-family:'Plus Jakarta Sans';">‹</span>
+              <div style="width:40px;height:40px;border-radius:50%;background:{{ chatColor }};display:flex;align-items:center;justify-content:center;font:800 14px 'Plus Jakarta Sans';color:#fff;">{{ chatInitials }}</div>
+              <div style="flex:1;"><div style="font:800 15px 'Plus Jakarta Sans';">{{ chatName }}</div><div style="display:flex;align-items:center;gap:5px;font:600 11px 'Plus Jakarta Sans';color:#22A05A;"><span style="width:7px;height:7px;border-radius:50%;background:#22A05A;"></span>En ligne</div></div>
+            </div>
+          </div>
+          <div class="fco-scroll" style="flex:1;overflow-y:auto;padding:18px 16px 12px;display:flex;flex-direction:column;gap:9px;">
+            <div style="text-align:center;font:600 10px 'Plus Jakarta Sans';color:#A8A29B;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Aujourd'hui</div>
+            <sc-for list="{{ threadView }}" as="m" hint-placeholder-count="3">
+              <div style="display:flex;justify-content:{{ m.justify }};">
+                <div style="max-width:74%;background:{{ m.bg }};color:{{ m.col }};border-radius:{{ m.radius }};padding:10px 14px;font:500 13px 'Plus Jakarta Sans';line-height:1.4;box-shadow:0 6px 16px -14px rgba(0,0,0,.5);">{{ m.text }}<div style="font:600 9px 'Plus Jakarta Sans';opacity:.6;margin-top:4px;text-align:right;">{{ m.time }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border-top:1px solid #EFEBE4;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+            <input value="{{ msgDraft }}" onChange="{{ onMsgInput }}" placeholder="Écris un message…" style="flex:1;height:44px;border-radius:14px;background:#F4F1EC;border:none;outline:none;padding:0 16px;font:500 13px 'Plus Jakarta Sans';color:#1A1614;" />
+            <div onClick="{{ sendMsg }}" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#E4002B,#FF5A1F);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 8px 18px -10px rgba(228,0,43,.8);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"></path></svg></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ BOTTOM NAV ============ -->
+      <sc-if value="{{ showNav }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;right:0;bottom:0;height:80px;background:{{ navBg }};backdrop-filter:blur(12px);border-top:1px solid {{ navBorder }};display:flex;align-items:flex-start;justify-content:space-around;padding-top:13px;z-index:30;">
+          <div onClick="{{ goFeed }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:{{ navFeed }};"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V20h14V9.5"></path></svg><span style="font:700 10px 'Plus Jakarta Sans';">Accueil</span></div>
+          <div onClick="{{ goMatchs }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:{{ navMatchs }};"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect><path d="M3 9h18M8 2.5v4M16 2.5v4"></path></svg><span style="font:700 10px 'Plus Jakarta Sans';">Matchs</span></div>
+          <div onClick="{{ goPublier }}" style="display:flex;flex-direction:column;align-items:center;margin-top:-9px;cursor:pointer;"><div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#F5C518,#F59B0B);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px -6px rgba(245,155,11,.8);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1A1614" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></div></div>
+          <div onClick="{{ goMessages }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;position:relative;color:{{ navMessages }};"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H10l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path></svg><span style="font:700 10px 'Plus Jakarta Sans';">Messages</span><span style="position:absolute;top:-3px;right:8px;width:7px;height:7px;border-radius:50%;background:#E4002B;"></span></div>
+          <div onClick="{{ goProfil }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:{{ navProfil }};"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"></circle><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"></path></svg><span style="font:700 10px 'Plus Jakarta Sans';">Profil</span></div>
+        </div>
+      </sc-if>
+
+      <!-- ============ COMMENTAIRES (overlay) ============ -->
+      <sc-if value="{{ showComments }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;justify-content:flex-end;">
+          <div onClick="{{ closeComments }}" style="position:absolute;inset:0;background:rgba(14,11,10,.5);"></div>
+          <div style="position:relative;background:#fff;border-radius:26px 26px 0 0;height:66%;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px;border-bottom:1px solid #F2EEE8;"><span style="font-family:'Anton';font-size:18px;text-transform:uppercase;">Commentaires ({{ commentTotal }})</span><span onClick="{{ closeComments }}" style="font-size:18px;color:#A8A29B;cursor:pointer;line-height:1;">✕</span></div>
+            <div class="fco-scroll" style="flex:1;overflow-y:auto;padding:16px 22px;display:flex;flex-direction:column;gap:16px;">
+              <sc-for list="{{ comments }}" as="c" hint-placeholder-count="2">
+                <div style="display:flex;gap:11px;">
+                  <div style="width:36px;height:36px;border-radius:50%;background:{{ c.color }};display:flex;align-items:center;justify-content:center;font:800 12px 'Plus Jakarta Sans';color:#fff;flex-shrink:0;">{{ c.initials }}</div>
+                  <div><div style="font:800 12px 'Plus Jakarta Sans';">{{ c.name }} <span style="font-weight:600;color:#A8A29B;">· {{ c.time }}</span></div><div style="font:500 13px 'Plus Jakarta Sans';color:#3A3530;margin-top:2px;line-height:1.35;">{{ c.text }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border-top:1px solid #F2EEE8;padding:12px 18px;display:flex;align-items:center;gap:10px;">
+              <input value="{{ commentDraft }}" onChange="{{ onCommentInput }}" placeholder="Ajoute un commentaire…" style="flex:1;height:44px;border-radius:14px;background:#F4F1EC;border:none;outline:none;padding:0 16px;font:500 13px 'Plus Jakarta Sans';color:#1A1614;" />
+              <div onClick="{{ sendComment }}" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#E4002B,#FF5A1F);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 8px 18px -10px rgba(228,0,43,.8);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"></path></svg></div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+  <div style="font:600 12px 'Plus Jakarta Sans';color:#7C746A;letter-spacing:.02em;">Prototype interactif — clique pour naviguer (connexion, onglets, like, profil…)</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    screen: 'login', matchTab: 'avenir', matchCat: 'U16', matchPoule: 'all', profilTab: 'photos', liked: false, likes: 145,
+    showComments: false, commentDraft: '', msgDraft: '',
+    chatName: '', chatInitials: '', chatColor: '#E4002B', thread: [],
+    comments: [
+      { name: 'Jean Dubois', initials: 'JD', color: 'linear-gradient(135deg,#4F8DF7,#2A5FD0)', text: "J'y étais ! Ambiance de folie !", time: '8 nov.' },
+      { name: 'Marie Blanc', initials: 'MB', color: 'linear-gradient(135deg,#F5C518,#F59B0B)', text: 'Bravo aux jeunes 👏', time: '8 nov.' },
+    ],
+  };
+
+  go(screen) { return () => this.setState({ screen }); }
+  setMatchTab(t) { return () => this.setState({ matchTab: t }); }
+  setCat(c) { return () => this.setState({ matchCat: c }); }
+  setPoule(p) { return () => this.setState({ matchPoule: p }); }
+  chip(active) {
+    return active
+      ? { bg: 'linear-gradient(95deg,#E4002B,#FF5A1F)', col: '#fff', border: 'none' }
+      : { bg: '#fff', col: '#5C564F', border: '1.5px solid #EAE6E0' };
+  }
+  setProfilTab(t) { return () => this.setState({ profilTab: t }); }
+  toggleLike = () => this.setState(s => ({ liked: !s.liked, likes: s.liked ? s.likes - 1 : s.likes + 1 }));
+
+  onMsgInput = (e) => this.setState({ msgDraft: e.target.value });
+  sendMsg = () => this.setState(s => { const t = (s.msgDraft || '').trim(); if (!t) return null; return { thread: [...s.thread, { me: true, text: t, time: "À l'instant" }], msgDraft: '' }; });
+  onCommentInput = (e) => this.setState({ commentDraft: e.target.value });
+  sendComment = () => this.setState(s => { const t = (s.commentDraft || '').trim(); if (!t) return null; return { comments: [...s.comments, { name: 'Marc Dupont', initials: 'MD', color: 'linear-gradient(135deg,#FF5A1F,#E4002B)', text: t, time: "À l'instant" }], commentDraft: '' }; });
+  openComments = () => this.setState({ showComments: true });
+  closeComments = () => this.setState({ showComments: false });
+  openChat(name, initials, color, thread) { return () => this.setState({ screen: 'chat', chatName: name, chatInitials: initials, chatColor: color, thread, msgDraft: '' }); }
+
+  seg(active) {
+    return active
+      ? { bg: '#fff', col: '#1A1614', sh: '0 2px 6px -2px rgba(0,0,0,.2)' }
+      : { bg: 'transparent', col: '#8A847D', sh: 'none' };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const onFeed = s.screen === 'feed';
+    const inactive = onFeed ? 'rgba(255,255,255,.6)' : '#A8A29B';
+    const navColor = (name) => s.screen === name ? '#E4002B' : inactive;
+    return {
+      isLogin: s.screen === 'login',
+      isSignup: s.screen === 'signup',
+      isFeed: onFeed,
+      isMatchs: s.screen === 'matchs',
+      isPublier: s.screen === 'publier',
+      isMessages: s.screen === 'messages',
+      isProfil: s.screen === 'profil',
+      isEdit: s.screen === 'editProfil',
+      showNav: ['feed', 'matchs', 'publier', 'messages', 'profil'].includes(s.screen),
+
+      goLogin: this.go('login'),
+      goSignup: this.go('signup'),
+      goFeed: this.go('feed'),
+      goMatchs: this.go('matchs'),
+      goPublier: this.go('publier'),
+      goMessages: this.go('messages'),
+      goProfil: this.go('profil'),
+      goEdit: this.go('editProfil'),
+
+      navBg: onFeed ? 'rgba(14,11,10,.72)' : '#fff',
+      navBorder: onFeed ? 'rgba(255,255,255,.08)' : '#EFEBE4',
+      navFeed: navColor('feed'),
+      navMatchs: navColor('matchs'),
+      navMessages: navColor('messages'),
+      navProfil: navColor('profil'),
+
+      isAvenir: s.matchTab === 'avenir',
+      isTermines: s.matchTab === 'termines',
+      catU16: this.chip(s.matchCat === 'U16'), setU16: this.setCat('U16'),
+      catU17: this.chip(s.matchCat === 'U17'), setU17: this.setCat('U17'),
+      catU18: this.chip(s.matchCat === 'U18'), setU18: this.setCat('U18'),
+      pouleAll: this.chip(s.matchPoule === 'all'), setPouleAll: this.setPoule('all'),
+      pouleA: this.chip(s.matchPoule === 'A'), setPouleA: this.setPoule('A'),
+      pouleB: this.chip(s.matchPoule === 'B'), setPouleB: this.setPoule('B'),
+      ...(() => {
+        const AVENIR = [
+          { cat: 'U16', poule: 'A', league: 'U16 Régional', home: 'Aussonne', away: 'Pibrac', date: 'lundi 17 novembre · 15:00', venue: "Stade d'Aussonne" },
+          { cat: 'U16', poule: 'B', league: 'U16 Régional', home: 'Montrabé', away: "L'Union", date: 'dimanche 23 novembre · 10:30', venue: 'Stade de Montrabé' },
+          { cat: 'U17', poule: 'A', league: 'U17 Régional', home: 'Blagnac', away: 'Toulouse FC', date: 'samedi 22 novembre · 15:00', venue: 'Stade des Ramassiers' },
+          { cat: 'U17', poule: 'B', league: 'U17 Régional', home: 'Muret', away: 'Cugnaux', date: 'dimanche 23 novembre · 15:30', venue: 'Stade Mermoz' },
+          { cat: 'U18', poule: 'A', league: 'U18 Régional', home: 'Colomiers', away: 'Balma', date: 'samedi 22 novembre · 16:00', venue: 'Stade Capitany' },
+          { cat: 'U18', poule: 'B', league: 'U18 Régional', home: 'Auch', away: 'Lourdes', date: 'dimanche 23 novembre · 14:00', venue: 'Stade Jacques Fouroux' },
+        ];
+        const TERMINES = [
+          { cat: 'U16', poule: 'A', league: 'U16 Régional', home: 'Blagnac', score: '1 - 0', away: 'Fenouillet', date: 'lundi 10 novembre · 14:00' },
+          { cat: 'U16', poule: 'B', league: 'U16 Régional', home: 'Toulouse FC', score: '3 - 1', away: 'Rodez', date: 'dimanche 9 novembre · 15:00' },
+          { cat: 'U17', poule: 'A', league: 'U17 Régional', home: 'Blagnac', score: '2 - 1', away: 'Toulouse FC', date: 'samedi 8 novembre · 15:00' },
+          { cat: 'U17', poule: 'B', league: 'U17 Régional', home: 'Muret', score: '0 - 0', away: 'Cugnaux', date: 'dimanche 9 novembre · 15:30' },
+          { cat: 'U18', poule: 'A', league: 'U18 Régional', home: 'Colomiers', score: '2 - 2', away: 'Balma', date: 'samedi 8 novembre · 16:00' },
+          { cat: 'U18', poule: 'B', league: 'U18 Régional', home: 'Auch', score: '0 - 1', away: 'Lourdes', date: 'dimanche 9 novembre · 14:00' },
+        ];
+        const f = (m) => m.cat === s.matchCat && (s.matchPoule === 'all' || m.poule === s.matchPoule);
+        const deco = (m) => ({ ...m, catLabel: m.cat + 'R', pouleLabel: 'Poule ' + m.poule });
+        const avenirList = AVENIR.filter(f).map(deco);
+        const terminesList = TERMINES.filter(f).map(deco);
+        return {
+          avenirList, terminesList,
+          avenirEmpty: avenirList.length === 0,
+          terminesEmpty: terminesList.length === 0,
+        };
+      })(),
+      isClassement: s.matchTab === 'classement',
+      isCalendrier: s.matchTab === 'calendrier',
+      setAvenir: this.setMatchTab('avenir'),
+      setTermines: this.setMatchTab('termines'),
+      setClassement: this.setMatchTab('classement'),
+      setCalendrier: this.setMatchTab('calendrier'),
+      segAv: this.seg(s.matchTab === 'avenir'),
+      segTe: this.seg(s.matchTab === 'termines'),
+      segCl: this.seg(s.matchTab === 'classement'),
+      segCa: this.seg(s.matchTab === 'calendrier'),
+
+      isPhotos: s.profilTab === 'photos',
+      isVideos: s.profilTab === 'videos',
+      setPhotos: this.setProfilTab('photos'),
+      setVideos: this.setProfilTab('videos'),
+      segPh: this.seg(s.profilTab === 'photos'),
+      segVi: this.seg(s.profilTab === 'videos'),
+
+      liked: s.liked,
+      likes: s.likes,
+      heartFill: s.liked ? '#E4002B' : 'rgba(255,255,255,0)',
+      toggleLike: this.toggleLike,
+
+      isChat: s.screen === 'chat',
+      chatName: s.chatName, chatInitials: s.chatInitials, chatColor: s.chatColor,
+      msgDraft: s.msgDraft,
+      onMsgInput: this.onMsgInput, sendMsg: this.sendMsg,
+      threadView: (s.thread || []).map(m => ({ text: m.text, time: m.time, justify: m.me ? 'flex-end' : 'flex-start', bg: m.me ? '#E4002B' : '#fff', col: m.me ? '#fff' : '#1A1614', radius: m.me ? '16px 16px 4px 16px' : '16px 16px 16px 4px' })),
+      openChatMarc: this.openChat('Marc Dupont', 'MD', 'linear-gradient(135deg,#4F8DF7,#2A5FD0)', [{ me: false, text: 'Super match hier ! 💪', time: '14:30' }, { me: false, text: "T'as filmé le but de la 87e ?", time: '14:31' }, { me: true, text: 'Ouais je poste la vidéo ce soir 🔥', time: '14:33' }]),
+      openChatJulie: this.openChat('Julie Martin', 'JM', 'linear-gradient(135deg,#F5C518,#F59B0B)', [{ me: false, text: 'Tu seras au prochain match ?', time: '12:15' }, { me: true, text: 'Carrément, je viens avec les potes 💪', time: '12:20' }]),
+      openChatThomas: this.openChat('Thomas Leroy', 'TL', 'linear-gradient(135deg,#E4002B,#FF5A1F)', [{ me: false, text: 'Merci pour les photos !', time: 'Hier' }, { me: true, text: 'De rien 😄 elles sont nettes', time: 'Hier' }]),
+      openChatSophie: this.openChat('Sophie Dubois', 'SD', 'linear-gradient(135deg,#7C5CF5,#5634C9)', [{ me: false, text: 'À quelle heure commence le match ?', time: 'Hier' }, { me: true, text: '15h au stade de Blagnac ⚽', time: 'Hier' }]),
+      showComments: s.showComments,
+      comments: s.comments,
+      commentTotal: 21 + s.comments.length,
+      commentDraft: s.commentDraft,
+      onCommentInput: this.onCommentInput, sendComment: this.sendComment,
+      openComments: this.openComments, closeComments: this.closeComments,
+    };
+  }
+}
+</script>
+</body>
+</html>

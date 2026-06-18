@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from .models import Match
 from .serializers import MatchSerializer
 from standings.tasks import recalcul_standing
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+
 
 
 def is_admin(user):
@@ -13,7 +15,8 @@ def is_admin(user):
 
 class MatchViewSet(viewsets.ModelViewSet):
     serializer_class = MatchSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
 
     def get_queryset(self):
         # Filters: /api/matches/?category=X&season=Y&group_name=Z&status=W
@@ -80,3 +83,26 @@ class MatchViewSet(viewsets.ModelViewSet):
         match.is_locked = False
         match.save()
         return Response({'id': match.id, 'is_locked': match.is_locked})
+    
+    @action(detail=False, methods=['get'])
+    def filters(self, request):
+        season = request.query_params.get('season', '2025')
+        categories = list(
+            Match.objects.filter(season=season)
+            .values_list('category', flat=True)
+            .distinct()
+            .order_by('category')
+        )
+        return Response({'categories': categories})
+
+    @action(detail=False, methods=['get'])
+    def groups(self, request):
+        season = request.query_params.get('season', '2025')
+        category = request.query_params.get('category', '')
+        groups = list(
+            Match.objects.filter(season=season, category=category)
+            .values_list('group_name', flat=True)
+            .distinct()
+            .order_by('group_name')
+        )
+        return Response({'groups': groups})

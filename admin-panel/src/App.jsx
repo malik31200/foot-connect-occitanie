@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Clubs from './pages/Clubs'
 import Teams from './pages/Teams'
 import Matches from './pages/Matches'
+import Standings from './pages/Standings'
 
 function Nav({ onLogout }) {
   return (
@@ -13,6 +14,7 @@ function Nav({ onLogout }) {
       <Link to="/clubs" style={{ color: 'white' }}>Clubs</Link>
       <Link to="/teams" style={{ color: 'white' }}>Équipes</Link>
       <Link to="/matches" style={{ color: 'white' }}>Matchs</Link>
+      <Link to="/standings" style={{ color: 'white' }}>Classements</Link>
     <button onClick={onLogout} style={{ marginLeft: 'auto', color: 'white', background: 'none', border: 'none', cursor: 'pointer' }}>
       Déconnexion
     </button>
@@ -51,6 +53,7 @@ function AppContent() {
       <Route path="/clubs" element={<Clubs/>} />
       <Route path="/teams" element={<Teams />} />
       <Route path="/matches" element={<Matches />} />
+      <Route path="/standings" element={<Standings />} />
     </Routes>
     </>
   )
