@@ -1421,5 +1421,46 @@ gantt
 
 ---
 
+## 13. Design — Référence visuelle (Sprint 4)
+
+Le dossier `Design/` contient le handoff complet créé par Claude Design :
+- `Design/prototype/` — fichiers `.dc.html` (prototypes interactifs, à ouvrir dans un navigateur pour visualiser)
+- `Design/screenshots/` — captures PNG des 13 écrans
+- `Design/README.md` — spec complète (design tokens, comportements, composants par écran)
+
+**Règle impérative :** Ne jamais copier le code des `.dc.html` dans le codebase. Ces fichiers utilisent un format interne (`support.js`) qui n'est pas du React Native. **Recréer chaque écran avec des composants React Native natifs** (`View`, `Text`, `Image`, `FlatList`, `TouchableOpacity`, `StyleSheet`, etc.).
+
+### Design tokens à utiliser partout (Sprint 4+)
+
+**Couleurs :**
+- Rouge Occitan : `#E4002B` (primaire, actif, accents)
+- Dégradé bouton rouge : `linear-gradient(95deg, #E4002B, #FF5A1F)`
+- Or : `#F5C518` (FAB, croix occitane, accents)
+- Fond écrans clairs : `#F6F3EE`
+- Fond champs : `#F4F1EC`
+- Encre (texte principal) : `#1A1614`
+- Texte secondaire : `#5C564F`
+- Vert succès : `#22A05A`
+
+**Typographie :**
+- Anton (Google Fonts) — titres, scores, logo, nombres (`text-transform: uppercase`)
+- Plus Jakarta Sans (Google Fonts, 400→800) — toute l'UI
+
+**Navigation basse (5 onglets) :** Accueil · Matchs · Publier (FAB or central) · Messages · Profil
+- Actif : rouge `#E4002B` / Inactif : `#A8A29B`
+- Sur le Feed (fond sombre) : barre translucide `rgba(14,11,10,.72)`
+- Hauteur barre : 78–80px
+
+### Écrans à implémenter (Sprint 4)
+1. Connexion + Inscription (auth mobile JWT)
+2. Feed (vidéos façon Reels, like, commentaires overlay)
+3. Matchs (restyler `MatchesScreen.js` aux design tokens)
+4. Publier (upload Cloudinary + création post)
+5. Messages (liste conversations)
+6. Conversation (chat privé)
+7. Profil + Modifier le profil
+
+---
+
 ## 12. Priorisation MoSCoW
 quadrantChart title Priorisation fonctionnalités — Impact vs Effort x-axis Effort faible --> Effort élevé y-axis Impact faible --> Impact élevé quadrant-1 Faire en premier quadrant-2 Planifier quadrant-3 Reconsidérer quadrant-4 Déléguer ou reporter Auth JWT: [0.2, 0.95] Scraper FFF: [0.65, 0.90] Page Matchs: [0.35, 0.88] Classements: [0.40, 0.82] Posts médias: [0.50, 0.80] Likes/commentaires: [0.25, 0.75] Follow: [0.30, 0.70] Feed personnalisé: [0.55, 0.72] Back-office CRUD: [0.45, 0.85] Messagerie privée: [0.60, 0.60] Notifications push: [0.70, 0.55] Recherche avancée: [0.65, 0.40] Stats avancées: [0.75, 0.35] Signalement: [0.50, 0.45]'"'

@@ -31,26 +31,3 @@ class Match(models.Model):
 
     def __str__(self):
         return f"{self.home_team} vs {self.away_team} ({self.date_time} à {self.venue})"
-    
-
-class Standing(models.Model):
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='standings')
-    category = models.CharField(max_length=50)
-    season = models.CharField(max_length=20)
-    group_name = models.CharField(max_length=100, blank=True, null=True)
-    played = models.IntegerField(default=0)
-    won = models.IntegerField(default=0)
-    draw = models.IntegerField(default=0)
-    lost = models.IntegerField(default=0)
-    goals_for = models.IntegerField(default=0)
-    goals_against = models.IntegerField(default=0)
-    goal_diff = models.IntegerField(default=0)
-    points = models.IntegerField(default=0)
-    rank = models.IntegerField(default=0)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = [['team', 'category', 'season', 'group_name']]
-
-    def __str__(self):
-        return f"{self.team} - {self.points}pts (Rank {self.rank})"
