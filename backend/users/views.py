@@ -4,7 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from .serializers import RegisterSerializer, UserSerializer
+from django.shortcuts import get_object_or_404
+from .models import User
+from .serializers import RegisterSerializer, UserSerializer, UserProfileSerializer
+from interactions.models import Follow
 
 
 class RegisterView(APIView):
@@ -41,3 +44,16 @@ class MeView(APIView):
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+    
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        serializer = UserProfileSerializer(user)
+        data = serializer.data
+        data['is_following'] = Follow.objects.filter(
+            follower=request.user, following=user
+        ).exists()
+        return Response(data)

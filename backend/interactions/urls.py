@@ -1,0 +1,13 @@
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import LikeToggleView, CommentViewSet, FollowToggleView
+
+
+router = DefaultRouter()
+router.register(r'posts/(?P<post_id>[^/.]+)/comments', CommentViewSet, basename='comment')
+
+urlpatterns = [
+    path('', include(router.urls)),
+    path('posts/<int:post_id>/like/', LikeToggleView.as_view(), name='like-toggle'),
+    path('users/<int:user_id>/follow/', FollowToggleView.as_view(), name='follow-toggle'),
+]
