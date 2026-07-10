@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import {
     View, Text, FlatList, Image, TouchableOpacity,
-    StyleSheet, ActivityIndicator, Dimensions
+    StyleSheet, ActivityIndicator, Dimensions,
+    Modal, TextInput, KeyboardAvoidingView, Platform, Alert
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
@@ -24,7 +25,7 @@ function VideoItem({ width, height }) {
     )
 }
 
-function PostCard({ post, token, onLike, navigation, itemHeight }) {
+function PostCard({ post, token, onLike, onComment, navigation, itemHeight }) {
     const medias = post.medias || []
     const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -83,10 +84,11 @@ function PostCard({ post, token, onLike, navigation, itemHeight }) {
                     </View>
                     <Text style={styles.actionCount}>{post.likes_count}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.actionBtn}>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => onComment(post.id)}>
                     <View style={styles.actionCircle}>
                         <Ionicons name="chatbubble-ellipses" size={22} color="#fff" />
                     </View>
+                    <Text style={styles.actionCount}>{post.comments_count ?? 0}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -125,6 +127,14 @@ export default function FeedScreen({ navigation }) {
     const [loading, setLoading] = useState(true)
     const headers = { Authorization: `Bearer ${token}` }
     const [itemHeight, setItemHeight] = useState(SCREEN_HEIGHT - TAB_BAR_HEIGHT)
+    const [commentPostId, setCommentPostId] = useState(null)
+    const [comments, setComments] = useState([])
+    const [commentText, setCommentText] = useState('')
+    const [currentUsername, setCurrentUsername] = useState('')
+
+    useEffect(() => {
+        client.get('/auth/me/', { headers }).then(res => setCurrentUsername(res.data.username)).catch(() => {})
+    }, [token])
 
 
     useFocusEffect(
@@ -136,6 +146,42 @@ export default function FeedScreen({ navigation }) {
                 .finally(() => setLoading(false))
         }, [token])
     )
+
+    async function openComments(postId) {
+        setCommentPostId(postId)
+        setComments([])
+        setCommentText('')
+        try {
+            const res = await client.get(`/posts/${postId}/comments/`, { headers })
+            setComments(res.data)
+        } catch {}
+    }
+
+    async function sendComment() {
+        const content = commentText.trim()
+        if (!content) return
+        setCommentText('')
+        try {
+            const res = await client.post(`/posts/${commentPostId}/comments/`, { content }, { headers })
+            setComments(prev => [...prev, res.data])
+            setPosts(prev => prev.map(p => p.id === commentPostId ? { ...p, comments_count: (p.comments_count ?? 0) + 1 } : p))
+        } catch {}
+    }
+
+    async function deleteComment(commentId) {
+        Alert.alert('Supprimer', 'Supprimer ce commentaire ?', [
+            { text: 'Annuler', style: 'cancel' },
+            {
+                text: 'Supprimer', style: 'destructive', onPress: async () => {
+                    try {
+                        await client.delete(`/posts/${commentPostId}/comments/${commentId}/`, { headers })
+                        setComments(prev => prev.filter(c => c.id !== commentId))
+                        setPosts(prev => prev.map(p => p.id === commentPostId ? { ...p, comments_count: Math.max(0, (p.comments_count ?? 0) - 1) } : p))
+                    } catch {}
+                }
+            }
+        ])
+    }
 
     async function handleLike(postId) {
         try {
@@ -159,11 +205,12 @@ export default function FeedScreen({ navigation }) {
     )
 
     return (
+        <>
         <FlatList
             data={posts}
             keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => (
-                <PostCard post={item} token={token} onLike={handleLike} navigation={navigation} itemHeight={itemHeight} />
+                <PostCard post={item} token={token} onLike={handleLike} onComment={openComments} navigation={navigation} itemHeight={itemHeight} />
             )}
             onLayout={(e) => setItemHeight(e.nativeEvent.layout.height)}
             snapToInterval={itemHeight}
@@ -171,6 +218,49 @@ export default function FeedScreen({ navigation }) {
             showsVerticalScrollIndicator={false}
         />
 
+        <Modal visible={commentPostId !== null} animationType="slide" transparent onRequestClose={() => setCommentPostId(null)}>
+            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setCommentPostId(null)} />
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalSheet}>
+                <View style={styles.modalHandle} />
+                <Text style={styles.modalTitle}>Commentaires</Text>
+                <FlatList
+                    data={comments}
+                    keyExtractor={item => item.id.toString()}
+                    contentContainerStyle={{ padding: 16, gap: 12 }}
+                    ListEmptyComponent={<Text style={styles.modalEmpty}>Sois le premier à commenter</Text>}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            onLongPress={item.author_username === currentUsername ? () => deleteComment(item.id) : null}
+                            activeOpacity={1}
+                        >
+                            <View style={styles.commentRow}>
+                                <View style={styles.commentAvatar}>
+                                    <Text style={styles.commentAvatarText}>{item.author_username?.[0]?.toUpperCase()}</Text>
+                                </View>
+                                <View style={styles.commentBubble}>
+                                    <Text style={styles.commentAuthor}>{item.author_username}</Text>
+                                    <Text style={styles.commentContent}>{item.content}</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                />
+                <View style={styles.commentInputRow}>
+                    <TextInput
+                        style={styles.commentInput}
+                        placeholder="Ajouter un commentaire..."
+                        placeholderTextColor="#A8A29B"
+                        value={commentText}
+                        onChangeText={setCommentText}
+                        multiline
+                    />
+                    <TouchableOpacity style={styles.commentSendBtn} onPress={sendComment}>
+                        <Ionicons name="send" size={18} color="#fff" />
+                    </TouchableOpacity>
+                </View>
+            </KeyboardAvoidingView>
+        </Modal>
+        </>
     )
 }
 
@@ -315,5 +405,104 @@ const styles = StyleSheet.create({
         width: 20,
         height: 6,
         backgroundColor: '#fff',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalSheet: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        maxHeight: '70%',
+        paddingBottom: 24,
+    },
+    modalHandle: {
+        width: 40,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: '#E0DDD9',
+        alignSelf: 'center',
+        marginTop: 12,
+        marginBottom: 4,
+    },
+    modalTitle: {
+        fontFamily: 'Anton_400Regular',
+        fontSize: 20,
+        color: '#1A1614',
+        textAlign: 'center',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F4F1EC',
+    },
+    modalEmpty: {
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 14,
+        color: '#A8A29B',
+        textAlign: 'center',
+        paddingTop: 24,
+    },
+    commentRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 10,
+    },
+    commentAvatar: {
+        width: 34,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: '#F5C518',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    commentAvatarText: {
+        fontFamily: 'PlusJakartaSans_800ExtraBold',
+        fontSize: 13,
+        color: '#1A1614',
+    },
+    commentBubble: {
+        flex: 1,
+        backgroundColor: '#F6F3EE',
+        borderRadius: 14,
+        padding: 10,
+    },
+    commentAuthor: {
+        fontFamily: 'PlusJakartaSans_700Bold',
+        fontSize: 13,
+        color: '#1A1614',
+        marginBottom: 2,
+    },
+    commentContent: {
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 14,
+        color: '#1A1614',
+    },
+    commentInputRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        gap: 8,
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: '#F4F1EC',
+    },
+    commentInput: {
+        flex: 1,
+        backgroundColor: '#F4F1EC',
+        borderRadius: 22,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 14,
+        color: '#1A1614',
+        maxHeight: 80,
+    },
+    commentSendBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#E4002B',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 })

@@ -192,9 +192,12 @@ export default function MatchesScreen() {
 
     useEffect(() => {
         if (!category) return
-        setPoule(null)
         client.get(`/matches/groups/?season=2025&category=${encodeURIComponent(category)}`)
-            .then(res => setGroups(res.data.groups))
+            .then(res => {
+                const g = res.data.groups || []
+                setGroups(g)
+                setPoule(g.length > 0 ? g[0] : null)
+            })
     }, [category])
 
     return (
@@ -214,7 +217,6 @@ export default function MatchesScreen() {
                 {groups.length > 0 && (
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}
                         style={styles.chipsRowSmall} contentContainerStyle={styles.chipsContent}>
-                        <Chip label="Toutes" selected={poule === null} onPress={() => setPoule(null)} />
                         {groups.map(g => (
                             <Chip key={g} label={g} selected={g === poule} onPress={() => setPoule(g)} />
                         ))}
