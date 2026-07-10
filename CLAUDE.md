@@ -221,7 +221,12 @@ L'admin dispose d'un dashboard de supervision avec :
 
 #### POST
 
-- id, author_id, match_id, media_type (`photo|video`), media_url, caption, likes_count, created_at
+- id, author_id, match_id, caption, likes_count, created_at
+- Note : un post peut contenir plusieurs médias (photos et/ou vidéo). Les médias sont stockés dans `POST_MEDIA`.
+
+#### POST_MEDIA
+
+- id, post_id, media_type (`photo|video`), media_url, order (entier pour l'ordre du carousel), created_at
 
 #### COMMENT
 
@@ -368,7 +373,8 @@ L'admin dispose d'un dashboard de supervision avec :
 #### POST `/api/posts`
 
 - Permission : user/admin — `match_id` obligatoire
-- Body : `{ "match_id": 10, "media_type": "photo", "media_url": "https://res.cloudinary.com/...", "caption": "Belle victoire !" }`
+- Body : `{ "match_id": 10, "caption": "Belle victoire !", "medias": [{ "media_type": "photo", "media_url": "https://res.cloudinary.com/..." }, { "media_type": "photo", "media_url": "https://res.cloudinary.com/..." }] }`
+- Un post peut contenir 1 vidéo ou plusieurs photos (carousel scrollable). Les médias sont stockés dans `PostMedia` avec un champ `order`.
 
 #### POST `/api/posts/{id}/like`
 
@@ -391,6 +397,14 @@ L'admin dispose d'un dashboard de supervision avec :
 #### POST `/api/users/{id}/follow`
 
 - Permission : user/admin — toggle follow/unfollow
+
+#### GET `/api/users/{id}/`
+
+- Permission : user/admin — profil d'un utilisateur
+- Réponse inclut les compteurs calculés à la volée (Option B choisie pour le MVP) :
+  - `followers_count` : `Follow.objects.filter(following=user).count()`
+  - `following_count` : `Follow.objects.filter(follower=user).count()`
+- Décision : pas de champs dénormalisés sur `User` pour éviter les problèmes de synchronisation. Calculé à chaque appel profil uniquement (pas dans le feed).
 
 ### 5.6 Messagerie privée
 
@@ -889,6 +903,12 @@ FFF_REGION=Occitanie
 - Signalement de contenu
 - Blocage utilisateur
 - Journal d'actions admin (audit)
+
+#### V1 Sprint B bis — Partage de publications (2 options à choisir)
+
+- **Option A (MVP)** : partage externe via l'API native React Native `Share` → ouvre le menu système du téléphone (WhatsApp, SMS, copier lien…). Aucun modèle en base requis.
+- **Option B (V1)** : repost interne (comme un Retweet) → modèle `SHARE` (id, user_id, post_id, created_at) + le post reposté apparaît dans le feed des abonnés.
+- MVP implémenté avec Option A (bouton partage sans backend).
 
 #### V1 Sprint C — Automatisation, sécurité et performance
 
