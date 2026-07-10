@@ -7,7 +7,6 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
-import axios from 'axios'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
@@ -16,7 +15,7 @@ const UPLOAD_PRESET = 'foot_occitanie'
 
 export default function PublishScreen() {
     const { token } = useAuth()
-    const [image, setImage] = useState(null)
+    const [assets, setAssets] = useState([])
     const [caption, setCaption] = useState('')
     const [matches, setMatches] = useState([])
     const [selectedMatch, setSelectedMatch] = useState(null)
@@ -31,49 +30,77 @@ export default function PublishScreen() {
         }, [token])
     )
 
-    async function pickImage() {
+    async function pickPhotos() {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
+            allowsMultipleSelection: true,
             quality: 0.8,
         })
-        if (!result.canceled) setImage(result.assets[0])
+        if (!result.canceled) setAssets(result.assets)
     }
 
-    async function uploadToCloudinary(uri) {
-        const formData = new FormData()
-        formData.append('file', { uri, type: 'image/jpeg', name: 'photo.jpg' })
-        formData.append('upload_preset', UPLOAD_PRESET)
-        const res = await axios.post(
-            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-            formData,
-        )
-        return res.data.secure_url
+    async function pickVideo() {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+            allowsMultipleSelection: false,
+            videoMaxDuration: 60,
+        })
+        if (!result.canceled) setAssets(result.assets)
     }
+
+    async function uploadToCloudinary(uri, isVideo) {
+        const formData = new FormData()
+        formData.append('file', {
+            uri,
+            type: isVideo ? 'video/mp4' : 'image/jpeg',
+            name: isVideo ? 'video.mp4' : 'photo.jpg',
+        })
+        formData.append('upload_preset', UPLOAD_PRESET)
+        const endpoint = isVideo ? 'video' : 'image'
+        const res = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${endpoint}/upload`,
+            { method: 'POST', body: formData },
+        )
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error?.message || 'Upload échoué')
+        return data.secure_url
+    }
+
 
     async function handlePublish() {
-        if (!image) {
-            Alert.alert('Erreur', 'Choisis une photo.')
+        if (assets.length === 0) {
+            Alert.alert('Erreur', 'Choisis au moins une photo ou une vidéo.')
             return
         }
         setUploading(true)
         try {
-            const mediaUrl = await uploadToCloudinary(image.uri)
+            const medias = []
+            for (const asset of assets) {
+                const isVideo = asset.type === 'video'
+                const url = await uploadToCloudinary(asset.uri, isVideo)
+                medias.push({
+                    media_type: isVideo ? 'video' : 'photo',
+                    media_url: url,
+                })
+            }
+
             await client.post('/posts/', {
                 ...(selectedMatch ? { match_id: selectedMatch.id } : {}),
                 caption,
-                medias: [{ media_type: 'photo', media_url: mediaUrl }]
+                medias,
             }, { headers })
             Alert.alert('Publié !', 'Ta publication est en ligne.')
-            setImage(null)
+            setAssets([])
             setCaption('')
             setSelectedMatch(null)
         } catch (e) {
-            Alert.alert('Erreur', 'Impossible de publier.')
+            const detail = e.response?.data?.error?.message || e.message || 'Impossible de publier.'
+            Alert.alert('Erreur', detail)
         } finally {
             setUploading(false)
         }
     }
+
 
     return (
         <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -81,19 +108,39 @@ export default function PublishScreen() {
                 <Text style={styles.headerTitle}>PUBLIER</Text>
             </View>
 
-            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-                {image ? (
-                    <Image source={{ uri: image.uri }} style={styles.preview} />
-                ) : (
-                    <View style={styles.imagePickerInner}>
-                        <View style={styles.iconCircle}>
-                            <Ionicons name="camera" size={32} color="#E4002B" />
+            {assets.length > 0 ? (
+                <TouchableOpacity style={styles.imagePicker} onPress={assets[0].type === 'video' ? pickVideo : pickPhotos}>
+                    {assets[0].type === 'video' ? (
+                        <View style={[styles.preview, { backgroundColor: '#1A1614', justifyContent: 'center', alignItems: 'center' }]}>
+                            <Ionicons name="play-circle" size={64} color="#F5C518" />
+                            <Text style={{ color: '#fff', fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 14, marginTop: 10 }}>
+                                Vidéo sélectionnée
+                            </Text>
                         </View>
-                        <Text style={styles.imagePickerText}>Choisir une photo</Text>
-                        <Text style={styles.imagePickerSub}>Appuie pour ouvrir ta galerie</Text>
-                    </View>
-                )}
-            </TouchableOpacity>
+                    ) : (
+                        <Image source={{ uri: assets[0].uri }} style={styles.preview} />
+                    )}
+                </TouchableOpacity>
+            ) : (
+                <View style={styles.pickerRow}>
+                    <TouchableOpacity style={styles.pickerBtn} onPress={pickPhotos}>
+                        <Ionicons name="images-outline" size={28} color="#E4002B" />
+                        <Text style={styles.pickerBtnText}>Photos</Text>
+                    </TouchableOpacity>
+                    <View style={styles.pickerDivider} />
+                    <TouchableOpacity style={styles.pickerBtn} onPress={pickVideo}>
+                        <Ionicons name="videocam-outline" size={28} color="#E4002B" />
+                        <Text style={styles.pickerBtnText}>Vidéo</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            {assets.length > 1 && (
+                <Text style={{ fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: '#5C564F', marginHorizontal: 16, marginBottom: 8 }}>
+                    {assets.length} photos sélectionnées
+                </Text>
+            )}
+
 
             <View style={styles.inputWrapper}>
                 <TextInput
@@ -187,34 +234,34 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginBottom: 16,
     },
-    imagePickerInner: {
+    preview: {
+        width: '100%',
+        height: '100%',
+    },
+    pickerRow: {
+        marginHorizontal: 16,
+        height: 120,
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        flexDirection: 'row',
+        marginBottom: 16,
+        overflow: 'hidden',
+    },
+    pickerBtn: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         gap: 8,
     },
-    iconCircle: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#F6F3EE',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 4,
-    },
-    imagePickerText: {
+    pickerBtnText: {
         fontFamily: 'PlusJakartaSans_700Bold',
-        fontSize: 16,
+        fontSize: 14,
         color: '#1A1614',
     },
-    imagePickerSub: {
-        fontFamily: 'PlusJakartaSans_400Regular',
-        fontSize: 13,
-        color: '#A8A29B',
-    },
-    preview: {
-        width: '100%',
-        height: '100%',
+    pickerDivider: {
+        width: 1,
+        backgroundColor: '#F4F1EC',
+        marginVertical: 20,
     },
     inputWrapper: {
         marginHorizontal: 16,

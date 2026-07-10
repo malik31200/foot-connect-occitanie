@@ -16,26 +16,60 @@ const TAB_BAR_HEIGHT = 80
 const CARD_HEIGHT = SCREEN_HEIGHT - TAB_BAR_HEIGHT
 
 
+function VideoItem({ width, height }) {
+    return (
+        <View style={{ width, height, backgroundColor: '#1A1614', justifyContent: 'center', alignItems: 'center' }}>
+            <Ionicons name="play-circle" size={80} color="rgba(255,255,255,0.5)" />
+        </View>
+    )
+}
+
 function PostCard({ post, token, onLike, navigation, itemHeight }) {
-    const firstMedia = post.medias?.[0]
+    const medias = post.medias || []
+    const [currentIndex, setCurrentIndex] = useState(0)
 
     return (
         <View style={[styles.card, { height: itemHeight }]}>
-            {firstMedia?.media_type === 'photo' ? (
-                <Image
-                    source={{ uri: firstMedia.media_url }}
-                    style={styles.media}
-                    resizeMode="cover"
-                />
-            ) : (
-                <View style={styles.mediaPlaceholder} />
-            )}
+            <FlatList
+                data={medias.length > 0 ? medias : [null]}
+                horizontal
+                pagingEnabled
+                scrollEnabled={medias.length > 1}
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item, index) => String(index)}
+                onScroll={(e) => {
+                    const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH)
+                    setCurrentIndex(idx)
+                }}
+                scrollEventThrottle={16}
+                renderItem={({ item }) => {
+                    if (!item) return <View style={{ width: SCREEN_WIDTH, height: itemHeight, backgroundColor: '#1A1614' }} />
+                    if (item.media_type === 'photo') {
+                        return (
+                            <Image
+                                source={{ uri: item.media_url }}
+                                style={{ width: SCREEN_WIDTH, height: itemHeight }}
+                                resizeMode="cover"
+                            />
+                        )
+                    }
+                    return <VideoItem uri={item.media_url} width={SCREEN_WIDTH} height={itemHeight} />
+                }}
+            />
 
             <LinearGradient
                 colors={['rgba(14,11,10,0.55)', 'transparent', 'rgba(14,11,10,0.85)']}
                 locations={[0, 0.25, 1]}
                 style={styles.overlay}
             />
+
+            {medias.length > 1 && (
+                <View style={styles.dotsContainer}>
+                    {medias.map((_, i) => (
+                        <View key={i} style={[styles.dot, i === currentIndex && styles.dotActive]} />
+                    ))}
+                </View>
+            )}
 
             <View style={styles.header}>
                 <OccitanCross size={28} color="#F5C518" />
@@ -261,5 +295,25 @@ const styles = StyleSheet.create({
         fontFamily: 'PlusJakartaSans_700Bold',
         fontSize: 12,
         color: '#fff',
+    },
+    dotsContainer: {
+        position: 'absolute',
+        top: 106,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 5,
+    },
+    dot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: 'rgba(255,255,255,0.55)',
+    },
+    dotActive: {
+        width: 20,
+        height: 6,
+        backgroundColor: '#fff',
     },
 })
