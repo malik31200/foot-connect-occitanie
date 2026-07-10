@@ -22,8 +22,6 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Au moins un média est requis.'}, status=status.HTTP_400_BAD_REQUEST)
         
         match_id = request.data.get('match_id')
-        if not match_id:
-            return Response({'detail': 'Le champ match_id est obligatoire.'}, status=status.HTTP_400_BAD_REQUEST)
         
         post = Post.objects.create(
             author=request.user,

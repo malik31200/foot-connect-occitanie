@@ -19,9 +19,12 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ['id','author_id', 'author_username', 'match_info', 'caption', 'likes_count', 'medias', 'created_at']
 
     def get_match_info(self, obj):
+        if not obj.match:
+            return None
         return {
             'id': obj.match.id,
             'home_team': obj.match.home_team.name,
             'away_team': obj.match.away_team.name,
             'date_time': obj.match.date_time,
         }
+

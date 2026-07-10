@@ -1,11 +1,10 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { TouchableOpacity, StyleSheet } from 'react-native'
+import { TouchableOpacity, StyleSheet, View, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-
 import { AuthProvider, useAuth } from './src/context/AuthContext'
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import FeedScreen from './src/screens/FeedScreen'
 import MatchesScreen from './src/screens/MatchesScreen'
 import PublishScreen from './src/screens/PublishScreen'
@@ -15,6 +14,15 @@ import LoginScreen from './src/screens/LoginScreen'
 import RegisterScreen from './src/screens/RegisterScreen'
 import ConversationScreen from './src/screens/ConversationScreen'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+
+import { useFonts } from 'expo-font'
+import { Anton_400Regular } from '@expo-google-fonts/anton'
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from '@expo-google-fonts/plus-jakarta-sans'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -28,6 +36,7 @@ function FABButton({ onPress }) {
 }
 
 function TabNavigator() {
+  const insets = useSafeAreaInsets()
   return (
     <Tab.Navigator
       screenOptions={{
@@ -35,11 +44,11 @@ function TabNavigator() {
         tabBarActiveTintColor: '#E4002B',
         tabBarInactiveTintColor: '#A8A29B',
         tabBarStyle: {
-          height: 80,
-          paddingBottom: 10,
+          height: 80 + insets.bottom,
+          paddingBottom: 10 + insets.bottom,
           backgroundColor: '#fff',
         },
-      }}  
+      }}
     >
       <Tab.Screen
         name="Accueil"
@@ -125,6 +134,19 @@ function RootNavigator() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Anton_400Regular,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
+  })
+
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <ActivityIndicator color="#E4002B" />
+    </View>
+  }
   return (
     <AuthProvider>
       <NavigationContainer>

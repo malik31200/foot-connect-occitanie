@@ -5,7 +5,7 @@ from matches.models import Match
 
 class Post(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
-    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='posts')
+    match = models.ForeignKey(Match, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts')
     caption = models.TextField(blank=True)
     likes_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)

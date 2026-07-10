@@ -4,15 +4,15 @@ import {
     View, Text, TextInput, TouchableOpacity, Image,
     StyleSheet, ActivityIndicator, Alert, ScrollView
 } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { Ionicons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import axios from 'axios'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
-
 const CLOUD_NAME = 'du7oifrll'
 const UPLOAD_PRESET = 'foot_occitanie'
-
 
 export default function PublishScreen() {
     const { token } = useAuth()
@@ -21,14 +21,13 @@ export default function PublishScreen() {
     const [matches, setMatches] = useState([])
     const [selectedMatch, setSelectedMatch] = useState(null)
     const [uploading, setUploading] = useState(false)
-
     const headers = { Authorization: `Bearer ${token}` }
 
     useFocusEffect(
         useCallback(() => {
             client.get('/matches/?season=2025', { headers })
                 .then(res => setMatches(res.data.results || res.data))
-                .catch((e) => console.log('ERREUR MATCHS:', e.message))
+                .catch(() => {})
         }, [token])
     )
 
@@ -38,14 +37,12 @@ export default function PublishScreen() {
             allowsEditing: true,
             quality: 0.8,
         })
-        if (!result.canceled) {
-            setImage(result.assets[0])
-        }
+        if (!result.canceled) setImage(result.assets[0])
     }
 
     async function uploadToCloudinary(uri) {
         const formData = new FormData()
-        formData.append('file', { uri, type: 'image/jpeg', name:'photo.jpg' })
+        formData.append('file', { uri, type: 'image/jpeg', name: 'photo.jpg' })
         formData.append('upload_preset', UPLOAD_PRESET)
         const res = await axios.post(
             `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
@@ -56,27 +53,22 @@ export default function PublishScreen() {
 
     async function handlePublish() {
         if (!image) {
-            Alert.alert('Erreur', 'Choisis une photo.');
-            return
-        }
-        if (!selectedMatch) {
-            Alert.alert('Erreur', 'Choisis un match.');
+            Alert.alert('Erreur', 'Choisis une photo.')
             return
         }
         setUploading(true)
         try {
             const mediaUrl = await uploadToCloudinary(image.uri)
             await client.post('/posts/', {
-                match_id: selectedMatch.id,
+                ...(selectedMatch ? { match_id: selectedMatch.id } : {}),
                 caption,
                 medias: [{ media_type: 'photo', media_url: mediaUrl }]
             }, { headers })
-            Alert.alert('Succès !', 'Publication créée.')
+            Alert.alert('Publié !', 'Ta publication est en ligne.')
             setImage(null)
             setCaption('')
             setSelectedMatch(null)
         } catch (e) {
-            console.log('ERREUR PUBLISH:', e.message, e.response?.data)
             Alert.alert('Erreur', 'Impossible de publier.')
         } finally {
             setUploading(false)
@@ -84,120 +76,205 @@ export default function PublishScreen() {
     }
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <Text style={styles.title}>Nouvelle publication</Text>
+        <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>PUBLIER</Text>
+            </View>
 
             <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-                {image
-                    ? <Image source={{ uri: image.uri }} style={styles.preview} />
-                    : <Text style={styles.imagePickerText}>+ Choisir une photo</Text>
-                }
+                {image ? (
+                    <Image source={{ uri: image.uri }} style={styles.preview} />
+                ) : (
+                    <View style={styles.imagePickerInner}>
+                        <View style={styles.iconCircle}>
+                            <Ionicons name="camera" size={32} color="#E4002B" />
+                        </View>
+                        <Text style={styles.imagePickerText}>Choisir une photo</Text>
+                        <Text style={styles.imagePickerSub}>Appuie pour ouvrir ta galerie</Text>
+                    </View>
+                )}
             </TouchableOpacity>
 
-            <TextInput
-                style={styles.input}
-                placeholder="Description..."
-                value={caption}
-                onChangeText={setCaption}
-                multiline
+            <View style={styles.inputWrapper}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Décris le moment..."
+                    placeholderTextColor="#A8A29B"
+                    value={caption}
+                    onChangeText={setCaption}
+                    multiline
                 />
+            </View>
 
-                <Text style={styles.label}>Choisis un match :</Text>
-                {matches.slice(0, 10).map(match => (
-                    <TouchableOpacity
-                        key={match.id}
-                        style={[styles.matchItem, selectedMatch?.id === match.id && styles.matchSelected]}
-                        onPress={() => setSelectedMatch(match)}
-                    >
-                        <Text style={[styles.matchText, selectedMatch?.id === match.id && styles.matchTextSelected]}>
-                            {match.home_team?.name} vs {match.away_team?.name}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
+            {matches.length > 0 && (
+                <>
+                    <Text style={styles.label}>Match lié (optionnel)</Text>
+                    {matches.slice(0, 10).map(match => (
+                        <TouchableOpacity
+                            key={match.id}
+                            style={[
+                                styles.matchItem,
+                                selectedMatch?.id === match.id && styles.matchSelected
+                            ]}
+                            onPress={() => setSelectedMatch(
+                                selectedMatch?.id === match.id ? null : match
+                            )}
+                        >
+                            <Ionicons
+                                name="football-outline"
+                                size={16}
+                                color={selectedMatch?.id === match.id ? '#fff' : '#5C564F'}
+                            />
+                            <Text style={[
+                                styles.matchText,
+                                selectedMatch?.id === match.id && styles.matchTextSelected
+                            ]}>
+                                {match.home_team?.name} · {match.away_team?.name}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </>
+            )}
 
-                <TouchableOpacity style={styles.button} onPress={handlePublish} disabled={uploading}>
-                    {uploading
-                        ? <ActivityIndicator color="#fff" />
-                        : <Text style={styles.buttonText}>Publier</Text>
-                    }
+            <LinearGradient
+                colors={['#E4002B', '#FF5A1F']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.btn}
+            >
+                <TouchableOpacity style={styles.btnInner} onPress={handlePublish} disabled={uploading}>
+                    {uploading ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <>
+                            <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
+                            <Text style={styles.btnText}>Publier</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
+            </LinearGradient>
         </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    screen: {
         flex: 1,
         backgroundColor: '#F6F3EE',
     },
     content: {
-        padding: 24,
+        paddingBottom: 40,
     },
-    title: {
-        fontSize: 22,
-        fontWeight: 'bold',
+    header: {
+        backgroundColor: '#fff',
+        paddingTop: 56,
+        paddingBottom: 16,
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F4F1EC',
+        marginBottom: 20,
+    },
+    headerTitle: {
+        fontFamily: 'Anton_400Regular',
+        fontSize: 28,
         color: '#1A1614',
-        marginBottom: 24
     },
     imagePicker: {
-        width: '100%',
-        height: 200,
-        backgroundColor: '#F4F1EC',
-        borderRadius: 12,
+        marginHorizontal: 16,
+        height: 220,
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        overflow: 'hidden',
+        marginBottom: 16,
+    },
+    imagePickerInner: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
-        overflow: 'hidden',
+        gap: 8,
+    },
+    iconCircle: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: '#F6F3EE',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 4,
     },
     imagePickerText: {
+        fontFamily: 'PlusJakartaSans_700Bold',
+        fontSize: 16,
+        color: '#1A1614',
+    },
+    imagePickerSub: {
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 13,
         color: '#A8A29B',
-        fontSize: 16
     },
     preview: {
         width: '100%',
-        height: 200
+        height: '100%',
+    },
+    inputWrapper: {
+        marginHorizontal: 16,
+        marginBottom: 20,
     },
     input: {
-        backgroundColor: '#F4F1EC',
-        borderRadius: 8,
-        padding: 14,
-        marginBottom: 16,
-        fontSize: 16,
+        backgroundColor: '#fff',
+        borderRadius: 14,
+        padding: 16,
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 15,
         color: '#1A1614',
-        minHeight: 80,
+        minHeight: 90,
+        textAlignVertical: 'top',
     },
     label: {
-        fontSize: 14,
+        fontFamily: 'PlusJakartaSans_700Bold',
+        fontSize: 13,
         color: '#5C564F',
-        marginBottom: 8,
-        fontWeight: 'bold'
+        marginBottom: 10,
+        marginHorizontal: 16,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     matchItem: {
-        backgroundColor: '#F4F1EC',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 8
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 14,
+        marginHorizontal: 16,
+        marginBottom: 8,
     },
     matchSelected: {
-        backgroundColor: '#E4002B'
+        backgroundColor: '#E4002B',
     },
     matchText: {
+        fontFamily: 'PlusJakartaSans_600SemiBold',
+        fontSize: 14,
         color: '#1A1614',
-        fontSize: 14
     },
     matchTextSelected: {
-        color: '#fff'
-    },
-    button: {
-        backgroundColor: '#E4002B',
-        borderRadius: 8,
-        padding: 16,
-        alignItems: 'center',
-        marginTop: 16,
-    },
-    buttonText: {
         color: '#fff',
+    },
+    btn: {
+        marginHorizontal: 16,
+        marginTop: 24,
+        borderRadius: 14,
+    },
+    btnInner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        height: 54,
+    },
+    btnText: {
+        fontFamily: 'PlusJakartaSans_800ExtraBold',
         fontSize: 16,
-        fontWeight: 'bold'
+        color: '#fff',
     },
 })

@@ -1,11 +1,16 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native'
+import {
+    View, Text, StyleSheet, ActivityIndicator,
+    TouchableOpacity, ScrollView
+} from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { Ionicons } from '@expo/vector-icons'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
 export default function ProfileScreen({ route, navigation }) {
-    const { token } = useAuth()
+    const { token, logout } = useAuth()
     const [profile, setProfile] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -18,12 +23,12 @@ export default function ProfileScreen({ route, navigation }) {
             const url = userId ? `/users/${userId}/` : '/auth/me/'
             client.get(url, { headers })
                 .then(res => setProfile(res.data))
-                .catch(() =>{})
+                .catch(() => {})
                 .finally(() => setLoading(false))
         }, [userId, token])
     )
 
-    async function handleMessages() {
+    async function handleMessage() {
         try {
             const res = await client.post('/conversations/', {
                 target_user_id: profile.id
@@ -35,68 +40,194 @@ export default function ProfileScreen({ route, navigation }) {
         } catch {}
     }
 
-    if (loading) return <ActivityIndicator style={{ flex: 1 }} />
+    if (loading) return (
+        <View style={styles.centered}>
+            <ActivityIndicator color="#E4002B" size="large" />
+        </View>
+    )
 
     return (
-        <View style={styles.container}>
-            <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                    {profile?.username?.charAt(0).toUpperCase()}
-                </Text>
-            </View>
-            <Text style={styles.username}>{profile?.username}</Text>
-            <Text style={styles.email}>{profile?.email}</Text>
+        <ScrollView style={styles.screen} bounces={false}>
+            <LinearGradient
+                colors={['#FF2A3C', '#E4002B', '#B80020']}
+                style={styles.header}
+            >
+                <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>
+                        {profile?.username?.charAt(0).toUpperCase()}
+                    </Text>
+                </View>
+                <Text style={styles.username}>@{profile?.username}</Text>
+                <Text style={styles.role}>{profile?.role === 'admin' ? 'Administrateur' : 'Joueur'}</Text>
+            </LinearGradient>
 
-            {userId && (
-                <TouchableOpacity style={styles.messageBtn} onPress={handleMessages}>
-                    <Text style={styles.messageBtnText}>Envoyer un message</Text>
-                </TouchableOpacity>
-            )}
-        </View>
+            <View style={styles.card}>
+                {userId && profile?.followers_count !== undefined && (
+                    <View style={styles.statsRow}>
+                        <View style={styles.stat}>
+                            <Text style={styles.statNumber}>{profile.followers_count}</Text>
+                            <Text style={styles.statLabel}>Abonnés</Text>
+                        </View>
+                        <View style={styles.statDivider} />
+                        <View style={styles.stat}>
+                            <Text style={styles.statNumber}>{profile.following_count}</Text>
+                            <Text style={styles.statLabel}>Abonnements</Text>
+                        </View>
+                    </View>
+                )}
+
+                <View style={styles.infoRow}>
+                    <Ionicons name="mail-outline" size={18} color="#5C564F" />
+                    <Text style={styles.infoText}>{profile?.email}</Text>
+                </View>
+
+                {userId ? (
+                    <LinearGradient
+                        colors={['#E4002B', '#FF5A1F']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.btn}
+                    >
+                        <TouchableOpacity style={styles.btnInner} onPress={handleMessage}>
+                            <Ionicons name="chatbubble-outline" size={18} color="#fff" />
+                            <Text style={styles.btnText}>Envoyer un message</Text>
+                        </TouchableOpacity>
+                    </LinearGradient>
+                ) : (
+                    <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+                        <Ionicons name="log-out-outline" size={20} color="#E4002B" />
+                        <Text style={styles.logoutText}>Se déconnecter</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    screen: {
         flex: 1,
-        alignItems: 'center',
-        paddingTop: 60,
         backgroundColor: '#F6F3EE',
     },
-    avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#E4002B',
+    centered: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
+    },
+    header: {
+        alignItems: 'center',
+        paddingTop: 72,
+        paddingBottom: 40,
+    },
+    avatar: {
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        backgroundColor: '#F5C518',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 14,
+        borderWidth: 3,
+        borderColor: 'rgba(255,255,255,0.4)',
     },
     avatarText: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#fff',
+        fontFamily: 'PlusJakartaSans_800ExtraBold',
+        fontSize: 36,
+        color: '#1A1614',
     },
     username: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: '#1A1614',
+        fontFamily: 'Anton_400Regular',
+        fontSize: 26,
+        color: '#fff',
         marginBottom: 4,
     },
-    email: {
+    role: {
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 13,
+        color: 'rgba(255,255,255,0.75)',
+        letterSpacing: 1,
+    },
+    card: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 28,
+        borderTopRightRadius: 28,
+        marginTop: -20,
+        padding: 24,
+        minHeight: 300,
+    },
+    statsRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+        paddingBottom: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F4F1EC',
+    },
+    stat: {
+        alignItems: 'center',
+        paddingHorizontal: 32,
+    },
+    statNumber: {
+        fontFamily: 'Anton_400Regular',
+        fontSize: 26,
+        color: '#1A1614',
+    },
+    statLabel: {
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 12,
+        color: '#5C564F',
+        marginTop: 2,
+    },
+    statDivider: {
+        width: 1,
+        height: 36,
+        backgroundColor: '#F4F1EC',
+    },
+    infoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        marginBottom: 24,
+        backgroundColor: '#F6F3EE',
+        borderRadius: 10,
+        padding: 14,
+    },
+    infoText: {
+        fontFamily: 'PlusJakartaSans_400Regular',
         fontSize: 14,
         color: '#5C564F',
     },
-    messageBtn: {
-        backgroundColor: '#E4002B',
-        borderRadius: 8,
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        marginTop: 8,
+    btn: {
+        borderRadius: 14,
+        marginTop: 4,
     },
-    messageBtnText: {
-        color: '#fff',
-        fontWeight: 'bold',
+    btnInner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        height: 52,
+    },
+    btnText: {
+        fontFamily: 'PlusJakartaSans_700Bold',
         fontSize: 15,
-    }
+        color: '#fff',
+    },
+    logoutBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        borderWidth: 1.5,
+        borderColor: '#E4002B',
+        borderRadius: 14,
+        height: 52,
+        marginTop: 4,
+    },
+    logoutText: {
+        fontFamily: 'PlusJakartaSans_700Bold',
+        fontSize: 15,
+        color: '#E4002B',
+    },
 })
