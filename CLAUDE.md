@@ -1,6 +1,23 @@
 
 ---
 
+## 0. Statut du projet
+
+| Sprint | Statut | Branche mergée |
+|--------|--------|----------------|
+| Sprint 0 — Init | ✅ Terminé | `main` |
+| Sprint 1 — Auth JWT | ✅ Terminé | `main` |
+| Sprint 2a — Scraper FFF | ✅ Terminé | `main` |
+| Sprint 2b — Référentiel sportif | ✅ Terminé | `main` |
+| Sprint 3 — Résultats + classements | ✅ Terminé | `main` |
+| Sprint 4 — Réseau social complet | ✅ Terminé | `main` (PR #5) |
+| Sprint 5 — Stabilisation + déploiement VPS | 🚧 En cours | `feature/sprint-5-deploy` |
+
+**Branche active :** `feature/sprint-5-deploy`
+**Documentation sprints :** `docs/`
+
+---
+
 ## 1. Cadrage produit
 
 ### 1.1 Vision

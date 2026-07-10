@@ -231,9 +231,61 @@ RootNavigator
 
 ---
 
+## Sprint 4.5 — Design system + corrections
+
+### Design system appliqué sur tous les écrans
+
+**Tokens utilisés partout :**
+- Rouge Occitan : `#E4002B` (boutons, actif, like)
+- Or : `#F5C518` (FAB, avatar, accents)
+- Fond : `#F6F3EE`
+- Encre : `#1A1614` (texte principal)
+- Texte secondaire : `#5C564F`
+- Polices : `Anton_400Regular` (titres, scores), `PlusJakartaSans` (UI)
+- Dégradé bouton : `['#E4002B', '#FF5A1F']`
+
+### Corrections et nouvelles fonctionnalités
+
+**FeedScreen :**
+- Carousel horizontal multi-photos avec dots indicateurs (points blancs)
+- Vidéo : placeholder ▶ (lecture vidéo reportée au build natif — expo-av/expo-video crashent dans Expo Go)
+- Commentaires : bottom sheet Modal, ajout, suppression (long press sur son commentaire), compteur
+- `comments_count` ajouté dans `PostSerializer` (calculé via `obj.comments.count()`)
+- Compteurs likes et commentaires mis à jour localement sans rechargement
+
+**PublishScreen :**
+- Deux boutons séparés : Photos (multi-sélection) / Vidéo (sélection unique)
+- Match lié rendu optionnel (backend : `match = ForeignKey(..., null=True, blank=True)`)
+- Upload Cloudinary via `fetch` natif (axios crashait pour les vidéos sur Android)
+- `mediaTypes: ['images']` / `['videos']` (remplacement `MediaTypeOptions` déprécié)
+
+**MatchesScreen :**
+- Chip "Toutes" supprimé — première poule auto-sélectionnée au chargement
+- Évite les doubles classements et la surcharge de matchs
+
+**ConversationScreen :**
+- Fix clavier Android : `KeyboardAvoidingView behavior='height'` + `keyboardVerticalOffset={90}`
+- `SafeAreaView edges={['bottom']}` pour éviter l'overlap avec la barre de navigation
+
+**App.js / navigation :**
+- `useSafeAreaInsets` dans TabNavigator pour corriger la barre d'onglets sur Android
+- `softwareKeyboardLayoutMode: "resize"` dans app.json
+
+### Décisions techniques Sprint 4.5
+
+| Décision | Choix | Raison |
+|----------|-------|--------|
+| Lecture vidéo | Placeholder ▶ | expo-av et expo-video crashent dans Expo Go — sera activé au build EAS |
+| Upload vidéo | `fetch` + FormData natif | axios plantait pour les fichiers binaires lourds sur Android |
+| Commentaires | Bottom sheet Modal RN | Pas de dépendance externe, simple et suffisant |
+| Sélection média | 2 boutons séparés Photos/Vidéo | `allowsMultipleSelection` + vidéo crash sur Android |
+| Poule "Toutes" | Supprimée | Provoquait doublons rank 1 dans classement |
+
+---
+
 ## Prochaine étape : Sprint 5
 
-- Modération back-office (suppression posts/commentaires)
+- Modération back-office (suppression posts/commentaires depuis l'admin React)
 - Logs applicatifs + monitoring minimal
-- Tests d'intégration
-- Déploiement VPS Ubuntu
+- Tests d'intégration end-to-end
+- Déploiement VPS Ubuntu (PostgreSQL, Gunicorn, Nginx, Redis, Celery)
