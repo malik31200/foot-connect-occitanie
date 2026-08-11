@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
+import client from '../api/client'
+
 
 export default function Login({ onLogin }) {
     const [email, setEmail] = useState('')
@@ -10,7 +12,7 @@ export default function Login({ onLogin }) {
         e.preventDefault()
         setError('')
         try {
-            const res = await axios.post('http://localhost:8000/api/auth/login', {
+            const res = await client.post('/auth/login/', {
                 email, password })
                 localStorage.setItem('access_token', res.data.access)
                 localStorage.setItem('refresh_token', res.data.refresh)

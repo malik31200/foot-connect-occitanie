@@ -1,6 +1,35 @@
 
 ---
 
+## 0. Statut du projet
+
+| Sprint | Statut | Branche mergée |
+|--------|--------|----------------|
+| Sprint 0 — Init | ✅ Terminé | `main` |
+| Sprint 1 — Auth JWT | ✅ Terminé | `main` |
+| Sprint 2a — Scraper FFF | ✅ Terminé | `main` |
+| Sprint 2b — Référentiel sportif | ✅ Terminé | `main` |
+| Sprint 3 — Résultats + classements | ✅ Terminé | `main` |
+| Sprint 4 — Réseau social complet | ✅ Terminé | `main` (PR #5) |
+| Sprint 5 — Stabilisation + déploiement VPS | ✅ Terminé | `main` (PR #6) |
+
+**Branche active :** `main`
+
+### Avancement Sprint 5 (terminé le 11/08/2026)
+
+| Tâche | Statut |
+|-------|--------|
+| Modération back-office (posts + commentaires) | ✅ Terminé |
+| Logging Django (`settings.py` + `backend/logs/`) | ✅ Terminé |
+| Proxy Vite + fix WSL2 admin panel | ✅ Terminé |
+| Recherche match dans PublishScreen | ✅ Terminé |
+| API FFF bloquée (403) depuis juin 2026 | ⚠️ En attente réouverture |
+| Déploiement VPS Hetzner (CPX12, Helsinki, 95.217.154.83) | ✅ Terminé |
+| SSL Let's Encrypt | ⏳ En attente d'un nom de domaine |
+**Documentation sprints :** `docs/`
+
+---
+
 ## 1. Cadrage produit
 
 ### 1.1 Vision
