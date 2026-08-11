@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect, useRef } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import {
     View, Text, FlatList, Image, TouchableOpacity,
@@ -18,10 +18,18 @@ const TAB_BAR_HEIGHT = 80
 const CARD_HEIGHT = SCREEN_HEIGHT - TAB_BAR_HEIGHT
 
 // --- Lecteur vidéo natif avec expo-video ---
-function VideoItem({ uri, width, height }) {
+// isActive = false → on met en pause (scroll ou changement d'onglet)
+function VideoItem({ uri, width, height, isActive }) {
     const player = useVideoPlayer(uri, p => {
         p.loop = true
     })
+
+    useEffect(() => {
+        if (!isActive) {
+            player.pause()
+        }
+    }, [isActive])
+
     return (
         <VideoView
             player={player}
@@ -32,7 +40,7 @@ function VideoItem({ uri, width, height }) {
     )
 }
 
-function PostCard({ post, onLike, onComment, navigation, itemHeight }) {
+function PostCard({ post, onLike, onComment, navigation, itemHeight, isActive }) {
     const medias = post.medias || []
     const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -78,7 +86,7 @@ function PostCard({ post, onLike, onComment, navigation, itemHeight }) {
                             </View>
                         )
                     }
-                    return <VideoItem uri={item.media_url} width={SCREEN_WIDTH} height={itemHeight} />
+                    return <VideoItem uri={item.media_url} width={SCREEN_WIDTH} height={itemHeight} isActive={isActive} />
                 }}
             />
 
@@ -152,6 +160,12 @@ export default function FeedScreen({ navigation }) {
     const [loading, setLoading] = useState(true)
     const headers = { Authorization: `Bearer ${token}` }
     const [itemHeight, setItemHeight] = useState(SCREEN_HEIGHT - TAB_BAR_HEIGHT)
+    const [activeIndex, setActiveIndex] = useState(0)
+    const [screenFocused, setScreenFocused] = useState(true)
+    const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 60 })
+    const onViewableItemsChanged = useRef(({ viewableItems }) => {
+        if (viewableItems.length > 0) setActiveIndex(viewableItems[0].index)
+    })
     const [commentPostId, setCommentPostId] = useState(null)
     const [comments, setComments] = useState([])
     const [commentText, setCommentText] = useState('')
@@ -163,11 +177,14 @@ export default function FeedScreen({ navigation }) {
 
     useFocusEffect(
         useCallback(() => {
+            setScreenFocused(true)
             setLoading(true)
             client.get('/feed/', { headers })
                 .then(res => setPosts(res.data))
                 .catch(() => {})
                 .finally(() => setLoading(false))
+            // Quand on quitte l'onglet, on met les vidéos en pause
+            return () => setScreenFocused(false)
         }, [token])
     )
 
@@ -240,7 +257,7 @@ export default function FeedScreen({ navigation }) {
         <FlatList
             data={posts}
             keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
                 <PostCard
                     post={item}
                     token={token}
@@ -248,9 +265,12 @@ export default function FeedScreen({ navigation }) {
                     onComment={openComments}
                     navigation={navigation}
                     itemHeight={itemHeight}
+                    isActive={index === activeIndex && screenFocused}
                 />
             )}
             onLayout={(e) => setItemHeight(e.nativeEvent.layout.height)}
+            onViewableItemsChanged={onViewableItemsChanged.current}
+            viewabilityConfig={viewabilityConfig.current}
             snapToInterval={itemHeight}
             decelerationRate="fast"
             showsVerticalScrollIndicator={false}

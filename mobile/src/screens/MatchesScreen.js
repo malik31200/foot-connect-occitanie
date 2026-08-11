@@ -61,7 +61,7 @@ function AvenirTab() {
     useEffect(() => {
         if (!category) return
         setLoading(true)
-        let url = `/matches/?status=scheduled&season=2025&category=${encodeURIComponent(category)}`
+        let url = `/matches/?status=scheduled&season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
             .then(res => setMatches(res.data.results || res.data))
@@ -85,7 +85,7 @@ function TerminesTab() {
     useEffect(() => {
         if (!category) return
         setLoading(true)
-        let url = `/matches/?status=finished&season=2025&category=${encodeURIComponent(category)}`
+        let url = `/matches/?status=finished&season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
             .then(res => setMatches(res.data.results || res.data))
@@ -109,7 +109,7 @@ function ClassementTab() {
     useEffect(() => {
         if (!category) return
         setLoading(true)
-        let url = `/standings/?season=2025&category=${encodeURIComponent(category)}`
+        let url = `/standings/?season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
             .then(res => setStandings(res.data.results || res.data))
@@ -159,7 +159,7 @@ function CalendrierTab() {
     useEffect(() => {
         if (!category) return
         setLoading(true)
-        let url = `/matches/?season=2025&category=${encodeURIComponent(category)}`
+        let url = `/matches/?season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
             .then(res => setMatches(res.data.results || res.data))
@@ -182,7 +182,7 @@ export default function MatchesScreen() {
     const [poule, setPoule] = useState(null)
 
     useEffect(() => {
-        client.get('/matches/filters/?season=2025')
+        client.get('/matches/filters/?season=2026/2027')
             .then(res => {
                 setCategories(res.data.categories)
                 if (res.data.categories.length > 0) setCategory(res.data.categories[0])
@@ -192,7 +192,7 @@ export default function MatchesScreen() {
 
     useEffect(() => {
         if (!category) return
-        client.get(`/matches/groups/?season=2025&category=${encodeURIComponent(category)}`)
+        client.get(`/matches/groups/?season=2026/2027&category=${encodeURIComponent(category)}`)
             .then(res => {
                 const g = res.data.groups || []
                 setGroups(g)
