@@ -20,11 +20,12 @@ export default function PublishScreen() {
     const [matches, setMatches] = useState([])
     const [selectedMatch, setSelectedMatch] = useState(null)
     const [uploading, setUploading] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
     const headers = { Authorization: `Bearer ${token}` }
 
     useFocusEffect(
         useCallback(() => {
-            client.get('/matches/?season=2025', { headers })
+            client.get('/matches/?status=scheduled', { headers })
                 .then(res => setMatches(res.data.results || res.data))
                 .catch(() => {})
         }, [token])
@@ -101,6 +102,13 @@ export default function PublishScreen() {
         }
     }
 
+        const filteredMatches = matches.filter(match => {
+        const query = searchQuery.toLowerCase()
+        const home = match.home_team?.name?.toLowerCase() || ''
+        const away = match.away_team?.name?.toLowerCase() || ''
+        return home.includes(query) || away.includes(query)
+    })
+
 
     return (
         <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -153,10 +161,18 @@ export default function PublishScreen() {
                 />
             </View>
 
-            {matches.length > 0 && (
+            <TextInput
+                style={[styles.input, { marginHorizontal: 16, marginBottom: 20 }]}
+                placeholder="Rechercher une équipe..."
+                placeholderTextColor="#A8A29B"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+            />
+
+            {filteredMatches.length > 0 && (
                 <>
                     <Text style={styles.label}>Match lié (optionnel)</Text>
-                    {matches.slice(0, 10).map(match => (
+                    {filteredMatches.map(match => (
                         <TouchableOpacity
                             key={match.id}
                             style={[
