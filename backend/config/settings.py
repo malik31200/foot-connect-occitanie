@@ -179,6 +179,8 @@ FFF_REGION_CODE = config('FFF_REGION_CODE', default='77')
 # CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://footconnect-occitanie.fr",
+    "https://www.footconnect-occitanie.fr",
 ]
 
 # Logging

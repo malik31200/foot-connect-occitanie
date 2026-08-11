@@ -157,11 +157,11 @@ sudo systemctl restart gunicorn celery celerybeat
 - [x] PostgreSQL installé + migrations (user: footconnect, db: footconnect)
 - [x] Gunicorn en service systemd (active + enabled)
 - [x] Nginx configuré (API `/api/` → Gunicorn, React statique sur `/`)
-- [ ] SSL Let's Encrypt — en attente d'un nom de domaine
+- [x] SSL Let's Encrypt — certificat actif sur footconnect-occitanie.fr (Let's Encrypt, expire 2026-11-09)
 - [x] Redis installé (active + enabled, port 6379)
 - [x] Celery Worker + Celery Beat en services systemd (active + enabled)
 - [ ] Scraper FFF — en attente réouverture API FFF (403 depuis juin 2026)
-- [x] URL production mise à jour dans `mobile/src/api/client.js` (http://95.217.154.83/api)
+- [x] URL production mise à jour dans `mobile/src/api/client.js` (https://footconnect-occitanie.fr/api)
 - [x] Tests de smoke OK (login API retourne JWT ✅, admin panel accessible ✅)
 
 ---

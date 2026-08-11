@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const client = axios.create({
-    baseURL: 'http://95.217.154.83/api',
+    baseURL: 'https://footconnect-occitanie.fr/api',
     timeout: 30000,
 })
 
