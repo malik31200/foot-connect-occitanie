@@ -16,3 +16,8 @@ class TeamSerializer(serializers.ModelSerializer):
         fields = ['id', 'club', 'club_id', 'name', 'category', 'group_name',
                   'season', 'fff_id', 'created_at']
         read_only_fields = ['created_at']
+
+    def validate_fff_id(self, value):
+        if value == '':
+            return None
+        return value
