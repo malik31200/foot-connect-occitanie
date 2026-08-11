@@ -3,13 +3,32 @@ import client from '../api/client'
 
 export default function Matches() {
     const [matches, setMatches] = useState([])
-    const [filters, setFilters] = useState({ status: '', category: '', season: '2025' })
+    const [teams, setTeams] = useState([])
+    const [filters, setFilters] = useState({ status: '', category: '', season: '2026/2027' })
     const [editingMatch, setEditingMatch] = useState(null)
-    const [scoreForm, setScoreForm] = useState({ home_score: '', away_score:'', status: 'finished' })
+    const [scoreForm, setScoreForm] = useState({ home_score: '', away_score: '', status: 'finished' })
+    const [createForm, setCreateForm] = useState({
+        home_team_id: '',
+        away_team_id: '',
+        category: 'U18',
+        season: '2026/2027',
+        group_name: 'Poule B',
+        matchday: '1',
+        date_time: '',
+        venue: '',
+        status: 'scheduled',
+    })
+    const [createError, setCreateError] = useState('')
 
     useEffect(() => {
         fetchMatches()
+        fetchTeams()
     }, [])
+
+    const fetchTeams = async () => {
+        const res = await client.get('/teams/')
+        setTeams(res.data)
+    }
 
     const fetchMatches = async () => {
         const params = new URLSearchParams()
@@ -29,13 +48,41 @@ export default function Matches() {
         fetchMatches()
     }
 
+    const handleCreateChange = (e) => {
+        setCreateForm({ ...createForm, [e.target.name]: e.target.value })
+    }
+
+    const handleCreateSubmit = async (e) => {
+        e.preventDefault()
+        setCreateError('')
+        try {
+            await client.post('/matches/', {
+                ...createForm,
+                matchday: parseInt(createForm.matchday),
+            })
+            setCreateForm({
+                home_team_id: '',
+                away_team_id: '',
+                category: 'U18',
+                season: '2026/2027',
+                group_name: 'Poule B',
+                matchday: '1',
+                date_time: '',
+                venue: '',
+                status: 'scheduled',
+            })
+            fetchMatches()
+        } catch (e) {
+            setCreateError('Erreur lors de la création du match.')
+        }
+    }
+
     const handleEditScore = (match) => {
         setEditingMatch(match.id)
         setScoreForm({
             home_score: match.home_score ?? '',
             away_score: match.away_score ?? '',
             status: 'finished',
-            
         })
     }
 
@@ -50,31 +97,61 @@ export default function Matches() {
         fetchMatches()
     }
 
+    const handleDelete = async (id) => {
+        if (!window.confirm('Supprimer ce match ?')) return
+        await client.delete(`/matches/${id}/`)
+        fetchMatches()
+    }
+
     return (
         <div style={{ padding: 24 }}>
             <h1>Matchs</h1>
 
+            {/* --- Formulaire création match --- */}
+            <h2>Ajouter un match</h2>
+            <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+                <select name="home_team_id" value={createForm.home_team_id} onChange={handleCreateChange} required>
+                    <option value="">Équipe domicile</option>
+                    {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+                <select name="away_team_id" value={createForm.away_team_id} onChange={handleCreateChange} required>
+                    <option value="">Équipe extérieur</option>
+                    {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+                <input name="category" placeholder="Catégorie" value={createForm.category} onChange={handleCreateChange} required style={{ width: 60 }} />
+                <input name="season" placeholder="Saison" value={createForm.season} onChange={handleCreateChange} required style={{ width: 90 }} />
+                <input name="group_name" placeholder="Poule" value={createForm.group_name} onChange={handleCreateChange} style={{ width: 80 }} />
+                <input name="matchday" type="number" placeholder="Journée" value={createForm.matchday} onChange={handleCreateChange} style={{ width: 70 }} />
+                <input name="date_time" type="datetime-local" value={createForm.date_time} onChange={handleCreateChange} required />
+                <input name="venue" placeholder="Lieu (optionnel)" value={createForm.venue} onChange={handleCreateChange} style={{ width: 140 }} />
+                <button type="submit">Créer</button>
+            </form>
+            {createError && <p style={{ color: 'red' }}>{createError}</p>}
+
+            {/* --- Filtres --- */}
             <form onSubmit={handleFilterSubmit} style={{ marginBottom: 24, display: 'flex', gap: 12 }}>
                 <select name="status" value={filters.status} onChange={handleFilterChange}>
                     <option value="">Tous status</option>
                     <option value="scheduled">À venir</option>
                     <option value="finished">Terminés</option>
                 </select>
-                <input name="season" placeholder="Saison" value={filters.season} onChange={handleFilterChange} style={{ width: 80 }} />
-                <input name="category" placeholder="Categorie" value={filters.category} onChange={handleFilterChange} />
+                <input name="season" placeholder="Saison" value={filters.season} onChange={handleFilterChange} style={{ width: 90 }} />
+                <input name="category" placeholder="Catégorie" value={filters.category} onChange={handleFilterChange} />
                 <button type="submit">Filtrer</button>
             </form>
 
             <p>{matches.length} match(s)</p>
 
-            <table>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
+                        <th>J.</th>
                         <th>Date</th>
                         <th>Domicile</th>
                         <th>Score</th>
                         <th>Extérieur</th>
                         <th>Catégorie</th>
+                        <th>Poule</th>
                         <th>Statut</th>
                         <th>Actions</th>
                     </tr>
@@ -82,26 +159,17 @@ export default function Matches() {
                 <tbody>
                     {matches.map((match) => (
                         <tr key={match.id}>
+                            <td>{match.matchday}</td>
                             <td>{new Date(match.date_time).toLocaleString('fr-FR')}</td>
                             <td>{match.home_team.name}</td>
                             <td>
                                 {editingMatch === match.id ? (
                                     <span>
-                                        <input
-                                            type="number"
-                                            value={scoreForm.home_score}
-                                            onChange={(e) => setScoreForm({ ...scoreForm, home_score: e.target.value })}
-                                            style={{ width: 40 }}
-                                            />
-                                            {' - '}
-                                            <input
-                                                type="number"
-                                                value={scoreForm.away_score}
-                                                onChange={(e) => setScoreForm({ ...scoreForm, away_score: e.target.value })}
-                                                style={{ width: 40 }}
-                                            />
-                                            <button onClick={() => handleScoreSubmit(match.id)}>✓</button>
-                                            <button onClick={() => setEditingMatch(null)}>✗</button>
+                                        <input type="number" value={scoreForm.home_score} onChange={(e) => setScoreForm({ ...scoreForm, home_score: e.target.value })} style={{ width: 40 }} />
+                                        {' - '}
+                                        <input type="number" value={scoreForm.away_score} onChange={(e) => setScoreForm({ ...scoreForm, away_score: e.target.value })} style={{ width: 40 }} />
+                                        <button onClick={() => handleScoreSubmit(match.id)}>✓</button>
+                                        <button onClick={() => setEditingMatch(null)}>✗</button>
                                     </span>
                                 ) : (
                                     <span>
@@ -112,18 +180,12 @@ export default function Matches() {
                             </td>
                             <td>{match.away_team.name}</td>
                             <td>{match.category}</td>
+                            <td>{match.group_name}</td>
                             <td>{match.status}</td>
-                            <td>
-                                {!match.is_locked && (
-                                    <button onClick={() => handleEditScore(match)}>
-                                        Saisir le score
-                                    </button>
-                                )}
-                                {match.is_locked && (
-                                    <button onClick={() => handleUnlock(match.id)}>
-                                        Déverrouiller
-                                    </button>
-                                )}
+                            <td style={{ display: 'flex', gap: 4 }}>
+                                {!match.is_locked && <button onClick={() => handleEditScore(match)}>Score</button>}
+                                {match.is_locked && <button onClick={() => handleUnlock(match.id)}>🔓</button>}
+                                <button onClick={() => handleDelete(match.id)} style={{ color: 'red' }}>✕</button>
                             </td>
                         </tr>
                     ))}
@@ -131,5 +193,4 @@ export default function Matches() {
             </table>
         </div>
     )
-
 }
