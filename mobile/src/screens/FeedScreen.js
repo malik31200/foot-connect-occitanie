@@ -3,10 +3,11 @@ import { useFocusEffect } from '@react-navigation/native'
 import {
     View, Text, FlatList, Image, TouchableOpacity,
     StyleSheet, ActivityIndicator, Dimensions,
-    Modal, TextInput, KeyboardAvoidingView, Platform, Alert
+    Modal, TextInput, KeyboardAvoidingView, Platform, Alert, Keyboard
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
+import { VideoView, useVideoPlayer } from 'expo-video'
 import OccitanCross from '../components/OccitanCross'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -16,18 +17,36 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 const TAB_BAR_HEIGHT = 80
 const CARD_HEIGHT = SCREEN_HEIGHT - TAB_BAR_HEIGHT
 
-
-function VideoItem({ width, height }) {
+// --- Lecteur vidéo natif avec expo-video ---
+function VideoItem({ uri, width, height }) {
+    const player = useVideoPlayer(uri, p => {
+        p.loop = true
+    })
     return (
-        <View style={{ width, height, backgroundColor: '#1A1614', justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons name="play-circle" size={80} color="rgba(255,255,255,0.5)" />
-        </View>
+        <VideoView
+            player={player}
+            style={{ width, height }}
+            contentFit="contain"
+            nativeControls
+        />
     )
 }
 
-function PostCard({ post, token, onLike, onComment, navigation, itemHeight }) {
+function PostCard({ post, onLike, onComment, navigation, itemHeight }) {
     const medias = post.medias || []
     const [currentIndex, setCurrentIndex] = useState(0)
+
+    // --- État local du like pour afficher le cœur rouge immédiatement ---
+    const [liked, setLiked] = useState(post.is_liked ?? false)
+    const [likesCount, setLikesCount] = useState(post.likes_count)
+
+    function handleLikePress() {
+        // Mise à jour optimiste : on change l'affichage avant la réponse API
+        const wasLiked = liked
+        setLiked(!wasLiked)
+        setLikesCount(prev => wasLiked ? prev - 1 : prev + 1)
+        onLike(post.id)
+    }
 
     return (
         <View style={[styles.card, { height: itemHeight }]}>
@@ -44,14 +63,19 @@ function PostCard({ post, token, onLike, onComment, navigation, itemHeight }) {
                 }}
                 scrollEventThrottle={16}
                 renderItem={({ item }) => {
-                    if (!item) return <View style={{ width: SCREEN_WIDTH, height: itemHeight, backgroundColor: '#1A1614' }} />
+                    if (!item) return (
+                        <View style={{ width: SCREEN_WIDTH, height: itemHeight, backgroundColor: '#1A1614' }} />
+                    )
                     if (item.media_type === 'photo') {
                         return (
-                            <Image
-                                source={{ uri: item.media_url }}
-                                style={{ width: SCREEN_WIDTH, height: itemHeight }}
-                                resizeMode="cover"
-                            />
+                            // fond noir + contain pour voir la photo complète sans zoom
+                            <View style={{ width: SCREEN_WIDTH, height: itemHeight, backgroundColor: '#0E0B0A' }}>
+                                <Image
+                                    source={{ uri: item.media_url }}
+                                    style={{ width: SCREEN_WIDTH, height: itemHeight }}
+                                    resizeMode="contain"
+                                />
+                            </View>
                         )
                     }
                     return <VideoItem uri={item.media_url} width={SCREEN_WIDTH} height={itemHeight} />
@@ -78,11 +102,12 @@ function PostCard({ post, token, onLike, onComment, navigation, itemHeight }) {
             </View>
 
             <View style={styles.actions}>
-                <TouchableOpacity style={styles.actionBtn} onPress={() => onLike(post.id)}>
-                    <View style={styles.actionCircle}>
-                        <Ionicons name="heart" size={24} color="#fff" />
+                <TouchableOpacity style={styles.actionBtn} onPress={handleLikePress}>
+                    <View style={[styles.actionCircle, liked && styles.actionCircleLiked]}>
+                        {/* Cœur rouge si aimé, blanc sinon */}
+                        <Ionicons name="heart" size={24} color={liked ? '#E4002B' : '#fff'} />
                     </View>
-                    <Text style={styles.actionCount}>{post.likes_count}</Text>
+                    <Text style={styles.actionCount}>{likesCount}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionBtn} onPress={() => onComment(post.id)}>
                     <View style={styles.actionCircle}>
@@ -136,7 +161,6 @@ export default function FeedScreen({ navigation }) {
         client.get('/auth/me/', { headers }).then(res => setCurrentUsername(res.data.username)).catch(() => {})
     }, [token])
 
-
     useFocusEffect(
         useCallback(() => {
             setLoading(true)
@@ -157,14 +181,22 @@ export default function FeedScreen({ navigation }) {
         } catch {}
     }
 
+    function closeComments() {
+        Keyboard.dismiss()
+        setCommentPostId(null)
+    }
+
     async function sendComment() {
         const content = commentText.trim()
         if (!content) return
         setCommentText('')
+        Keyboard.dismiss() // ferme le clavier après envoi
         try {
             const res = await client.post(`/posts/${commentPostId}/comments/`, { content }, { headers })
             setComments(prev => [...prev, res.data])
-            setPosts(prev => prev.map(p => p.id === commentPostId ? { ...p, comments_count: (p.comments_count ?? 0) + 1 } : p))
+            setPosts(prev => prev.map(p =>
+                p.id === commentPostId ? { ...p, comments_count: (p.comments_count ?? 0) + 1 } : p
+            ))
         } catch {}
     }
 
@@ -176,7 +208,9 @@ export default function FeedScreen({ navigation }) {
                     try {
                         await client.delete(`/posts/${commentPostId}/comments/${commentId}/`, { headers })
                         setComments(prev => prev.filter(c => c.id !== commentId))
-                        setPosts(prev => prev.map(p => p.id === commentPostId ? { ...p, comments_count: Math.max(0, (p.comments_count ?? 0) - 1) } : p))
+                        setPosts(prev => prev.map(p =>
+                            p.id === commentPostId ? { ...p, comments_count: Math.max(0, (p.comments_count ?? 0) - 1) } : p
+                        ))
                     } catch {}
                 }
             }
@@ -185,10 +219,7 @@ export default function FeedScreen({ navigation }) {
 
     async function handleLike(postId) {
         try {
-            const res = await client.post(`/posts/${postId}/like/`, {}, { headers })
-            setPosts(prev =>
-                prev.map(p => p.id === postId ? { ...p, likes_count: res.data.likes_count } : p)
-            )
+            await client.post(`/posts/${postId}/like/`, {}, { headers })
         } catch {}
     }
 
@@ -210,7 +241,14 @@ export default function FeedScreen({ navigation }) {
             data={posts}
             keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => (
-                <PostCard post={item} token={token} onLike={handleLike} onComment={openComments} navigation={navigation} itemHeight={itemHeight} />
+                <PostCard
+                    post={item}
+                    token={token}
+                    onLike={handleLike}
+                    onComment={openComments}
+                    navigation={navigation}
+                    itemHeight={itemHeight}
+                />
             )}
             onLayout={(e) => setItemHeight(e.nativeEvent.layout.height)}
             snapToInterval={itemHeight}
@@ -218,16 +256,31 @@ export default function FeedScreen({ navigation }) {
             showsVerticalScrollIndicator={false}
         />
 
-        <Modal visible={commentPostId !== null} animationType="slide" transparent onRequestClose={() => setCommentPostId(null)}>
-            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setCommentPostId(null)} />
-            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalSheet}>
+        <Modal
+            visible={commentPostId !== null}
+            animationType="slide"
+            transparent
+            onRequestClose={closeComments}
+        >
+            {/* Toucher en dehors ferme le modal ET le clavier */}
+            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeComments} />
+
+            {/* behavior="padding" fonctionne sur Android ET iOS */}
+            <KeyboardAvoidingView
+                behavior="padding"
+                keyboardVerticalOffset={Platform.OS === 'android' ? 0 : 0}
+                style={styles.modalSheet}
+            >
                 <View style={styles.modalHandle} />
                 <Text style={styles.modalTitle}>Commentaires</Text>
                 <FlatList
                     data={comments}
                     keyExtractor={item => item.id.toString()}
+                    keyboardShouldPersistTaps="handled"
                     contentContainerStyle={{ padding: 16, gap: 12 }}
-                    ListEmptyComponent={<Text style={styles.modalEmpty}>Sois le premier à commenter</Text>}
+                    ListEmptyComponent={
+                        <Text style={styles.modalEmpty}>Sois le premier à commenter</Text>
+                    }
                     renderItem={({ item }) => (
                         <TouchableOpacity
                             onLongPress={item.author_username === currentUsername ? () => deleteComment(item.id) : null}
@@ -235,7 +288,9 @@ export default function FeedScreen({ navigation }) {
                         >
                             <View style={styles.commentRow}>
                                 <View style={styles.commentAvatar}>
-                                    <Text style={styles.commentAvatarText}>{item.author_username?.[0]?.toUpperCase()}</Text>
+                                    <Text style={styles.commentAvatarText}>
+                                        {item.author_username?.[0]?.toUpperCase()}
+                                    </Text>
                                 </View>
                                 <View style={styles.commentBubble}>
                                     <Text style={styles.commentAuthor}>{item.author_username}</Text>
@@ -253,6 +308,9 @@ export default function FeedScreen({ navigation }) {
                         value={commentText}
                         onChangeText={setCommentText}
                         multiline
+                        returnKeyType="send"
+                        onSubmitEditing={sendComment}
+                        blurOnSubmit
                     />
                     <TouchableOpacity style={styles.commentSendBtn} onPress={sendComment}>
                         <Ionicons name="send" size={18} color="#fff" />
@@ -286,13 +344,6 @@ const styles = StyleSheet.create({
         width: SCREEN_WIDTH,
         height: CARD_HEIGHT,
         backgroundColor: '#0E0B0A',
-    },
-    media: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    mediaPlaceholder: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#1A1614',
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
@@ -330,6 +381,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.2)',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    actionCircleLiked: {
+        backgroundColor: 'rgba(228,0,43,0.2)',
     },
     actionCount: {
         color: '#fff',
