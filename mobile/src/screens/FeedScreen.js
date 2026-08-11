@@ -76,12 +76,20 @@ function PostCard({ post, onLike, onComment, navigation, itemHeight, isActive })
                     )
                     if (item.media_type === 'photo') {
                         return (
-                            // cover = plein écran style TikTok (bords légèrement coupés)
+                            // Style TikTok : photo entière + fond flouté derrière
                             <View style={{ width: SCREEN_WIDTH, height: itemHeight, backgroundColor: '#0E0B0A' }}>
+                                {/* Fond : même image en cover + flou */}
+                                <Image
+                                    source={{ uri: item.media_url }}
+                                    style={{ ...StyleSheet.absoluteFillObject }}
+                                    resizeMode="cover"
+                                    blurRadius={18}
+                                />
+                                {/* Photo complète par-dessus en contain */}
                                 <Image
                                     source={{ uri: item.media_url }}
                                     style={{ width: SCREEN_WIDTH, height: itemHeight }}
-                                    resizeMode="cover"
+                                    resizeMode="contain"
                                 />
                             </View>
                         )
