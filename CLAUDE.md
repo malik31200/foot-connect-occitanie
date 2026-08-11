@@ -25,7 +25,7 @@
 | Recherche match dans PublishScreen | ✅ Terminé |
 | API FFF bloquée (403) depuis juin 2026 | ⚠️ En attente réouverture |
 | Déploiement VPS Hetzner (CPX12, Helsinki, 95.217.154.83) | ✅ Terminé |
-| SSL Let's Encrypt | ⏳ En attente d'un nom de domaine |
+| SSL Let's Encrypt + domaine footconnect-occitanie.fr | ✅ Terminé |
 **Documentation sprints :** `docs/`
 
 ---
