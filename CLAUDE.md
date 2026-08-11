@@ -11,11 +11,11 @@
 | Sprint 2b — Référentiel sportif | ✅ Terminé | `main` |
 | Sprint 3 — Résultats + classements | ✅ Terminé | `main` |
 | Sprint 4 — Réseau social complet | ✅ Terminé | `main` (PR #5) |
-| Sprint 5 — Stabilisation + déploiement VPS | 🚧 En cours | `feature/sprint-5-deploy` |
+| Sprint 5 — Stabilisation + déploiement VPS | ✅ Terminé | `main` (PR #6) |
 
-**Branche active :** `feature/sprint-5-deploy`
+**Branche active :** `main`
 
-### Avancement Sprint 5 (au 11/08/2026)
+### Avancement Sprint 5 (terminé le 11/08/2026)
 
 | Tâche | Statut |
 |-------|--------|
@@ -24,7 +24,8 @@
 | Proxy Vite + fix WSL2 admin panel | ✅ Terminé |
 | Recherche match dans PublishScreen | ✅ Terminé |
 | API FFF bloquée (403) depuis juin 2026 | ⚠️ En attente réouverture |
-| Déploiement VPS Hetzner | 🚧 En cours (vérification compte) |
+| Déploiement VPS Hetzner (CPX12, Helsinki, 95.217.154.83) | ✅ Terminé |
+| SSL Let's Encrypt | ⏳ En attente d'un nom de domaine |
 **Documentation sprints :** `docs/`
 
 ---

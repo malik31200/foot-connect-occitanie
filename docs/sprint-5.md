@@ -152,17 +152,17 @@ sudo systemctl restart gunicorn celery celerybeat
 - [ ] Log actions admin explicites — à faire en V1
 
 ### Déploiement VPS
-- [ ] VPS provisionné (Ubuntu 22.04 — Hetzner, vérification compte en cours)
-- [ ] SSH + firewall ufw
-- [ ] PostgreSQL installé + migrations
-- [ ] Gunicorn en service systemd
-- [ ] Nginx configuré (API + React statique)
-- [ ] SSL Let's Encrypt actif
-- [ ] Redis installé
-- [ ] Celery Worker + Celery Beat en services systemd
-- [ ] Scraper FFF vérifié en production
-- [ ] URL production mise à jour dans `mobile/src/api/client.js`
-- [ ] Tests de smoke OK
+- [x] VPS provisionné (Ubuntu 26.04 — Hetzner CPX12, Helsinki, IP : 95.217.154.83)
+- [x] SSH + firewall ufw (ports 22, 80, 443)
+- [x] PostgreSQL installé + migrations (user: footconnect, db: footconnect)
+- [x] Gunicorn en service systemd (active + enabled)
+- [x] Nginx configuré (API `/api/` → Gunicorn, React statique sur `/`)
+- [ ] SSL Let's Encrypt — en attente d'un nom de domaine
+- [x] Redis installé (active + enabled, port 6379)
+- [x] Celery Worker + Celery Beat en services systemd (active + enabled)
+- [ ] Scraper FFF — en attente réouverture API FFF (403 depuis juin 2026)
+- [x] URL production mise à jour dans `mobile/src/api/client.js` (http://95.217.154.83/api)
+- [x] Tests de smoke OK (login API retourne JWT ✅, admin panel accessible ✅)
 
 ---
 
