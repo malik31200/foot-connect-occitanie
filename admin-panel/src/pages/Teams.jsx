@@ -67,7 +67,7 @@ export default function Teams() {
                 <input name="category" placeholder="Catégorie" value={form.category} onChange={handleChange} required />
                 <input name="group_name" placeholder="Poule" value={form.group_name} onChange={handleChange} />
                 <input name="season" placeholder="Saison" value={form.season} onChange={handleChange} required />
-                <input name="fff_id" placeholder="ID FFF" value={form.fff_id} onChange={handleChange} required />
+                <input name="fff_id" placeholder="ID FFF (optionnel)" value={form.fff_id} onChange={handleChange} />
                 <button type='submit'>Créer</button>
             </form>
             {error && <p style={{ color: 'red' }}>{error}</p>}

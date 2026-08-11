@@ -46,7 +46,7 @@ export default function Clubs() {
                 <input name="name" placeholder="Nom du club" value={form.name} onChange={handleChange} required />
                 <input name="city" placeholder="Ville" value={form.city} onChange={handleChange} />
                 <input name="logo_url" placeholder="URL Logo" value={form.logo_url} onChange={handleChange} />
-                <input name="fff_id" placeholder="ID FFF" value={form.fff_id} onChange={handleChange} required />
+                <input name="fff_id" placeholder="ID FFF (optionnel)" value={form.fff_id} onChange={handleChange} />
                 <button type="submit">Créer</button>
             </form>
             {error && <p style={{ color: 'red' }}>{error}</p>}
