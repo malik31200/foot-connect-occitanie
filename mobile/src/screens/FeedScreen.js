@@ -76,12 +76,12 @@ function PostCard({ post, onLike, onComment, navigation, itemHeight, isActive })
                     )
                     if (item.media_type === 'photo') {
                         return (
-                            // fond noir + contain pour voir la photo complète sans zoom
+                            // cover = plein écran style TikTok (bords légèrement coupés)
                             <View style={{ width: SCREEN_WIDTH, height: itemHeight, backgroundColor: '#0E0B0A' }}>
                                 <Image
                                     source={{ uri: item.media_url }}
                                     style={{ width: SCREEN_WIDTH, height: itemHeight }}
-                                    resizeMode="contain"
+                                    resizeMode="cover"
                                 />
                             </View>
                         )
