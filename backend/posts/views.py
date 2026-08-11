@@ -39,6 +39,14 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return Response(PostSerializer(post).data, status=status.HTTP_201_CREATED)
     
+    def destroy(self, request, *args, **kwargs):
+        post = self.get_object()
+        # Only author or admin can to delete a post
+        if post.author != request.user and request.user.role != 'admin':
+            return Response(status=403)
+        post.delete()
+        return Response(status=204)
+    
 
 class FeedView(APIView):
     permission_classes = [IsAuthenticated]
