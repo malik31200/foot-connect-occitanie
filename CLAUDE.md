@@ -14,6 +14,17 @@
 | Sprint 5 — Stabilisation + déploiement VPS | 🚧 En cours | `feature/sprint-5-deploy` |
 
 **Branche active :** `feature/sprint-5-deploy`
+
+### Avancement Sprint 5 (au 11/08/2026)
+
+| Tâche | Statut |
+|-------|--------|
+| Modération back-office (posts + commentaires) | ✅ Terminé |
+| Logging Django (`settings.py` + `backend/logs/`) | ✅ Terminé |
+| Proxy Vite + fix WSL2 admin panel | ✅ Terminé |
+| Recherche match dans PublishScreen | ✅ Terminé |
+| API FFF bloquée (403) depuis juin 2026 | ⚠️ En attente réouverture |
+| Déploiement VPS Hetzner | 🚧 En cours (vérification compte) |
 **Documentation sprints :** `docs/`
 
 ---

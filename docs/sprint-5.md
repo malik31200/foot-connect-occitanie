@@ -37,13 +37,18 @@ Un écran dans l'admin web permettant à l'administrateur de :
 
 ### Ce qu'on logue
 
-- Erreurs API (4xx/5xx) via middleware Django
-- Actions admin : suppression post, suppression commentaire, unlock match
-- Synchronisations FFF (déjà dans SYNC_LOG)
+- Erreurs Django (WARNING+) → `backend/logs/django.log`
+- Erreurs scraper FFF → même fichier
+- Synchronisations FFF → `SYNC_LOG` en base (déjà en place)
 
 ### Approche
 
-Utilisation du module `logging` Python natif + configuration dans `settings.py`.
+Module `logging` Python natif configuré dans `settings.py` avec :
+- **Formatter** `verbose` : `[date] LEVEL app : message`
+- **Handler** `file` : écrit dans `backend/logs/django.log` (WARNING+)
+- **Handler** `console` : affiche dans le terminal
+- **Loggers** : `django` et `scraper` branchés sur les deux handlers
+
 Pas de service externe pour le MVP (Sentry ou similaire en V1).
 
 ---
@@ -112,22 +117,43 @@ sudo systemctl restart gunicorn celery celerybeat
 
 ---
 
-## 4. Checklist Sprint 5
+## 4. Corrections et améliorations Sprint 5
+
+### PublishScreen (mobile)
+- Recherche de match par nom d'équipe (filtre client-side sur `home_team.name` / `away_team.name`)
+- Suppression de la limite `.slice(0, 10)` — tous les matchs disponibles
+- Filtre `?status=scheduled` au lieu de `?season=2025` (indépendant de la saison)
+
+### Back-office admin
+- Proxy Vite configuré dans `vite.config.js` (résout le problème WSL2 localhost → réseau)
+- `client.js` : baseURL passée à `/api` (URL relative, plus de `localhost:8000` en dur)
+- `Login.jsx` : utilise désormais `client` (plus d'axios direct + trailing slash)
+
+### Scraper FFF
+- API FFF passée en accès privé (403) depuis juin 2026
+- Architecture scraper en place — opérationnel dès réouverture de l'API
+- Données saisies manuellement via admin panel en attendant
+
+---
+
+## 5. Checklist Sprint 5
 
 ### Modération back-office
-- [ ] Endpoint `DELETE /api/posts/{id}/` (admin only)
-- [ ] Écran "Modération" dans l'admin React : liste des posts
-- [ ] Bouton supprimer post avec confirmation
-- [ ] Voir + supprimer commentaires d'un post
-- [ ] Logs actions admin (suppression)
+- [x] Endpoint `DELETE /api/posts/{id}/` (admin only)
+- [x] Écran "Modération" dans l'admin React : liste des posts avec compteur commentaires
+- [x] Bouton supprimer post avec confirmation
+- [x] Voir + supprimer commentaires d'un post (toggle, try/catch)
+- [ ] Logs actions admin (suppression) — à faire en V1
 
 ### Logs applicatifs
-- [ ] Configuration `logging` dans `settings.py`
-- [ ] Log erreurs 4xx/5xx
-- [ ] Log actions admin
+- [x] Configuration `logging` dans `settings.py`
+- [x] Log erreurs Django (WARNING+) → `backend/logs/django.log`
+- [x] Log erreurs scraper → même fichier
+- [ ] Log actions admin explicites — à faire en V1
 
 ### Déploiement VPS
-- [ ] VPS provisionné (Ubuntu 22.04)
+- [ ] VPS provisionné (Ubuntu 22.04 — Hetzner, vérification compte en cours)
+- [ ] SSH + firewall ufw
 - [ ] PostgreSQL installé + migrations
 - [ ] Gunicorn en service systemd
 - [ ] Nginx configuré (API + React statique)
