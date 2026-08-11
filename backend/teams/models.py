@@ -8,7 +8,7 @@ class Team(models.Model):
     category = models.CharField(max_length=50)
     group_name = models.CharField(max_length=100, blank=True, null=True)
     season = models.CharField(max_length=20)
-    fff_id = models.CharField(max_length=50, unique=True)
+    fff_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
