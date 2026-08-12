@@ -1,0 +1,444 @@
+<title>Politique de Confidentialité — Foot Connect Occitanie</title>
+<style>
+  /* ── Tokens ── */
+  :root {
+    --red:     #E4002B;
+    --red-dk:  #B80020;
+    --gold:    #F5C518;
+    --ink:     #1A1614;
+    --muted:   #5C564F;
+    --subtle:  #A8A29B;
+    --surface: #F6F3EE;
+    --card:    #FFFFFF;
+    --border:  #E8E4DF;
+    --bg:      var(--surface);
+    --text:    var(--ink);
+    --text2:   var(--muted);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:      #18110F;
+      --card:    #221816;
+      --border:  #33221E;
+      --text:    #F0EBE6;
+      --text2:   #A8A29B;
+      --surface: #18110F;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:      #18110F;
+    --card:    #221816;
+    --border:  #33221E;
+    --text:    #F0EBE6;
+    --text2:   #A8A29B;
+    --surface: #18110F;
+  }
+
+  /* ── Reset + base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+  a { color: var(--red); text-underline-offset: 3px; }
+  a:hover { color: var(--red-dk); }
+
+  /* ── Header ── */
+  .site-header {
+    background: linear-gradient(135deg, #FF2A3C, var(--red) 55%, var(--red-dk));
+    padding: 3rem 1.5rem 2.5rem;
+    text-align: center;
+  }
+  .cross {
+    display: inline-block;
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: .75rem;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
+  }
+  .app-name {
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .app-sub {
+    color: rgba(255,255,255,.7);
+    font-size: .8rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    margin-top: .35rem;
+  }
+  .page-label {
+    display: inline-block;
+    margin-top: 1.25rem;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.3);
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: .35rem .85rem;
+    border-radius: 999px;
+  }
+
+  /* ── Layout ── */
+  .doc {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 2rem;
+    font-size: .8rem;
+    color: var(--text2);
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .meta span { display: flex; align-items: center; gap: .4rem; }
+
+  /* ── Sections ── */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1rem;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1rem;
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    background: var(--red);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    color: #fff;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  h2 {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  p { color: var(--text2); margin-bottom: .75rem; font-size: .9375rem; }
+  p:last-child { margin-bottom: 0; }
+  ul { color: var(--text2); padding-left: 1.25rem; font-size: .9375rem; }
+  ul li { margin-bottom: .4rem; }
+  ul li::marker { color: var(--red); }
+
+  /* ── Data table ── */
+  .data-table {
+    width: 100%; border-collapse: collapse; font-size: .875rem;
+    overflow-x: auto; display: block;
+  }
+  .data-table th {
+    text-align: left; font-weight: 700; font-size: .7rem;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--text2); padding: .6rem .75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: .65rem .75rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2); vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface); }
+  .pill {
+    display: inline-block; padding: .15rem .55rem;
+    border-radius: 999px; font-size: .7rem; font-weight: 700;
+    background: rgba(228,0,43,.12); color: var(--red);
+  }
+
+  /* ── Rights grid ── */
+  .rights {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: .75rem;
+    margin-top: .5rem;
+  }
+  .right-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: .85rem 1rem;
+  }
+  .right-card strong {
+    display: block; font-size: .8rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .05em;
+    color: var(--text); margin-bottom: .3rem;
+  }
+  .right-card span { font-size: .8rem; color: var(--text2); }
+
+  /* ── Contact box ── */
+  .contact-box {
+    background: linear-gradient(135deg, rgba(228,0,43,.08), rgba(245,197,24,.06));
+    border: 1px solid rgba(228,0,43,.2);
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    align-items: center; justify-content: space-between;
+    margin-top: 1rem;
+  }
+  .contact-box p { margin: 0; }
+  .contact-link {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: var(--red);
+    color: #fff !important;
+    font-weight: 700; font-size: .85rem;
+    padding: .6rem 1.25rem; border-radius: 10px;
+    text-decoration: none; white-space: nowrap;
+    transition: background .15s;
+  }
+  .contact-link:hover { background: var(--red-dk); }
+
+  /* ── Footer ── */
+  .doc-footer {
+    text-align: center; margin-top: 3rem;
+    padding-top: 1.5rem; border-top: 1px solid var(--border);
+    font-size: .78rem; color: var(--subtle);
+  }
+  .gold { color: var(--gold); }
+
+  @media (max-width: 520px) {
+    .section { padding: 1.25rem 1.1rem; }
+    .doc { padding: 1.5rem 1rem 4rem; }
+  }
+</style>
+
+<header class="site-header">
+  <div class="cross">✦</div>
+  <div class="app-name">Foot Connect Occitanie</div>
+  <div class="app-sub">Application mobile</div>
+  <div class="page-label">Politique de confidentialité</div>
+</header>
+
+<main class="doc">
+
+  <div class="meta">
+    <span>📅 Dernière mise à jour : août 2026</span>
+    <span>🌍 Données hébergées en UE (Helsinki, Finlande)</span>
+    <span>🇫🇷 RGPD applicable</span>
+  </div>
+
+  <!-- Introduction -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">📋</div>
+      <h2>Introduction</h2>
+    </div>
+    <p>
+      Foot Connect Occitanie (ci-après « l'Application ») est une plateforme mobile dédiée au football amateur en Occitanie. Elle permet de suivre les matchs et classements, et de partager des publications liées aux rencontres sportives.
+    </p>
+    <p>
+      La présente politique décrit quelles données nous collectons, pourquoi, comment nous les protégeons, et quels sont vos droits. En utilisant l'Application, vous acceptez les pratiques décrites ici.
+    </p>
+    <p>
+      <strong>Responsable du traitement :</strong> Malik Bouanani —
+      <a href="mailto:likma81200@hotmail.fr">likma81200@hotmail.fr</a>
+    </p>
+  </div>
+
+  <!-- Données collectées -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">🗂️</div>
+      <h2>Données collectées</h2>
+    </div>
+    <p>Nous collectons uniquement les données nécessaires au fonctionnement de l'Application :</p>
+    <div style="overflow-x:auto; margin-top:.75rem;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Catégorie</th>
+            <th>Données</th>
+            <th>Finalité</th>
+            <th>Base légale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Compte</strong></td>
+            <td>Pseudo, adresse e-mail, mot de passe (chiffré)</td>
+            <td>Authentification</td>
+            <td><span class="pill">Contrat</span></td>
+          </tr>
+          <tr>
+            <td><strong>Publications</strong></td>
+            <td>Photos, vidéos, légendes</td>
+            <td>Partage de contenu sportif</td>
+            <td><span class="pill">Consentement</span></td>
+          </tr>
+          <tr>
+            <td><strong>Interactions</strong></td>
+            <td>Likes, commentaires, abonnements</td>
+            <td>Fonctionnalités sociales</td>
+            <td><span class="pill">Contrat</span></td>
+          </tr>
+          <tr>
+            <td><strong>Messages</strong></td>
+            <td>Conversations privées</td>
+            <td>Messagerie entre utilisateurs</td>
+            <td><span class="pill">Contrat</span></td>
+          </tr>
+          <tr>
+            <td><strong>Technique</strong></td>
+            <td>Journaux d'accès (IP, horodatage)</td>
+            <td>Sécurité et débogage</td>
+            <td><span class="pill">Intérêt légitime</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:1rem;">
+      Nous ne collectons <strong>aucune donnée de localisation</strong>, aucune donnée de santé, et nous ne vendons aucune donnée personnelle à des tiers.
+    </p>
+  </div>
+
+  <!-- Hébergement et tiers -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">🏗️</div>
+      <h2>Hébergement et services tiers</h2>
+    </div>
+    <ul>
+      <li>
+        <strong>Serveur applicatif</strong> — VPS Hetzner, Helsinki, Finlande (Union Européenne). Données soumises au RGPD.
+      </li>
+      <li>
+        <strong>Cloudinary</strong> — Stockage des photos et vidéos publiées. Cloudinary LLC (USA) est conforme au RGPD via les clauses contractuelles types (SCC). Politique de confidentialité : <a href="https://cloudinary.com/privacy" target="_blank" rel="noopener">cloudinary.com/privacy</a>
+      </li>
+    </ul>
+    <p style="margin-top:.85rem;">
+      Aucune donnée n'est transmise à d'autres tiers sans votre consentement explicite.
+    </p>
+  </div>
+
+  <!-- Conservation -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">⏱️</div>
+      <h2>Durée de conservation</h2>
+    </div>
+    <ul>
+      <li><strong>Données de compte</strong> — conservées jusqu'à la suppression de votre compte.</li>
+      <li><strong>Publications et messages</strong> — supprimés à votre demande ou à la fermeture du compte.</li>
+      <li><strong>Journaux techniques</strong> — conservés 90 jours maximum, puis supprimés automatiquement.</li>
+    </ul>
+  </div>
+
+  <!-- Sécurité -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">🔒</div>
+      <h2>Sécurité</h2>
+    </div>
+    <ul>
+      <li>Toutes les communications sont chiffrées en <strong>HTTPS/TLS</strong>.</li>
+      <li>Les mots de passe sont <strong>hachés</strong> (jamais stockés en clair).</li>
+      <li>L'authentification utilise des <strong>tokens JWT</strong> à durée de vie limitée.</li>
+      <li>L'accès serveur est restreint par <strong>clé SSH</strong> et pare-feu.</li>
+      <li>Les tokens de session sont stockés dans le <strong>coffre sécurisé</strong> de votre appareil (Keychain iOS / Keystore Android).</li>
+    </ul>
+  </div>
+
+  <!-- Droits -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">⚖️</div>
+      <h2>Vos droits (RGPD)</h2>
+    </div>
+    <p>Conformément au Règlement Général sur la Protection des Données, vous disposez des droits suivants :</p>
+    <div class="rights">
+      <div class="right-card">
+        <strong>Accès</strong>
+        <span>Obtenir une copie de vos données personnelles</span>
+      </div>
+      <div class="right-card">
+        <strong>Rectification</strong>
+        <span>Corriger des informations inexactes</span>
+      </div>
+      <div class="right-card">
+        <strong>Suppression</strong>
+        <span>Demander l'effacement de vos données</span>
+      </div>
+      <div class="right-card">
+        <strong>Portabilité</strong>
+        <span>Recevoir vos données dans un format structuré</span>
+      </div>
+      <div class="right-card">
+        <strong>Opposition</strong>
+        <span>Vous opposer à certains traitements</span>
+      </div>
+      <div class="right-card">
+        <strong>Limitation</strong>
+        <span>Restreindre le traitement de vos données</span>
+      </div>
+    </div>
+    <p style="margin-top:1rem;">
+      Pour exercer ces droits, contactez-nous à l'adresse ci-dessous. Nous répondrons dans un délai de <strong>30 jours</strong>. Vous pouvez également introduire une réclamation auprès de la <a href="https://www.cnil.fr" target="_blank" rel="noopener">CNIL</a>.
+    </p>
+  </div>
+
+  <!-- Mineurs -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">🧒</div>
+      <h2>Mineurs</h2>
+    </div>
+    <p>
+      L'Application est destinée aux personnes âgées de <strong>13 ans et plus</strong>. Nous ne collectons pas sciemment de données personnelles concernant des enfants de moins de 13 ans. Si vous pensez qu'un mineur nous a communiqué des données sans consentement parental, contactez-nous pour en demander la suppression.
+    </p>
+  </div>
+
+  <!-- Modifications -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">📝</div>
+      <h2>Modifications de cette politique</h2>
+    </div>
+    <p>
+      Nous pouvons mettre à jour cette politique en cas d'évolution de l'Application ou de la réglementation. La date de dernière mise à jour figure en haut de ce document. En cas de modification substantielle, vous serez informé via l'Application.
+    </p>
+  </div>
+
+  <!-- Contact -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-icon">✉️</div>
+      <h2>Nous contacter</h2>
+    </div>
+    <p>Pour toute question relative à la protection de vos données personnelles :</p>
+    <div class="contact-box">
+      <p><strong>Malik Bouanani</strong><br>
+      Responsable du traitement — Foot Connect Occitanie</p>
+      <a class="contact-link" href="mailto:likma81200@hotmail.fr">
+        ✉ likma81200@hotmail.fr
+      </a>
+    </div>
+  </div>
+
+  <footer class="doc-footer">
+    <span class="gold">✦</span> Foot Connect Occitanie &nbsp;·&nbsp; Politique de confidentialité &nbsp;·&nbsp; Août 2026
+  </footer>
+
+</main>
