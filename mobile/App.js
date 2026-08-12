@@ -129,7 +129,15 @@ function AuthNavigator() {
 }
 
 function RootNavigator() {
-  const { token } = useAuth()
+  const { token, loading } = useAuth()
+  // Pendant la vérification du token stocké : écran de chargement neutre
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#E4002B' }}>
+        <ActivityIndicator color="#fff" size="large" />
+      </View>
+    )
+  }
   return token ? <MainNavigator /> : <AuthNavigator />
 }
 
