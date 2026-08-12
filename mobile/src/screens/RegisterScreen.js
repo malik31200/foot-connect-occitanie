@@ -25,7 +25,7 @@ export default function RegisterScreen({ navigation }) {
         try {
             await client.post('/auth/register/', { username, email, password })
             const res = await client.post('/auth/login/', { email, password })
-            login(res.data.access)
+            login(res.data.access, res.data.refresh)
         } catch (e) {
             const msg = e.response?.data
                 ? Object.values(e.response.data).flat().join('\n')

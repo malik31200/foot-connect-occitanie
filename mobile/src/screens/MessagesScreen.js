@@ -4,6 +4,7 @@ import {
     View, Text, FlatList, TouchableOpacity,
     StyleSheet, ActivityIndicator
 } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -32,13 +33,26 @@ export default function MessagesScreen({ navigation }) {
 
     return (
         <View style={styles.screen}>
-            <View style={styles.header}>
+
+            {/* Header gradient rouge — même identité que Login/Profil */}
+            <LinearGradient
+                colors={['#FF2A3C', '#E4002B', '#B80020']}
+                style={styles.header}
+            >
                 <Text style={styles.headerTitle}>MESSAGES</Text>
-            </View>
+                {conversations.length > 0 && (
+                    <Text style={styles.headerCount}>
+                        {conversations.length} conversation{conversations.length > 1 ? 's' : ''}
+                    </Text>
+                )}
+            </LinearGradient>
 
             {conversations.length === 0 ? (
                 <View style={styles.centered}>
-                    <Ionicons name="chatbubble-ellipses-outline" size={56} color="#A8A29B" />
+                    {/* Icône dans un cercle rouge pour garder l'identité */}
+                    <View style={styles.emptyIcon}>
+                        <Ionicons name="chatbubble-ellipses" size={36} color="#fff" />
+                    </View>
                     <Text style={styles.emptyText}>Aucune conversation</Text>
                     <Text style={styles.emptySubText}>
                         Va sur le profil d'un joueur pour lui écrire
@@ -56,7 +70,9 @@ export default function MessagesScreen({ navigation }) {
                                 conversationId: item.id,
                                 username: item.other_username
                             })}
+                            activeOpacity={0.8}
                         >
+                            {/* Avatar avec initiale sur fond or */}
                             <View style={styles.avatar}>
                                 <Text style={styles.avatarText}>
                                     {item.other_username[0].toUpperCase()}
@@ -64,7 +80,13 @@ export default function MessagesScreen({ navigation }) {
                             </View>
                             <View style={styles.info}>
                                 <Text style={styles.username}>{item.other_username}</Text>
-                                <Text style={styles.lastMessage} numberOfLines={1}>
+                                <Text
+                                    style={[
+                                        styles.lastMessage,
+                                        item.unread_count > 0 && styles.lastMessageUnread
+                                    ]}
+                                    numberOfLines={1}
+                                >
                                     {item.last_message || 'Aucun message'}
                                 </Text>
                             </View>
@@ -87,36 +109,47 @@ const styles = StyleSheet.create({
         backgroundColor: '#F6F3EE',
     },
     header: {
-        backgroundColor: '#fff',
-        paddingTop: 56,
-        paddingBottom: 16,
+        paddingTop: 60,
+        paddingBottom: 24,
         paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F4F1EC',
     },
     headerTitle: {
         fontFamily: 'Anton_400Regular',
-        fontSize: 28,
-        color: '#1A1614',
+        fontSize: 32,
+        color: '#fff',
+    },
+    headerCount: {
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 13,
+        color: 'rgba(255,255,255,0.75)',
+        marginTop: 4,
     },
     centered: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 32,
+        gap: 12,
+    },
+    emptyIcon: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#E4002B',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8,
     },
     emptyText: {
         fontFamily: 'PlusJakartaSans_700Bold',
         fontSize: 18,
         color: '#1A1614',
-        marginTop: 16,
     },
     emptySubText: {
         fontFamily: 'PlusJakartaSans_400Regular',
         fontSize: 14,
         color: '#5C564F',
         textAlign: 'center',
-        marginTop: 8,
     },
     list: {
         padding: 16,
@@ -126,13 +159,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#fff',
-        borderRadius: 14,
+        borderRadius: 16,
         padding: 14,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 2,
     },
     avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 52,
+        height: 52,
+        borderRadius: 26,
         backgroundColor: '#F5C518',
         justifyContent: 'center',
         alignItems: 'center',
@@ -140,7 +178,7 @@ const styles = StyleSheet.create({
     },
     avatarText: {
         fontFamily: 'PlusJakartaSans_800ExtraBold',
-        fontSize: 20,
+        fontSize: 22,
         color: '#1A1614',
     },
     info: {
@@ -154,8 +192,12 @@ const styles = StyleSheet.create({
     lastMessage: {
         fontFamily: 'PlusJakartaSans_400Regular',
         fontSize: 13,
-        color: '#5C564F',
+        color: '#A8A29B',
         marginTop: 3,
+    },
+    lastMessageUnread: {
+        color: '#1A1614',
+        fontFamily: 'PlusJakartaSans_600SemiBold',
     },
     badge: {
         backgroundColor: '#E4002B',
