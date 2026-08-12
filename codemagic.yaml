@@ -1,0 +1,43 @@
+workflows:
+  ios-release:
+    name: iOS Release
+    max_build_duration: 120
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: fr.footconnect.occitanie
+      vars:
+        XCODE_WORKSPACE: "mobile/ios/FootConnectOccitanie.xcworkspace"
+        XCODE_SCHEME: "FootConnectOccitanie"
+        APP_STORE_APPLE_ID: "6800713864"
+      node: v18.17.0
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install dependencies
+        script: |
+          cd mobile
+          npm install
+      - name: Set up app
+        script: |
+          cd mobile
+          npx expo prebuild --platform ios --clean
+      - name: Install CocoaPods
+        script: |
+          cd mobile/ios
+          pod install
+      - name: Build iOS
+        script: |
+          cd mobile
+          xcode-project build-ipa \
+            --workspace "ios/FootConnectOccitanie.xcworkspace" \
+            --scheme "FootConnectOccitanie"
+    artifacts:
+      - mobile/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
