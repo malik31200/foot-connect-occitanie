@@ -108,7 +108,13 @@ function MainNavigator() {
       <Stack.Screen
         name="Conversation"
         component={ConversationScreen}
-        options={({ route }) => ({ title: route.params.username })}
+        options={({ route }) => ({
+          title: route.params.username,
+          headerStyle: { backgroundColor: '#E4002B' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontFamily: 'Anton_400Regular', fontSize: 20 },
+          headerBackTitleVisible: false,
+        })}
       />
       <Stack.Screen
         name="Profile"
