@@ -60,7 +60,7 @@ function AvenirTab() {
 
     useEffect(() => {
         if (!category) return
-        setLoading(true)
+        if (matches.length === 0) setLoading(true)
         let url = `/matches/?status=scheduled&season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
@@ -84,7 +84,7 @@ function TerminesTab() {
 
     useEffect(() => {
         if (!category) return
-        setLoading(true)
+        if (matches.length === 0) setLoading(true)
         let url = `/matches/?status=finished&season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
@@ -108,7 +108,7 @@ function ClassementTab() {
 
     useEffect(() => {
         if (!category) return
-        setLoading(true)
+        if (standings.length === 0) setLoading(true)
         let url = `/standings/?season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
@@ -158,7 +158,7 @@ function CalendrierTab() {
 
     useEffect(() => {
         if (!category) return
-        setLoading(true)
+        if (matches.length === 0) setLoading(true)
         let url = `/matches/?season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)

@@ -19,7 +19,8 @@ export default function ProfileScreen({ route, navigation }) {
 
     useFocusEffect(
         useCallback(() => {
-            setLoading(true)
+            // Spinner uniquement au premier chargement — sinon on garde l'ancien profil visible
+            if (!profile) setLoading(true)
             const url = userId ? `/users/${userId}/` : '/auth/me/'
             client.get(url, { headers })
                 .then(res => setProfile(res.data))

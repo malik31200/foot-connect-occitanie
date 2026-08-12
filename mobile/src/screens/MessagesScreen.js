@@ -17,7 +17,8 @@ export default function MessagesScreen({ navigation }) {
 
     useFocusEffect(
         useCallback(() => {
-            setLoading(true)
+            // Spinner uniquement si on n'a rien à afficher — sinon refresh en fond
+            if (conversations.length === 0) setLoading(true)
             client.get('/conversations/', { headers })
                 .then(res => setConversations(res.data))
                 .catch(() => {})
