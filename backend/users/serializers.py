@@ -17,12 +17,12 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
         )
         return user
-    
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role']
+        fields = ['id', 'username', 'email', 'role', 'sport_role', 'avatar_url']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -31,11 +31,22 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'avatar_url', 'followers_count', 'following_count']
+        fields = ['id', 'username', 'email', 'role', 'sport_role', 'avatar_url',
+                  'followers_count', 'following_count']
 
     def get_followers_count(self, obj):
         return obj.followers.count()
-    
+
     def get_following_count(self, obj):
         return obj.following.count()
-    
+
+
+class UpdateProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'sport_role', 'avatar_url']
+        extra_kwargs = {
+            'username': {'required': False},
+            'sport_role': {'required': False},
+            'avatar_url': {'required': False},
+        }

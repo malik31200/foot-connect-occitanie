@@ -76,13 +76,28 @@ export default function ProfileScreen({ route, navigation }) {
                 colors={['#FF2A3C', '#E4002B', '#B80020']}
                 style={styles.header}
             >
-                <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>
-                        {profile?.username?.charAt(0).toUpperCase()}
-                    </Text>
-                </View>
+                {profile?.avatar_url ? (
+                    <Image
+                        source={{ uri: profile.avatar_url }}
+                        style={[styles.avatar, { backgroundColor: 'transparent' }]}
+                    />
+                ) : (
+                    <View style={styles.avatar}>
+                        <Text style={styles.avatarText}>
+                            {profile?.username?.charAt(0).toUpperCase()}
+                        </Text>
+                    </View>
+                )}
                 <Text style={styles.username}>@{profile?.username}</Text>
-                <Text style={styles.role}>{profile?.role === 'admin' ? 'Administrateur' : 'Joueur'}</Text>
+                <Text style={styles.role}>
+                    {profile?.role === 'admin'
+                        ? 'Administrateur'
+                        : profile?.sport_role === 'coach'
+                        ? 'Coach'
+                        : profile?.sport_role === 'joueur'
+                        ? 'Joueur'
+                        : 'Supporter'}
+                </Text>
             </LinearGradient>
 
             <View style={styles.card}>
@@ -133,10 +148,19 @@ export default function ProfileScreen({ route, navigation }) {
                         </LinearGradient>
                     </View>
                 ) : (
-                    <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-                        <Ionicons name="log-out-outline" size={20} color="#E4002B" />
-                        <Text style={styles.logoutText}>Se déconnecter</Text>
-                    </TouchableOpacity>
+                    <View style={{ gap: 12 }}>
+                        <TouchableOpacity
+                            style={styles.editBtn}
+                            onPress={() => navigation.navigate('EditProfile')}
+                        >
+                            <Ionicons name="pencil-outline" size={18} color="#1A1614" />
+                            <Text style={styles.editBtnText}>Modifier le profil</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+                            <Ionicons name="log-out-outline" size={20} color="#E4002B" />
+                            <Text style={styles.logoutText}>Se déconnecter</Text>
+                        </TouchableOpacity>
+                    </View>
                 )}
             </View>
 
@@ -303,6 +327,20 @@ const styles = StyleSheet.create({
     followBtnTextActive: {
         color: '#E4002B',
     },
+    editBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: '#F4F1EC',
+        borderRadius: 14,
+        height: 52,
+    },
+    editBtnText: {
+        fontFamily: 'PlusJakartaSans_700Bold',
+        fontSize: 15,
+        color: '#1A1614',
+    },
     logoutBtn: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -312,7 +350,6 @@ const styles = StyleSheet.create({
         borderColor: '#E4002B',
         borderRadius: 14,
         height: 52,
-        marginTop: 4,
     },
     logoutText: {
         fontFamily: 'PlusJakartaSans_700Bold',

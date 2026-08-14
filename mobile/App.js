@@ -13,6 +13,7 @@ import ProfileScreen from './src/screens/ProfileScreen'
 import LoginScreen from './src/screens/LoginScreen'
 import RegisterScreen from './src/screens/RegisterScreen'
 import ConversationScreen from './src/screens/ConversationScreen'
+import EditProfileScreen from './src/screens/EditProfileScreen'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import { useFonts } from 'expo-font'
@@ -120,6 +121,17 @@ function MainNavigator() {
         name="Profile"
         component={ProfileScreen}
         options={({ route }) => ({ title: route.params?.username || 'Profil' })}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          title: 'Modifier le profil',
+          headerStyle: { backgroundColor: '#E4002B' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontFamily: 'Anton_400Regular', fontSize: 20 },
+          headerBackTitleVisible: false,
+        }}
       />
     </Stack.Navigator>
   )
