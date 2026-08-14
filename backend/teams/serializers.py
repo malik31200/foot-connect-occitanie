@@ -10,12 +10,16 @@ class TeamSerializer(serializers.ModelSerializer):
         source='club',
         write_only=True,
     )
+    logo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Team
         fields = ['id', 'club', 'club_id', 'name', 'category', 'group_name',
-                  'season', 'fff_id', 'created_at']
+                  'season', 'fff_id', 'created_at', 'logo_url']
         read_only_fields = ['created_at']
+
+    def get_logo_url(self, obj):
+        return obj.club.logo_url if obj.club else None
 
     def validate_fff_id(self, value):
         if value == '':
