@@ -152,11 +152,15 @@ function PostCard({ post, onLike, onComment, onDelete, currentUserId, navigation
                     style={{ alignSelf: 'flex-start' }}
                 >
                     <View style={styles.authorRow}>
-                        <View style={styles.avatar}>
-                            <Text style={styles.avatarText}>
-                                {post.author_username?.[0]?.toUpperCase()}
-                            </Text>
-                        </View>
+                        {post.author_avatar_url ? (
+                            <Image source={{ uri: post.author_avatar_url }} style={styles.avatar} />
+                        ) : (
+                            <View style={styles.avatar}>
+                                <Text style={styles.avatarText}>
+                                    {post.author_username?.[0]?.toUpperCase()}
+                                </Text>
+                            </View>
+                        )}
                         <Text style={styles.author}>{post.author_username}</Text>
                     </View>
                 </TouchableOpacity>

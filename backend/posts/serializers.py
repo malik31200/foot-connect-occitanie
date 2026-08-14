@@ -12,13 +12,14 @@ class PostSerializer(serializers.ModelSerializer):
     medias = PostMediaSerializer(many=True, read_only=True)
     author_username = serializers.CharField(source='author.username', read_only=True)
     author_id = serializers.IntegerField(source='author.id', read_only=True)
+    author_avatar_url = serializers.CharField(source='author.avatar_url', read_only=True, allow_null=True)
     match_info = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['id', 'author_id', 'author_username', 'match_info', 'caption',
+        fields = ['id', 'author_id', 'author_username', 'author_avatar_url', 'match_info', 'caption',
                   'likes_count', 'comments_count', 'is_liked', 'medias', 'created_at']
 
     def get_comments_count(self, obj):

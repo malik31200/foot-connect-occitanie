@@ -12,6 +12,13 @@ import { useAuth } from '../context/AuthContext'
 const SCREEN_WIDTH = Dimensions.get('window').width
 const GRID_SIZE = (SCREEN_WIDTH - 4) / 3
 
+function getVideoThumbnail(url) {
+    if (!url || !url.includes('cloudinary.com')) return null
+    return url
+        .replace('/video/upload/', '/video/upload/so_0/')
+        .replace(/\.(mp4|mov|avi|webm)$/i, '.jpg')
+}
+
 export default function ProfileScreen({ route, navigation }) {
     const { token, logout } = useAuth()
     const [profile, setProfile] = useState(null)
@@ -183,16 +190,27 @@ export default function ProfileScreen({ route, navigation }) {
                         ItemSeparatorComponent={() => <View style={{ height: 2 }} />}
                         renderItem={({ item }) => {
                             const media = item.medias?.[0]
+                            const thumb = media?.media_type === 'video'
+                                ? getVideoThumbnail(media.media_url)
+                                : media?.media_url
                             return (
-                                <View style={styles.gridCell}>
-                                    {media?.media_type === 'photo' ? (
-                                        <Image source={{ uri: media.media_url }} style={styles.gridImg} />
+                                <TouchableOpacity
+                                    style={styles.gridCell}
+                                    onPress={() => navigation.navigate('PostDetail', { post: item })}
+                                >
+                                    {thumb ? (
+                                        <Image source={{ uri: thumb }} style={styles.gridImg} />
                                     ) : (
                                         <View style={[styles.gridImg, styles.gridVideo]}>
                                             <Ionicons name="videocam" size={24} color="#fff" />
                                         </View>
                                     )}
-                                </View>
+                                    {media?.media_type === 'video' && (
+                                        <View style={styles.videoIcon}>
+                                            <Ionicons name="play-circle" size={20} color="#fff" />
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
                             )
                         }}
                     />
@@ -390,5 +408,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#2A2220',
+    },
+    videoIcon: {
+        position: 'absolute',
+        bottom: 6,
+        right: 6,
     },
 })
