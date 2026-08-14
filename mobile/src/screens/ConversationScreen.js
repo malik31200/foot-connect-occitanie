@@ -4,7 +4,7 @@ import {
     View, Text, FlatList, TextInput, TouchableOpacity,
     StyleSheet, Alert, KeyboardAvoidingView, Platform
 } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -16,7 +16,7 @@ export default function ConversationScreen({ route }) {
     const [text, setText] = useState('')
     const flatListRef = useRef(null)
     const headers = { Authorization: `Bearer ${token}` }
-
+    const insets = useSafeAreaInsets()
 
     useFocusEffect(
         useCallback(() => {
@@ -55,45 +55,46 @@ export default function ConversationScreen({ route }) {
         }
     }
 
+    // Sur iOS : KeyboardAvoidingView gère le clavier
+    // Sur Android : "pan" dans app.json fait monter tout l'écran → View suffit
+    const Wrapper = Platform.OS === 'ios' ? KeyboardAvoidingView : View
+    const wrapperProps = Platform.OS === 'ios'
+        ? { behavior: 'padding', keyboardVerticalOffset: 90 }
+        : {}
+
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#F6F3EE' }} edges={['bottom']}>
-            <KeyboardAvoidingView
-                style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={90}
-            >
-                <FlatList
-                    ref={flatListRef}
-                    data={messages}
-                    keyExtractor={item => item.id.toString()}
-                    contentContainerStyle={styles.list}
-                    onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-                    renderItem={({ item }) => {
-                        const isMe = item.sender_username !== username
-                        return (
-                            <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleOther]}>
-                                <Text style={[styles.bubbleText, isMe ? styles.bubbleTextMe : styles.bubbleTextOther]}>
-                                    {item.content}
-                                </Text>
-                            </View>
-                        )
-                    }}
+        <Wrapper style={styles.container} {...wrapperProps}>
+            <FlatList
+                ref={flatListRef}
+                data={messages}
+                keyExtractor={item => item.id.toString()}
+                contentContainerStyle={styles.list}
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+                renderItem={({ item }) => {
+                    const isMe = item.sender_username !== username
+                    return (
+                        <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleOther]}>
+                            <Text style={[styles.bubbleText, isMe ? styles.bubbleTextMe : styles.bubbleTextOther]}>
+                                {item.content}
+                            </Text>
+                        </View>
+                    )
+                }}
+            />
+            <View style={[styles.inputRow, { paddingBottom: 12 + insets.bottom }]}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Message..."
+                    placeholderTextColor="#A8A29B"
+                    value={text}
+                    onChangeText={setText}
+                    multiline
                 />
-                <View style={styles.inputRow}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Message..."
-                        placeholderTextColor="#A8A29B"
-                        value={text}
-                        onChangeText={setText}
-                        multiline
-                    />
-                    <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
-                        <Ionicons name="send" size={20} color="#fff" />
-                    </TouchableOpacity>
-                </View>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+                <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
+                    <Ionicons name="send" size={20} color="#fff" />
+                </TouchableOpacity>
+            </View>
+        </Wrapper>
     )
 }
 
@@ -137,7 +138,8 @@ const styles = StyleSheet.create({
     inputRow: {
         flexDirection: 'row',
         alignItems: 'flex-end',
-        padding: 12,
+        paddingTop: 12,
+        paddingHorizontal: 12,
         backgroundColor: '#fff',
         borderTopWidth: 1,
         borderTopColor: '#F4F1EC',

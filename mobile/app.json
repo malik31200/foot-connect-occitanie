@@ -14,15 +14,20 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "fr.footconnect.occitanie"
+      "bundleIdentifier": "fr.footconnect.occitanie",
+      "buildNumber": "2",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "softwareKeyboardLayoutMode": "resize",
-      "package": "fr.footconnect.occitanie"
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "fr.footconnect.occitanie",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -36,6 +41,7 @@
       "eas": {
         "projectId": "797ed8bb-d7f9-41bd-ae26-7b3c07838458"
       }
-    }
+    },
+    "owner": "malik31200s-team"
   }
 }
