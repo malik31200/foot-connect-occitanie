@@ -96,6 +96,10 @@ export default function ProfileScreen({ route, navigation }) {
                         ? 'Coach'
                         : profile?.sport_role === 'joueur'
                         ? 'Joueur'
+                        : profile?.sport_role === 'club'
+                        ? 'Dirigeant de club'
+                        : profile?.sport_role === 'partenaire'
+                        ? 'Partenaire'
                         : 'Supporter'}
                 </Text>
             </LinearGradient>

@@ -16,6 +16,8 @@ const SPORT_ROLES = [
     { value: 'joueur', label: 'Joueur', icon: 'football-outline' },
     { value: 'coach', label: 'Coach', icon: 'ribbon-outline' },
     { value: 'supporter', label: 'Supporter', icon: 'heart-outline' },
+    { value: 'club', label: 'Dirigeant', icon: 'business-outline' },
+    { value: 'partenaire', label: 'Partenaire', icon: 'briefcase-outline' },
 ]
 
 export default function EditProfileScreen({ navigation }) {
@@ -250,9 +252,9 @@ const styles = StyleSheet.create({
         fontSize: 15, color: '#1A1614',
     },
 
-    roleRow: { flexDirection: 'row', gap: 10 },
+    roleRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     roleBtn: {
-        flex: 1, alignItems: 'center', justifyContent: 'center',
+        width: '30%', alignItems: 'center', justifyContent: 'center',
         paddingVertical: 14, borderRadius: 12,
         backgroundColor: '#fff',
         borderWidth: 1.5, borderColor: '#F4F1EC',
