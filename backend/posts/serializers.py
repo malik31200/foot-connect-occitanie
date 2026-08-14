@@ -14,13 +14,21 @@ class PostSerializer(serializers.ModelSerializer):
     author_id = serializers.IntegerField(source='author.id', read_only=True)
     match_info = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['id','author_id', 'author_username', 'match_info', 'caption', 'likes_count', 'comments_count', 'medias', 'created_at']
+        fields = ['id', 'author_id', 'author_username', 'match_info', 'caption',
+                  'likes_count', 'comments_count', 'is_liked', 'medias', 'created_at']
 
     def get_comments_count(self, obj):
         return obj.comments.count()
+
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(user=request.user).exists()
+        return False
 
     def get_match_info(self, obj):
         if not obj.match:

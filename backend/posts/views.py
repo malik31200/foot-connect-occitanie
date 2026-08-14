@@ -14,7 +14,7 @@ class PostViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
 
     def get_queryset(self):
-        return Post.objects.all().select_related('author', 'match__home_team', 'match__away_team').prefetch_related('medias')
+        return Post.objects.all().select_related('author', 'match__home_team', 'match__away_team').prefetch_related('medias', 'likes')
 
     def create(self, request, *args, **kwargs):
         medias_data  = request.data.get('medias', [])
@@ -37,7 +37,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 order=i
             )
 
-        return Response(PostSerializer(post).data, status=status.HTTP_201_CREATED)
+        return Response(PostSerializer(post, context={'request': request}).data, status=status.HTTP_201_CREATED)
     
     def destroy(self, request, *args, **kwargs):
         post = self.get_object()
@@ -63,6 +63,6 @@ class FeedView(APIView):
 
         posts = posts.select_related(
             'author', 'match__home_team', 'match__away_team'
-        ).prefetch_related('medias')
+        ).prefetch_related('medias', 'likes').order_by('-created_at')
 
-        return Response(PostSerializer(posts, many=True).data)
+        return Response(PostSerializer(posts, many=True, context={'request': request}).data)

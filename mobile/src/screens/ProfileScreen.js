@@ -29,6 +29,19 @@ export default function ProfileScreen({ route, navigation }) {
         }, [userId, token])
     )
 
+    async function handleFollow() {
+        try {
+            const res = await client.post(`/users/${profile.id}/follow/`, {}, { headers })
+            setProfile(prev => ({
+                ...prev,
+                is_following: res.data.following,
+                followers_count: res.data.following
+                    ? (prev.followers_count ?? 0) + 1
+                    : Math.max(0, (prev.followers_count ?? 0) - 1),
+            }))
+        } catch {}
+    }
+
     async function handleMessage() {
         try {
             const res = await client.post('/conversations/', {
@@ -83,17 +96,32 @@ export default function ProfileScreen({ route, navigation }) {
                 </View>
 
                 {userId ? (
-                    <LinearGradient
-                        colors={['#E4002B', '#FF5A1F']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.btn}
-                    >
-                        <TouchableOpacity style={styles.btnInner} onPress={handleMessage}>
-                            <Ionicons name="chatbubble-outline" size={18} color="#fff" />
-                            <Text style={styles.btnText}>Envoyer un message</Text>
+                    <View style={{ gap: 12 }}>
+                        <TouchableOpacity
+                            style={[styles.followBtn, profile?.is_following && styles.followBtnActive]}
+                            onPress={handleFollow}
+                        >
+                            <Ionicons
+                                name={profile?.is_following ? 'person-remove-outline' : 'person-add-outline'}
+                                size={18}
+                                color={profile?.is_following ? '#E4002B' : '#fff'}
+                            />
+                            <Text style={[styles.followBtnText, profile?.is_following && styles.followBtnTextActive]}>
+                                {profile?.is_following ? 'Ne plus suivre' : 'Suivre'}
+                            </Text>
                         </TouchableOpacity>
-                    </LinearGradient>
+                        <LinearGradient
+                            colors={['#E4002B', '#FF5A1F']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.btn}
+                        >
+                            <TouchableOpacity style={styles.btnInner} onPress={handleMessage}>
+                                <Ionicons name="chatbubble-outline" size={18} color="#fff" />
+                                <Text style={styles.btnText}>Envoyer un message</Text>
+                            </TouchableOpacity>
+                        </LinearGradient>
+                    </View>
                 ) : (
                     <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
                         <Ionicons name="log-out-outline" size={20} color="#E4002B" />
@@ -214,6 +242,28 @@ const styles = StyleSheet.create({
         fontFamily: 'PlusJakartaSans_700Bold',
         fontSize: 15,
         color: '#fff',
+    },
+    followBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        height: 52,
+        borderRadius: 14,
+        backgroundColor: '#E4002B',
+    },
+    followBtnActive: {
+        backgroundColor: '#fff',
+        borderWidth: 1.5,
+        borderColor: '#E4002B',
+    },
+    followBtnText: {
+        fontFamily: 'PlusJakartaSans_700Bold',
+        fontSize: 15,
+        color: '#fff',
+    },
+    followBtnTextActive: {
+        color: '#E4002B',
     },
     logoutBtn: {
         flexDirection: 'row',

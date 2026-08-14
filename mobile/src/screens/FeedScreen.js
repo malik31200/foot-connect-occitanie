@@ -25,7 +25,9 @@ function VideoItem({ uri, width, height, isActive }) {
     })
 
     useEffect(() => {
-        if (!isActive) {
+        if (isActive) {
+            player.play()
+        } else {
             player.pause()
         }
     }, [isActive])
@@ -35,12 +37,12 @@ function VideoItem({ uri, width, height, isActive }) {
             player={player}
             style={{ width, height }}
             contentFit="contain"
-            nativeControls
+            nativeControls={false}
         />
     )
 }
 
-function PostCard({ post, onLike, onComment, navigation, itemHeight, isActive }) {
+function PostCard({ post, onLike, onComment, onDelete, currentUserId, navigation, itemHeight, isActive }) {
     const medias = post.medias || []
     const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -115,6 +117,14 @@ function PostCard({ post, onLike, onComment, navigation, itemHeight, isActive })
             <View style={styles.header}>
                 <OccitanCross size={28} color="#F5C518" />
                 <Text style={styles.logoText}>FOOT CONNECT</Text>
+                {currentUserId && post.author_id === currentUserId && (
+                    <TouchableOpacity
+                        style={styles.deleteBtn}
+                        onPress={() => onDelete(post.id)}
+                    >
+                        <Ionicons name="trash-outline" size={20} color="#fff" />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <View style={styles.actions}>
@@ -134,10 +144,13 @@ function PostCard({ post, onLike, onComment, navigation, itemHeight, isActive })
             </View>
 
             <View style={styles.info}>
-                <TouchableOpacity onPress={() => navigation.navigate('Profile', {
-                    userId: post.author_id,
-                    username: post.author_username
-                })}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Profile', {
+                        userId: post.author_id,
+                        username: post.author_username
+                    })}
+                    style={{ alignSelf: 'flex-start' }}
+                >
                     <View style={styles.authorRow}>
                         <View style={styles.avatar}>
                             <Text style={styles.avatarText}>
@@ -178,9 +191,13 @@ export default function FeedScreen({ navigation }) {
     const [comments, setComments] = useState([])
     const [commentText, setCommentText] = useState('')
     const [currentUsername, setCurrentUsername] = useState('')
+    const [currentUserId, setCurrentUserId] = useState(null)
 
     useEffect(() => {
-        client.get('/auth/me/', { headers }).then(res => setCurrentUsername(res.data.username)).catch(() => {})
+        client.get('/auth/me/', { headers }).then(res => {
+            setCurrentUsername(res.data.username)
+            setCurrentUserId(res.data.id)
+        }).catch(() => {})
     }, [token])
 
     useFocusEffect(
@@ -248,6 +265,20 @@ export default function FeedScreen({ navigation }) {
         } catch {}
     }
 
+    async function handleDeletePost(postId) {
+        Alert.alert('Supprimer', 'Supprimer cette publication ?', [
+            { text: 'Annuler', style: 'cancel' },
+            {
+                text: 'Supprimer', style: 'destructive', onPress: async () => {
+                    try {
+                        await client.delete(`/posts/${postId}/`, { headers })
+                        setPosts(prev => prev.filter(p => p.id !== postId))
+                    } catch {}
+                }
+            }
+        ])
+    }
+
     if (loading) return (
         <View style={styles.loading}>
             <ActivityIndicator color="#E4002B" size="large" />
@@ -271,6 +302,8 @@ export default function FeedScreen({ navigation }) {
                     token={token}
                     onLike={handleLike}
                     onComment={openComments}
+                    onDelete={handleDeletePost}
+                    currentUserId={currentUserId}
                     navigation={navigation}
                     itemHeight={itemHeight}
                     isActive={index === activeIndex && screenFocused}
@@ -293,10 +326,10 @@ export default function FeedScreen({ navigation }) {
             {/* Toucher en dehors ferme le modal ET le clavier */}
             <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeComments} />
 
-            {/* behavior="padding" fonctionne sur Android ET iOS */}
+            {/* Sur iOS : padding pousse le contenu. Sur Android : height réduit la hauteur */}
             <KeyboardAvoidingView
-                behavior="padding"
-                keyboardVerticalOffset={Platform.OS === 'android' ? 0 : 0}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={0}
                 style={styles.modalSheet}
             >
                 <View style={styles.modalHandle} />
@@ -391,6 +424,12 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: '#fff',
     },
+    deleteBtn: {
+        position: 'absolute',
+        right: 16,
+        top: 0,
+        padding: 6,
+    },
     actions: {
         position: 'absolute',
         right: 16,
@@ -481,11 +520,12 @@ const styles = StyleSheet.create({
         width: 6,
         height: 6,
         borderRadius: 3,
-        backgroundColor: 'rgba(255,255,255,0.55)',
+        backgroundColor: 'rgba(255,255,255,0.85)',
     },
     dotActive: {
-        width: 20,
+        width: 24,
         height: 6,
+        borderRadius: 3,
         backgroundColor: '#fff',
     },
     modalOverlay: {
