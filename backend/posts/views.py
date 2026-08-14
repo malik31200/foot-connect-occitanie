@@ -14,7 +14,13 @@ class PostViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
 
     def get_queryset(self):
-        return Post.objects.all().select_related('author', 'match__home_team', 'match__away_team').prefetch_related('medias', 'likes')
+        qs = Post.objects.all().select_related(
+            'author', 'match__home_team', 'match__away_team'
+        ).prefetch_related('medias', 'likes').order_by('-created_at')
+        author_id = self.request.query_params.get('author')
+        if author_id:
+            qs = qs.filter(author_id=author_id)
+        return qs
 
     def create(self, request, *args, **kwargs):
         medias_data  = request.data.get('medias', [])

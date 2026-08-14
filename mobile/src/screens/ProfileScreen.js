@@ -2,12 +2,15 @@ import React, { useCallback, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import {
     View, Text, StyleSheet, ActivityIndicator,
-    TouchableOpacity, ScrollView
+    TouchableOpacity, ScrollView, FlatList, Image, Dimensions
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
+
+const SCREEN_WIDTH = Dimensions.get('window').width
+const GRID_SIZE = (SCREEN_WIDTH - 4) / 3
 
 export default function ProfileScreen({ route, navigation }) {
     const { token, logout } = useAuth()
@@ -16,14 +19,21 @@ export default function ProfileScreen({ route, navigation }) {
 
     const userId = route?.params?.userId
     const headers = { Authorization: `Bearer ${token}` }
+    const [posts, setPosts] = useState([])
 
     useFocusEffect(
         useCallback(() => {
-            // Spinner uniquement au premier chargement — sinon on garde l'ancien profil visible
             if (!profile) setLoading(true)
             const url = userId ? `/users/${userId}/` : '/auth/me/'
             client.get(url, { headers })
-                .then(res => setProfile(res.data))
+                .then(res => {
+                    setProfile(res.data)
+                    // Fetch posts de cet utilisateur
+                    const authorId = res.data.id
+                    client.get(`/posts/?author=${authorId}`, { headers })
+                        .then(r => setPosts(r.data))
+                        .catch(() => {})
+                })
                 .catch(() => {})
                 .finally(() => setLoading(false))
         }, [userId, token])
@@ -129,6 +139,34 @@ export default function ProfileScreen({ route, navigation }) {
                     </TouchableOpacity>
                 )}
             </View>
+
+            {/* Grille de publications */}
+            {posts.length > 0 && (
+                <View style={styles.gridSection}>
+                    <Text style={styles.gridTitle}>Publications ({posts.length})</Text>
+                    <FlatList
+                        data={posts}
+                        keyExtractor={item => item.id.toString()}
+                        numColumns={3}
+                        scrollEnabled={false}
+                        ItemSeparatorComponent={() => <View style={{ height: 2 }} />}
+                        renderItem={({ item }) => {
+                            const media = item.medias?.[0]
+                            return (
+                                <View style={styles.gridCell}>
+                                    {media?.media_type === 'photo' ? (
+                                        <Image source={{ uri: media.media_url }} style={styles.gridImg} />
+                                    ) : (
+                                        <View style={[styles.gridImg, styles.gridVideo]}>
+                                            <Ionicons name="videocam" size={24} color="#fff" />
+                                        </View>
+                                    )}
+                                </View>
+                            )
+                        }}
+                    />
+                </View>
+            )}
         </ScrollView>
     )
 }
@@ -280,5 +318,33 @@ const styles = StyleSheet.create({
         fontFamily: 'PlusJakartaSans_700Bold',
         fontSize: 15,
         color: '#E4002B',
+    },
+    gridSection: {
+        backgroundColor: '#fff',
+        marginTop: 12,
+        paddingTop: 16,
+        paddingBottom: 32,
+    },
+    gridTitle: {
+        fontFamily: 'PlusJakartaSans_700Bold',
+        fontSize: 14,
+        color: '#1A1614',
+        paddingHorizontal: 16,
+        marginBottom: 8,
+    },
+    gridCell: {
+        width: GRID_SIZE,
+        height: GRID_SIZE,
+        marginRight: 2,
+    },
+    gridImg: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#1A1614',
+    },
+    gridVideo: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#2A2220',
     },
 })
