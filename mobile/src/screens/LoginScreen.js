@@ -6,6 +6,7 @@ import {
 } from 'react-native'
 import OccitanCross from '../components/OccitanCross'
 import { LinearGradient } from 'expo-linear-gradient'
+import { Ionicons } from '@expo/vector-icons'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
@@ -14,6 +15,7 @@ export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
 
     async function handleLogin() {
         if (!email || !password) {
@@ -63,14 +65,19 @@ export default function LoginScreen({ navigation }) {
                     />
 
                     <Text style={styles.label}>Mot de passe</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Ton mot de passe"
-                        placeholderTextColor="#A8A29B"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                    />
+                    <View style={styles.inputWrapper}>
+                        <TextInput
+                            style={styles.inputFlex}
+                            placeholder="Ton mot de passe"
+                            placeholderTextColor="#A8A29B"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                        />
+                        <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.eyeBtn}>
+                            <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#A8A29B" />
+                        </TouchableOpacity>
+                    </View>
 
                     <LinearGradient
                         colors={['#E4002B', '#FF5A1F']}
@@ -161,6 +168,26 @@ export default function LoginScreen({ navigation }) {
         fontFamily: 'PlusJakartaSans_400Regular',
         color: '#1A1614',
         marginBottom: 16,
+    },
+    inputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F4F1EC',
+        borderRadius: 14,
+        marginBottom: 16,
+        height: 50,
+    },
+    inputFlex: {
+        flex: 1,
+        paddingHorizontal: 16,
+        fontSize: 15,
+        fontFamily: 'PlusJakartaSans_400Regular',
+        color: '#1A1614',
+    },
+    eyeBtn: {
+        paddingHorizontal: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     button: {
         borderRadius: 15,
