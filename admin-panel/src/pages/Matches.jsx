@@ -19,6 +19,8 @@ export default function Matches() {
         status: 'scheduled',
     })
     const [createError, setCreateError] = useState('')
+    const [editingId, setEditingId] = useState(null)
+    const [editForm, setEditForm] = useState({ date_time: '', venue: '', status: '', group_name: '', matchday: '' })
 
     useEffect(() => {
         fetchMatches()
@@ -92,6 +94,30 @@ export default function Matches() {
         fetchMatches()
     }
 
+    const handleEditStart = (match) => {
+        setEditingId(match.id)
+        setEditForm({
+            date_time: match.date_time ? match.date_time.slice(0, 16) : '',
+            venue: match.venue || '',
+            status: match.status || 'scheduled',
+            group_name: match.group_name || '',
+            matchday: match.matchday || '',
+        })
+    }
+
+    const handleEditSave = async (id) => {
+        try {
+            await client.patch(`/matches/${id}/`, {
+                ...editForm,
+                matchday: parseInt(editForm.matchday),
+            })
+            setEditingId(null)
+            fetchMatches()
+        } catch (e) {
+            alert('Erreur lors de la modification.')
+        }
+    }
+
     const handleUnlock = async (id) => {
         await client.patch(`/matches/${id}/unlock/`)
         fetchMatches()
@@ -152,12 +178,55 @@ export default function Matches() {
                         <th>Extérieur</th>
                         <th>Catégorie</th>
                         <th>Poule</th>
+                        <th>Lieu</th>
                         <th>Statut</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {matches.map((match) => (
+                    {matches.map((match) => editingId === match.id ? (
+                        <tr key={match.id} style={{ background: '#fffbe6' }}>
+                            <td>
+                                <input type="number" value={editForm.matchday}
+                                    onChange={e => setEditForm({ ...editForm, matchday: e.target.value })}
+                                    style={{ width: 50 }} />
+                            </td>
+                            <td>
+                                <input type="datetime-local" value={editForm.date_time}
+                                    onChange={e => setEditForm({ ...editForm, date_time: e.target.value })}
+                                    style={{ width: 160 }} />
+                            </td>
+                            <td>{match.home_team.name}</td>
+                            <td>
+                                {match.home_score !== null ? `${match.home_score} - ${match.away_score}` : '-'}
+                            </td>
+                            <td>{match.away_team.name}</td>
+                            <td>{match.category}</td>
+                            <td>
+                                <input value={editForm.group_name}
+                                    onChange={e => setEditForm({ ...editForm, group_name: e.target.value })}
+                                    style={{ width: 80 }} />
+                            </td>
+                            <td>
+                                <input value={editForm.venue}
+                                    onChange={e => setEditForm({ ...editForm, venue: e.target.value })}
+                                    placeholder="Adresse du stade"
+                                    style={{ width: 180 }} />
+                            </td>
+                            <td>
+                                <select value={editForm.status}
+                                    onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
+                                    <option value="scheduled">À venir</option>
+                                    <option value="finished">Terminé</option>
+                                    <option value="postponed">Reporté</option>
+                                </select>
+                            </td>
+                            <td style={{ display: 'flex', gap: 4 }}>
+                                <button onClick={() => handleEditSave(match.id)} style={{ color: 'green' }}>✓</button>
+                                <button onClick={() => setEditingId(null)}>✗</button>
+                            </td>
+                        </tr>
+                    ) : (
                         <tr key={match.id}>
                             <td>{match.matchday}</td>
                             <td>{new Date(match.date_time).toLocaleString('fr-FR')}</td>
@@ -181,8 +250,10 @@ export default function Matches() {
                             <td>{match.away_team.name}</td>
                             <td>{match.category}</td>
                             <td>{match.group_name}</td>
+                            <td>{match.venue || '-'}</td>
                             <td>{match.status}</td>
                             <td style={{ display: 'flex', gap: 4 }}>
+                                <button onClick={() => handleEditStart(match)}>Modifier</button>
                                 {!match.is_locked && <button onClick={() => handleEditScore(match)}>Score</button>}
                                 {match.is_locked && <button onClick={() => handleUnlock(match.id)}>🔓</button>}
                                 <button onClick={() => handleDelete(match.id)} style={{ color: 'red' }}>✕</button>

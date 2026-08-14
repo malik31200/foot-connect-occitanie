@@ -115,10 +115,13 @@ export default function ProfileScreen({ route, navigation }) {
                     </View>
                 )}
 
-                <View style={styles.infoRow}>
-                    <Ionicons name="mail-outline" size={18} color="#5C564F" />
-                    <Text style={styles.infoText}>{profile?.email}</Text>
-                </View>
+                {/* Email uniquement sur son propre profil */}
+                {!userId && (
+                    <View style={styles.infoRow}>
+                        <Ionicons name="mail-outline" size={18} color="#5C564F" />
+                        <Text style={styles.infoText}>{profile?.email}</Text>
+                    </View>
+                )}
 
                 {userId ? (
                     <View style={{ gap: 12 }}>

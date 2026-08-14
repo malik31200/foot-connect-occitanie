@@ -96,7 +96,16 @@ export default function EditProfileScreen({ navigation }) {
                 { text: 'OK', onPress: () => navigation.goBack() }
             ])
         } catch (e) {
-            const msg = e.response?.data?.username?.[0] || 'Impossible de sauvegarder.'
+            const data = e.response?.data
+            let msg = 'Impossible de sauvegarder.'
+            if (data) {
+                if (data.detail) msg = data.detail
+                else if (data.username) msg = 'Pseudo : ' + data.username[0]
+                else if (data.sport_role) msg = 'Rôle : ' + data.sport_role[0]
+                else msg = JSON.stringify(data)
+            } else if (e.message) {
+                msg = e.message
+            }
             Alert.alert('Erreur', msg)
         } finally {
             setSaving(false)
