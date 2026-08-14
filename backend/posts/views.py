@@ -58,16 +58,10 @@ class FeedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        following_ids = Follow.objects.filter(
-            follower=request.user
-        ).values_list('following', flat=True)
-
-        if following_ids:
-            posts = Post.objects.filter(author__in=following_ids)
-        else:
-            posts = Post.objects.all()
-
-        posts = posts.select_related(
+        # Feed = tous les posts, triés par date
+        # Les abonnements sont utilisés pour le réseau social (compteurs, is_following)
+        # mais ne filtrent pas le feed pour ne pas cacher du contenu
+        posts = Post.objects.all().select_related(
             'author', 'match__home_team', 'match__away_team'
         ).prefetch_related('medias', 'likes').order_by('-created_at')
 
