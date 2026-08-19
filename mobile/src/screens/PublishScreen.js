@@ -85,10 +85,10 @@ export default function PublishScreen() {
                 const sortedFinished = [...finished].sort((a, b) => new Date(b.date_time) - new Date(a.date_time))
                 const sortedScheduled = [...scheduled].sort((a, b) => new Date(a.date_time) - new Date(b.date_time))
 
-                // Prendre les 2 derniers terminés + les 2 prochains
+                // Tous les matchs terminés (du plus récent) + tous les matchs à venir
                 const options = [
-                    ...sortedFinished.slice(0, 2),
-                    ...sortedScheduled.slice(0, 2),
+                    ...sortedFinished,
+                    ...sortedScheduled,
                 ]
                 setMatchOptions(options)
             }).catch(() => {}).finally(() => setLoadingMatches(false))

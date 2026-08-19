@@ -9,6 +9,7 @@ const REFRESH_KEY = 'refresh_token'
 
 export function AuthProvider({ children }) {
     const [token, setToken] = useState(null)
+    const [user, setUser] = useState(null)
     // loading = true pendant qu'on vérifie si l'utilisateur est déjà connecté
     const [loading, setLoading] = useState(true)
 
@@ -20,7 +21,13 @@ export function AuthProvider({ children }) {
                 if (refreshToken) {
                     // On a un refresh token → on demande un nouvel access token
                     const res = await client.post('/auth/refresh/', { refresh: refreshToken })
-                    setToken(res.data.access)
+                    const accessToken = res.data.access
+                    setToken(accessToken)
+                    // Charger le profil utilisateur
+                    const meRes = await client.get('/auth/me/', {
+                        headers: { Authorization: `Bearer ${accessToken}` }
+                    })
+                    setUser(meRes.data)
                 }
             } catch {
                 // Refresh token expiré ou invalide → on efface et on affiche le login
@@ -33,8 +40,9 @@ export function AuthProvider({ children }) {
     }, [])
 
     // Appelé après un login réussi — sauvegarde le refresh token sur l'appareil
-    async function login(accessToken, refreshToken) {
+    async function login(accessToken, refreshToken, userData) {
         setToken(accessToken)
+        if (userData) setUser(userData)
         if (refreshToken) {
             await SecureStore.setItemAsync(REFRESH_KEY, refreshToken)
         }
@@ -43,11 +51,12 @@ export function AuthProvider({ children }) {
     // Efface tout → retour à l'écran de connexion
     async function logout() {
         setToken(null)
+        setUser(null)
         await SecureStore.deleteItemAsync(REFRESH_KEY)
     }
 
     return (
-        <AuthContext.Provider value={{ token, login, logout, loading }}>
+        <AuthContext.Provider value={{ token, user, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     )

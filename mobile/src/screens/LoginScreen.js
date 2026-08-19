@@ -25,7 +25,10 @@ export default function LoginScreen({ navigation }) {
             setLoading(true)
             try {
                 const res = await client.post('/auth/login/', {email, password })
-                login(res.data.access, res.data.refresh)
+                const meRes = await client.get('/auth/me/', {
+                    headers: { Authorization: `Bearer ${res.data.access}` }
+                })
+                login(res.data.access, res.data.refresh, meRes.data)
             } catch (e) {
                 const msg = e.response?.data?.detail || 'Erreur réseau.'
                 Alert.alert('Erreur', msg)
