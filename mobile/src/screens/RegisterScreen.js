@@ -21,11 +21,11 @@ export default function RegisterScreen({ navigation }) {
     const [sportRole, setSportRole] = useState('supporter')
 
     const ROLES = [
-        { value: 'supporter', label: '❤️ Supporter' },
-        { value: 'joueur', label: '⚽ Joueur' },
-        { value: 'coach', label: '📋 Coach' },
-        { value: 'club', label: '🏟️ Dirigeant' },
-        { value: 'partenaire', label: '🤝 Partenaire' },
+        { value: 'supporter', label: 'Supporter' },
+        { value: 'joueur', label: 'Joueur' },
+        { value: 'coach', label: 'Coach' },
+        { value: 'club', label: 'Dirigeant' },
+        { value: 'partenaire', label: 'Partenaire' },
     ]
 
     function showTerms() {
