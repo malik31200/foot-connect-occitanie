@@ -23,7 +23,7 @@ def send_reset_email(to_email, code):
                 'Content-Type': 'application/json',
             },
             json={
-                'from': 'Foot Connect Occitanie <onboarding@resend.dev>',
+                'from': 'Foot Connect Occitanie <noreply@footconnect-occitanie.fr>',
                 'to': [to_email],
                 'subject': 'Réinitialisation de ton mot de passe – Foot Connect',
                 'html': f'''
