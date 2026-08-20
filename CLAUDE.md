@@ -12,6 +12,7 @@
 | Sprint 3 — Résultats + classements | ✅ Terminé | `main` |
 | Sprint 4 — Réseau social complet | ✅ Terminé | `main` (PR #5) |
 | Sprint 5 — Stabilisation + déploiement VPS | ✅ Terminé | `main` (PR #6) |
+| Sprint 6 — Corrections bugs + builds stores | ✅ Terminé | `main` |
 
 **Branche active :** `main`
 
@@ -23,9 +24,79 @@
 | Logging Django (`settings.py` + `backend/logs/`) | ✅ Terminé |
 | Proxy Vite + fix WSL2 admin panel | ✅ Terminé |
 | Recherche match dans PublishScreen | ✅ Terminé |
-| API FFF bloquée (403) depuis juin 2026 | ⚠️ En attente réouverture |
+| API FFF bloquée (403) depuis juin 2026 | ⚠️ Toujours bloquée (protection JS cookie) |
 | Déploiement VPS Hetzner (CPX12, Helsinki, 95.217.154.83) | ✅ Terminé |
 | SSL Let's Encrypt + domaine footconnect-occitanie.fr | ✅ Terminé |
+
+### Avancement Sprint 6 (terminé le 19/08/2026)
+
+#### Corrections mobile (bugs utilisateurs)
+
+| Bug | Fix | Fichier(s) |
+|-----|-----|------------|
+| Clavier trop bas dans ConversationScreen (Android) | `softwareKeyboardLayoutMode: "pan"` dans app.json | `mobile/app.json`, `ConversationScreen.js` |
+| Likes non persistants | Déjà corrigé via `is_liked` SerializerMethodField | `posts/serializers.py` |
+| PublishScreen crashait (700+ matchs) | Rechargement filtré catégorie+poule, tous matchs affichés | `PublishScreen.js` |
+| Follow/unfollow cassé | Endpoint `POST /users/{id}/follow/` + `is_following` dans serializer | `interactions/` |
+| Impossible de supprimer son post | `destroy()` vérifie `author == request.user OR admin` | `posts/views.py` |
+| Rôle profil affichait mauvaise valeur | Mapping `sport_role` → libellé dans ProfileScreen | `ProfileScreen.js` |
+| Impossible de voir le mot de passe | `secureTextEntry` toggle dans LoginScreen | `LoginScreen.js` |
+| Impossible de modifier profil/avatar | Nouveau `EditProfileScreen` + `PATCH /auth/me/` | `EditProfileScreen.js`, `users/views.py` |
+| Publications non visibles sur profil | Grille `FlatList` 3 colonnes avec `?author=id` | `ProfileScreen.js` |
+| Feed ne montrait que les abonnements | `FeedView` retourne tous les posts sans filtre follow | `posts/views.py` |
+| Logos clubs ne chargeaient pas | `logo_url` via `SerializerMethodField` depuis `club` | `teams/serializers.py` |
+| Avatar auteur absent dans feed | `author_avatar_url` dans `PostSerializer` | `posts/serializers.py` |
+| Miniatures vidéo noires | Transformation Cloudinary `/video/upload/so_0/` + `.jpg` | `ProfileScreen.js`, `FeedScreen.js` |
+| Posts non cliquables | Navigation vers `PostDetailScreen` | `ProfileScreen.js`, `FeedScreen.js` |
+
+#### Nouveaux écrans mobile
+
+| Écran | Description |
+|-------|-------------|
+| `EditProfileScreen.js` | Modifier username, sport_role, avatar (upload Cloudinary) |
+| `PostDetailScreen.js` | Détail d'un post (médias, auteur, likes, commentaires) |
+
+#### Corrections back-office admin
+
+| Fix | Fichier(s) |
+|-----|------------|
+| Bouton "Modifier" ajouté dans Clubs | `admin-panel/src/pages/Clubs.jsx` |
+| Bouton "Modifier" ajouté dans Teams | `admin-panel/src/pages/Teams.jsx` |
+| Bouton "Modifier" ajouté dans Matches (+ champ Lieu) | `admin-panel/src/pages/Matches.jsx` |
+| Saison par défaut classements → 2026/2027 | `admin-panel/src/pages/Standings.jsx` |
+
+#### Modèle User étendu
+
+| Champ | Type | Valeurs |
+|-------|------|---------|
+| `sport_role` | CharField | `joueur`, `coach`, `supporter`, `club`, `partenaire` |
+| `avatar_url` | URLField | URL Cloudinary |
+
+Migration : `backend/users/migrations/0002_add_sport_role_and_avatar.py`
+
+#### Déploiement VPS via git
+
+- Dépôt GitHub configuré sur le VPS (`/opt/foot-connect`)
+- Remote : `https://github.com/malik31200/foot-connect-occitanie.git`
+- Commande de mise à jour : `git fetch origin main && git checkout origin/main -- <fichiers> && systemctl restart gunicorn`
+
+#### Builds stores (v1.0.1)
+
+| Platform | Version | Build | Statut |
+|----------|---------|-------|--------|
+| iOS | 1.0.1 | 3 | ✅ Soumis TestFlight |
+| Android | 1.0.1 | 3 (versionCode) | ✅ .aab uploadé Play Store Alpha |
+
+#### API FFF — Statut investigation (19/08/2026)
+
+- Endpoint trouvé dans Network tab : `https://api-dofa.fff.fr/api/engagements?competition.cp_no=449978&phase.ph_no=1&poule.gp_no=1`
+- Bloquée par protection JavaScript (cookies définis par JS, curl ne peut pas les obtenir)
+- **Fichiers .txt dans `backend/`** : exports manuels du calendrier FFF (format : Journée → date → équipe dom → `-` → équipe ext → score optionnel)
+- **Script d'import déjà fait** : `backend/matches/management/commands/import_calendar.py`
+  - Usage : `python manage.py import_calendar <fichier.txt>`
+  - `merge_duplicate_clubs.py` : fusionne les doublons de clubs créés à l'import
+- Solution long terme : Playwright headless browser ou accès officiel API FFF
+
 **Documentation sprints :** `docs/`
 
 ---

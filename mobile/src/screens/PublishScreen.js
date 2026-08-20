@@ -33,8 +33,11 @@ export default function PublishScreen() {
     const [category, setCategory] = useState(null)
     const [groups, setGroups] = useState([])
     const [poule, setPoule] = useState(null)
-    const [matchOptions, setMatchOptions] = useState([]) // dernier terminé + prochain à venir
+    const [matchOptions, setMatchOptions] = useState([])
     const [loadingMatches, setLoadingMatches] = useState(false)
+    const [manualMode, setManualMode] = useState(false)
+    const [manualHome, setManualHome] = useState('')
+    const [manualAway, setManualAway] = useState('')
 
     const headers = { Authorization: `Bearer ${token}` }
 
@@ -146,7 +149,8 @@ export default function PublishScreen() {
             }
             await client.post('/posts/', {
                 ...(selectedMatch ? { match_id: selectedMatch.id } : {}),
-                caption,
+                caption: caption + (manualMode && manualHome && manualAway
+                    ? `\n⚽ ${manualHome} - ${manualAway}` : ''),
                 medias,
             }, { headers })
             Alert.alert('Publié !', 'Ta publication est en ligne.')
@@ -266,6 +270,39 @@ export default function PublishScreen() {
                 })
             )}
 
+            {/* Mode saisie manuelle */}
+            <TouchableOpacity
+                style={styles.manualToggle}
+                onPress={() => { setManualMode(!manualMode); setSelectedMatch(null) }}
+            >
+                <Ionicons
+                    name={manualMode ? 'checkbox' : 'square-outline'}
+                    size={18}
+                    color="#E4002B"
+                />
+                <Text style={styles.manualToggleText}>Mon match n'est pas dans la liste</Text>
+            </TouchableOpacity>
+
+            {manualMode && (
+                <View style={styles.manualInputs}>
+                    <TextInput
+                        style={styles.manualInput}
+                        placeholder="Équipe domicile"
+                        placeholderTextColor="#A8A29B"
+                        value={manualHome}
+                        onChangeText={setManualHome}
+                    />
+                    <Text style={styles.manualVs}>VS</Text>
+                    <TextInput
+                        style={styles.manualInput}
+                        placeholder="Équipe extérieur"
+                        placeholderTextColor="#A8A29B"
+                        value={manualAway}
+                        onChangeText={setManualAway}
+                    />
+                </View>
+            )}
+
             {/* Bouton publier */}
             <LinearGradient colors={['#E4002B', '#FF5A1F']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.btn}>
                 <TouchableOpacity style={styles.btnInner} onPress={handlePublish} disabled={uploading}>
@@ -316,6 +353,24 @@ const styles = StyleSheet.create({
     matchDate: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: '#A8A29B' },
     matchText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 14, color: '#1A1614' },
     matchTextSelected: { color: '#fff' },
+    manualToggle: {
+        flexDirection: 'row', alignItems: 'center', gap: 8,
+        marginHorizontal: 16, marginTop: 12, marginBottom: 4,
+    },
+    manualToggleText: {
+        fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: '#5C564F',
+    },
+    manualInputs: {
+        marginHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8,
+    },
+    manualInput: {
+        flex: 1, backgroundColor: '#fff', borderRadius: 12,
+        paddingHorizontal: 12, paddingVertical: 10,
+        fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: '#1A1614',
+    },
+    manualVs: {
+        fontFamily: 'Anton_400Regular', fontSize: 14, color: '#A8A29B',
+    },
     btn: { marginHorizontal: 16, marginTop: 24, borderRadius: 14 },
     btnInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 54 },
     btnText: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 16, color: '#fff' },

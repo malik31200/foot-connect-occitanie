@@ -3,7 +3,7 @@ import client from '../api/client'
 
 export default function Standings() {
     const [standings, setStandings] = useState([])
-    const [filters, setFilters] = useState({ category: '', season: '2025', group_name: '' })
+    const [filters, setFilters] = useState({ category: '', season: '2026/2027', group_name: '' })
 
     useEffect(() => {
         fetchStandings()

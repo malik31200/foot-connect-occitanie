@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useRef } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import {
     View, Text, StyleSheet, ActivityIndicator,
-    TouchableOpacity, ScrollView, FlatList, Image, Dimensions
+    TouchableOpacity, ScrollView, FlatList, Image, Dimensions, Alert
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
@@ -173,6 +173,30 @@ export default function ProfileScreen({ route, navigation }) {
                         <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
                             <Ionicons name="log-out-outline" size={20} color="#E4002B" />
                             <Text style={styles.logoutText}>Se déconnecter</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.deleteBtn}
+                            onPress={() => Alert.alert(
+                                'Supprimer le compte',
+                                'Cette action est irréversible. Toutes tes données seront supprimées.',
+                                [
+                                    { text: 'Annuler', style: 'cancel' },
+                                    {
+                                        text: 'Supprimer', style: 'destructive',
+                                        onPress: async () => {
+                                            try {
+                                                await client.delete('/auth/me/', { headers })
+                                                logout()
+                                            } catch {
+                                                Alert.alert('Erreur', 'Impossible de supprimer le compte.')
+                                            }
+                                        }
+                                    }
+                                ]
+                            )}
+                        >
+                            <Ionicons name="trash-outline" size={18} color="#A8A29B" />
+                            <Text style={styles.deleteBtnText}>Supprimer mon compte</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -380,6 +404,18 @@ const styles = StyleSheet.create({
         fontFamily: 'PlusJakartaSans_700Bold',
         fontSize: 15,
         color: '#E4002B',
+    },
+    deleteBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        height: 44,
+    },
+    deleteBtnText: {
+        fontFamily: 'PlusJakartaSans_600SemiBold',
+        fontSize: 13,
+        color: '#A8A29B',
     },
     gridSection: {
         backgroundColor: '#fff',

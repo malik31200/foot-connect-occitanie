@@ -100,6 +100,10 @@ export default function LoginScreen({ navigation }) {
                         </TouchableOpacity>
                     </LinearGradient>
 
+                    <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} style={{ marginBottom: 16 }}>
+                        <Text style={[styles.link, { color: '#E4002B' }]}>Mot de passe oublié ?</Text>
+                    </TouchableOpacity>
+
                     <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                         <Text style={styles.link}>
                             Pas encore de compte ?{' '}

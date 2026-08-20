@@ -219,3 +219,5 @@ LOGGING = {
         },
     },
 }
+# Resend — envoi emails transactionnels
+RESEND_API_KEY = config("RESEND_API_KEY", default="")

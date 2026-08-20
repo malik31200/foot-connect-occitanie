@@ -15,6 +15,7 @@ import RegisterScreen from './src/screens/RegisterScreen'
 import ConversationScreen from './src/screens/ConversationScreen'
 import EditProfileScreen from './src/screens/EditProfileScreen'
 import PostDetailScreen from './src/screens/PostDetailScreen'
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import { useFonts } from 'expo-font'
@@ -154,6 +155,7 @@ function AuthNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   )
 }

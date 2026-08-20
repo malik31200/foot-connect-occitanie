@@ -3,31 +3,45 @@ import client from '../api/client'
 
 export default function Clubs() {
     const [clubs, setClubs] = useState([])
-    const [form, setForm] = useState({ name: '', city: '', logo_url: '', fff_id: '', })
+    const [form, setForm] = useState({ name: '', city: '', logo_url: '', fff_id: '' })
     const [error, setError] = useState('')
+    const [editingId, setEditingId] = useState(null)
+    const [editForm, setEditForm] = useState({ name: '', city: '', logo_url: '', fff_id: '' })
 
-    useEffect(() => {
-        fetchClubs()
-    }, [])
+    useEffect(() => { fetchClubs() }, [])
 
     const fetchClubs = async () => {
         const res = await client.get('/clubs/')
         setClubs(res.data)
     }
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value })
-    }
+    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+    const handleEditChange = (e) => setEditForm({ ...editForm, [e.target.name]: e.target.value })
 
     const handleCreate = async (e) => {
         e.preventDefault()
         setError('')
         try {
             await client.post('/clubs/', form)
-            setForm({ name: '', city: '', logo_url: '', fff_id: '', })
+            setForm({ name: '', city: '', logo_url: '', fff_id: '' })
             fetchClubs()
         } catch {
             setError('Erreur lors de la création du club.')
+        }
+    }
+
+    const handleEditStart = (club) => {
+        setEditingId(club.id)
+        setEditForm({ name: club.name, city: club.city || '', logo_url: club.logo_url || '', fff_id: club.fff_id || '' })
+    }
+
+    const handleEditSave = async (id) => {
+        try {
+            await client.patch(`/clubs/${id}/`, editForm)
+            setEditingId(null)
+            fetchClubs()
+        } catch {
+            alert('Erreur lors de la modification du club.')
         }
     }
 
@@ -58,18 +72,36 @@ export default function Clubs() {
                         <th>Nom</th>
                         <th>Ville</th>
                         <th>ID FFF</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {clubs.map((club) => (
                         <tr key={club.id}>
-                            <td>{club.name}</td>
-                            <td>{club.city || '—'}</td>
-                            <td>{club.fff_id}</td>
-                            <td>
-                                <button onClick={() => handleDelete(club.id)}>Supprimer</button>
-                            </td>
+                            {editingId === club.id ? (
+                                <>
+                                    <td><input name="name" value={editForm.name} onChange={handleEditChange} style={{ width: '100%' }} /></td>
+                                    <td><input name="city" value={editForm.city} onChange={handleEditChange} style={{ width: '100%' }} /></td>
+                                    <td>
+                                        <input name="fff_id" value={editForm.fff_id} onChange={handleEditChange} placeholder="ID FFF" style={{ width: 120, display: 'block' }} />
+                                        <input name="logo_url" value={editForm.logo_url} onChange={handleEditChange} placeholder="URL Logo" style={{ width: 120, marginTop: 4, display: 'block' }} />
+                                    </td>
+                                    <td style={{ display: 'flex', gap: 4 }}>
+                                        <button onClick={() => handleEditSave(club.id)} style={{ color: 'green' }}>✓ Sauver</button>
+                                        <button onClick={() => setEditingId(null)}>✗ Annuler</button>
+                                    </td>
+                                </>
+                            ) : (
+                                <>
+                                    <td>{club.name}</td>
+                                    <td>{club.city || '—'}</td>
+                                    <td>{club.fff_id || '—'}</td>
+                                    <td style={{ display: 'flex', gap: 4 }}>
+                                        <button onClick={() => handleEditStart(club)}>Modifier</button>
+                                        <button onClick={() => handleDelete(club.id)} style={{ color: 'red' }}>Supprimer</button>
+                                    </td>
+                                </>
+                            )}
                         </tr>
                     ))}
                 </tbody>
