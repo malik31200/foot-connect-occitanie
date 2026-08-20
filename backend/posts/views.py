@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 from rest_framework.response import Response
 from .models import Post, PostMedia
 from .serializers import PostSerializer
-from interactions.models import Follow
+from interactions.models import Follow, Block
 
 
 
@@ -20,6 +20,13 @@ class PostViewSet(viewsets.ModelViewSet):
         author_id = self.request.query_params.get('author')
         if author_id:
             qs = qs.filter(author_id=author_id)
+        else:
+            # Exclure les posts des utilisateurs bloqués par l'utilisateur connecté
+            if self.request.user.is_authenticated:
+                blocked_ids = Block.objects.filter(
+                    blocker=self.request.user
+                ).values_list('blocked_id', flat=True)
+                qs = qs.exclude(author_id__in=blocked_ids)
         return qs
 
     def create(self, request, *args, **kwargs):

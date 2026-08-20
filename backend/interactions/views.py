@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from posts.models import Post
 from users.models import User
-from .models import Like, Comment, Follow
+from .models import Like, Comment, Follow, Block, Report
 from .serializers import CommentSerializer, FollowSerializer
 
 
@@ -68,3 +68,33 @@ class FollowToggleView(APIView):
         return Response({'following': True})
         
     
+
+
+class BlockToggleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        if request.user.id == user_id:
+            return Response({'detail': 'Impossible de se bloquer soi-même.'}, status=status.HTTP_400_BAD_REQUEST)
+        target = get_object_or_404(User, id=user_id)
+        block, created = Block.objects.get_or_create(blocker=request.user, blocked=target)
+        if not created:
+            block.delete()
+            return Response({'blocked': False})
+        # Retirer le follow si existant
+        Follow.objects.filter(follower=request.user, following=target).delete()
+        return Response({'blocked': True})
+
+
+class ReportPostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, post_id):
+        post = get_object_or_404(Post, id=post_id)
+        reason = request.data.get('reason', 'inappropriate')
+        Report.objects.get_or_create(
+            reporter=request.user,
+            post=post,
+            defaults={'reason': reason}
+        )
+        return Response({'detail': 'Contenu signalé. Notre équipe va examiner ce signalement.'})

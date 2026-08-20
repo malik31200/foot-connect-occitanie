@@ -17,10 +17,29 @@ export default function RegisterScreen({ navigation }) {
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
+    const [acceptedTerms, setAcceptedTerms] = useState(false)
+
+    function showTerms() {
+        Alert.alert(
+            'Conditions d\'utilisation',
+            'En utilisant Foot Connect Occitanie, tu acceptes :\n\n' +
+            '• Ne publier aucun contenu offensant, haineux ou illégal.\n' +
+            '• Respecter tous les membres de la communauté.\n' +
+            '• Tout contenu inapproprié peut être signalé et supprimé.\n' +
+            '• Les utilisateurs qui enfreignent ces règles peuvent être exclus.\n' +
+            '• Nous traiterons tout signalement sous 24 heures.\n\n' +
+            'L\'administrateur se réserve le droit de supprimer tout contenu et de bannir tout utilisateur qui ne respecte pas ces règles.',
+            [{ text: 'Fermer', style: 'cancel' }]
+        )
+    }
 
     async function handleRegister() {
         if (!username || !email || !password) {
             Alert.alert('Erreur', 'Remplis tous les champs.')
+            return
+        }
+        if (!acceptedTerms) {
+            Alert.alert('Erreur', 'Tu dois accepter les conditions d\'utilisation pour continuer.')
             return
         }
         setLoading(true)
@@ -98,11 +117,29 @@ export default function RegisterScreen({ navigation }) {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Case à cocher CGU — obligatoire pour Apple */}
+                    <TouchableOpacity
+                        style={styles.checkboxRow}
+                        onPress={() => setAcceptedTerms(v => !v)}
+                        activeOpacity={0.7}
+                    >
+                        <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
+                            {acceptedTerms && <Ionicons name="checkmark" size={14} color="#fff" />}
+                        </View>
+                        <Text style={styles.checkboxText}>
+                            J'accepte les{' '}
+                            <Text style={styles.checkboxLink} onPress={showTerms}>
+                                Conditions d'utilisation
+                            </Text>
+                            {' '}et les règles de la communauté
+                        </Text>
+                    </TouchableOpacity>
+
                     <LinearGradient
                         colors={['#E4002B', '#FF5A1F']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
-                        style={styles.button}
+                        style={[styles.button, !acceptedTerms && { opacity: 0.5 }]}
                     >
                         <TouchableOpacity
                             style={styles.buttonInner}
@@ -246,5 +283,39 @@ const styles = StyleSheet.create({
     linkBold: {
         color: '#E4002B',
         fontFamily: 'PlusJakartaSans_700Bold',
+    },
+    checkboxRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 10,
+        marginBottom: 16,
+    },
+    checkbox: {
+        width: 22,
+        height: 22,
+        borderRadius: 6,
+        borderWidth: 1.5,
+        borderColor: '#A8A29B',
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 1,
+        flexShrink: 0,
+    },
+    checkboxChecked: {
+        backgroundColor: '#E4002B',
+        borderColor: '#E4002B',
+    },
+    checkboxText: {
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 13,
+        color: '#5C564F',
+        flex: 1,
+        lineHeight: 20,
+    },
+    checkboxLink: {
+        fontFamily: 'PlusJakartaSans_700Bold',
+        color: '#E4002B',
+        textDecorationLine: 'underline',
     },
 })

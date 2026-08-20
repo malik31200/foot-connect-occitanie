@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import LikeToggleView, CommentViewSet, FollowToggleView
+from .views import LikeToggleView, CommentViewSet, FollowToggleView, BlockToggleView, ReportPostView
 
 
 router = DefaultRouter()
@@ -9,5 +9,7 @@ router.register(r'posts/(?P<post_id>[^/.]+)/comments', CommentViewSet, basename=
 urlpatterns = [
     path('', include(router.urls)),
     path('posts/<int:post_id>/like/', LikeToggleView.as_view(), name='like-toggle'),
+    path('posts/<int:post_id>/report/', ReportPostView.as_view(), name='report-post'),
     path('users/<int:user_id>/follow/', FollowToggleView.as_view(), name='follow-toggle'),
+    path('users/<int:user_id>/block/', BlockToggleView.as_view(), name='block-user'),
 ]

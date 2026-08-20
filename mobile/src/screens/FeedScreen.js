@@ -42,7 +42,7 @@ function VideoItem({ uri, width, height, isActive }) {
     )
 }
 
-function PostCard({ post, onLike, onComment, onDelete, currentUserId, navigation, itemHeight, isActive }) {
+function PostCard({ post, onLike, onComment, onDelete, onReport, currentUserId, navigation, itemHeight, isActive }) {
     const medias = post.medias || []
     const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -117,14 +117,30 @@ function PostCard({ post, onLike, onComment, onDelete, currentUserId, navigation
             <View style={styles.header}>
                 <OccitanCross size={28} color="#F5C518" />
                 <Text style={styles.logoText}>FOOT CONNECT</Text>
-                {currentUserId && post.author_id === currentUserId && (
+                {currentUserId && post.author_id === currentUserId ? (
                     <TouchableOpacity
                         style={styles.deleteBtn}
                         onPress={() => onDelete(post.id)}
                     >
                         <Ionicons name="trash-outline" size={20} color="#fff" />
                     </TouchableOpacity>
-                )}
+                ) : currentUserId && post.author_id !== currentUserId ? (
+                    <TouchableOpacity
+                        style={styles.deleteBtn}
+                        onPress={() => Alert.alert(
+                            'Signaler ce contenu',
+                            'Pourquoi signales-tu ce contenu ?',
+                            [
+                                { text: 'Annuler', style: 'cancel' },
+                                { text: 'Spam', onPress: () => onReport(post.id, 'spam') },
+                                { text: 'Contenu inapproprié', onPress: () => onReport(post.id, 'inappropriate') },
+                                { text: 'Harcèlement', onPress: () => onReport(post.id, 'harassment') },
+                            ]
+                        )}
+                    >
+                        <Ionicons name="flag-outline" size={20} color="#fff" />
+                    </TouchableOpacity>
+                ) : null}
             </View>
 
             <View style={styles.actions}>
@@ -269,6 +285,15 @@ export default function FeedScreen({ navigation }) {
         } catch {}
     }
 
+    async function handleReportPost(postId, reason) {
+        try {
+            await client.post(`/posts/${postId}/report/`, { reason }, { headers })
+            Alert.alert('Signalement envoyé', 'Merci. Notre équipe va examiner ce contenu sous 24h.')
+        } catch {
+            Alert.alert('Erreur', 'Impossible d\'envoyer le signalement.')
+        }
+    }
+
     async function handleDeletePost(postId) {
         Alert.alert('Supprimer', 'Supprimer cette publication ?', [
             { text: 'Annuler', style: 'cancel' },
@@ -307,6 +332,7 @@ export default function FeedScreen({ navigation }) {
                     onLike={handleLike}
                     onComment={openComments}
                     onDelete={handleDeletePost}
+                    onReport={handleReportPost}
                     currentUserId={currentUserId}
                     navigation={navigation}
                     itemHeight={itemHeight}

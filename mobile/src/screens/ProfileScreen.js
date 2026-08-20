@@ -59,6 +59,28 @@ export default function ProfileScreen({ route, navigation }) {
         } catch {}
     }
 
+    async function handleBlock() {
+        Alert.alert(
+            'Bloquer cet utilisateur',
+            `Tu ne verras plus les publications de @${profile.username}. Veux-tu continuer ?`,
+            [
+                { text: 'Annuler', style: 'cancel' },
+                {
+                    text: 'Bloquer', style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await client.post(`/users/${profile.id}/block/`, {}, { headers })
+                            Alert.alert('Utilisateur bloqué', `@${profile.username} a été bloqué.`)
+                            navigation.goBack()
+                        } catch {
+                            Alert.alert('Erreur', 'Impossible de bloquer cet utilisateur.')
+                        }
+                    }
+                }
+            ]
+        )
+    }
+
     async function handleMessage() {
         try {
             const res = await client.post('/conversations/', {
@@ -160,6 +182,10 @@ export default function ProfileScreen({ route, navigation }) {
                                 <Text style={styles.btnText}>Envoyer un message</Text>
                             </TouchableOpacity>
                         </LinearGradient>
+                        <TouchableOpacity style={styles.blockBtn} onPress={handleBlock}>
+                            <Ionicons name="ban-outline" size={16} color="#A8A29B" />
+                            <Text style={styles.blockBtnText}>Bloquer cet utilisateur</Text>
+                        </TouchableOpacity>
                     </View>
                 ) : (
                     <View style={{ gap: 12 }}>
@@ -404,6 +430,19 @@ const styles = StyleSheet.create({
         fontFamily: 'PlusJakartaSans_700Bold',
         fontSize: 15,
         color: '#E4002B',
+    },
+    blockBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        height: 40,
+        marginTop: 4,
+    },
+    blockBtnText: {
+        fontFamily: 'PlusJakartaSans_400Regular',
+        fontSize: 13,
+        color: '#A8A29B',
     },
     deleteBtn: {
         flexDirection: 'row',
