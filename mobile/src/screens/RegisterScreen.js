@@ -18,6 +18,15 @@ export default function RegisterScreen({ navigation }) {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [acceptedTerms, setAcceptedTerms] = useState(false)
+    const [sportRole, setSportRole] = useState('supporter')
+
+    const ROLES = [
+        { value: 'supporter', label: '❤️ Supporter' },
+        { value: 'joueur', label: '⚽ Joueur' },
+        { value: 'coach', label: '📋 Coach' },
+        { value: 'club', label: '🏟️ Dirigeant' },
+        { value: 'partenaire', label: '🤝 Partenaire' },
+    ]
 
     function showTerms() {
         Alert.alert(
@@ -44,9 +53,12 @@ export default function RegisterScreen({ navigation }) {
         }
         setLoading(true)
         try {
-            await client.post('/auth/register/', { username, email, password })
+            await client.post('/auth/register/', { username, email, password, sport_role: sportRole })
             const res = await client.post('/auth/login/', { email, password })
-            login(res.data.access, res.data.refresh)
+            const meRes = await client.get('/auth/me/', {
+                headers: { Authorization: `Bearer ${res.data.access}` }
+            })
+            login(res.data.access, res.data.refresh, meRes.data)
         } catch (e) {
             const msg = e.response?.data
                 ? Object.values(e.response.data).flat().join('\n')
@@ -115,6 +127,22 @@ export default function RegisterScreen({ navigation }) {
                         <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.eyeBtn}>
                             <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#A8A29B" />
                         </TouchableOpacity>
+                    </View>
+
+                    {/* Sélection du rôle */}
+                    <Text style={styles.label}>Tu es...</Text>
+                    <View style={styles.rolesGrid}>
+                        {ROLES.map(r => (
+                            <TouchableOpacity
+                                key={r.value}
+                                style={[styles.roleChip, sportRole === r.value && styles.roleChipActive]}
+                                onPress={() => setSportRole(r.value)}
+                            >
+                                <Text style={[styles.roleChipText, sportRole === r.value && styles.roleChipTextActive]}>
+                                    {r.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
 
                     {/* Case à cocher CGU — obligatoire pour Apple */}
@@ -283,6 +311,32 @@ const styles = StyleSheet.create({
     linkBold: {
         color: '#E4002B',
         fontFamily: 'PlusJakartaSans_700Bold',
+    },
+    rolesGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginBottom: 20,
+    },
+    roleChip: {
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 20,
+        backgroundColor: '#F4F1EC',
+        borderWidth: 1.5,
+        borderColor: '#F4F1EC',
+    },
+    roleChipActive: {
+        backgroundColor: '#FFF0F2',
+        borderColor: '#E4002B',
+    },
+    roleChipText: {
+        fontFamily: 'PlusJakartaSans_600SemiBold',
+        fontSize: 13,
+        color: '#5C564F',
+    },
+    roleChipTextActive: {
+        color: '#E4002B',
     },
     checkboxRow: {
         flexDirection: 'row',
