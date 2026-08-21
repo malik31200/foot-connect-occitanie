@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import LikeToggleView, CommentViewSet, FollowToggleView, BlockToggleView, ReportPostView
+from .views import LikeToggleView, CommentViewSet, FollowToggleView, BlockToggleView, ReportPostView, CommentLikeToggleView, ReportCommentView
 
 
 router = DefaultRouter()
@@ -12,4 +12,6 @@ urlpatterns = [
     path('posts/<int:post_id>/report/', ReportPostView.as_view(), name='report-post'),
     path('users/<int:user_id>/follow/', FollowToggleView.as_view(), name='follow-toggle'),
     path('users/<int:user_id>/block/', BlockToggleView.as_view(), name='block-user'),
+    path('comments/<int:comment_id>/like/', CommentLikeToggleView.as_view(), name='comment-like-toggle'),
+    path('comments/<int:comment_id>/report/', ReportCommentView.as_view(), name='report-comment'),
 ]

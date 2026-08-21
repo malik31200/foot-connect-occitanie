@@ -27,7 +27,26 @@ function VideoBlock({ uri }) {
     )
 }
 
-function CommentItem({ comment, currentUserId, onDelete }) {
+function CommentItem({ comment, currentUserId, onDelete, onLike, onReport }) {
+    const [liked, setLiked] = React.useState(comment.is_liked || false)
+    const [likesCount, setLikesCount] = React.useState(comment.likes_count || 0)
+
+    async function handleLike() {
+        const wasLiked = liked
+        setLiked(!wasLiked)
+        setLikesCount(c => wasLiked ? c - 1 : c + 1)
+        try {
+            const res = await onLike(comment.id)
+            if (res) {
+                setLiked(res.liked)
+                setLikesCount(res.likes_count)
+            }
+        } catch {
+            setLiked(wasLiked)
+            setLikesCount(c => wasLiked ? c + 1 : c - 1)
+        }
+    }
+
     return (
         <View style={styles.commentRow}>
             {comment.author_avatar_url ? (
@@ -43,11 +62,29 @@ function CommentItem({ comment, currentUserId, onDelete }) {
                 <Text style={styles.commentAuthor}>@{comment.author_username}</Text>
                 <Text style={styles.commentContent}>{comment.content}</Text>
             </View>
-            {comment.author_id === currentUserId && (
-                <TouchableOpacity onPress={() => onDelete(comment.id)} style={styles.commentDelete}>
-                    <Ionicons name="trash-outline" size={16} color="#A8A29B" />
+            <View style={styles.commentActions}>
+                <TouchableOpacity onPress={handleLike} style={styles.commentLikeBtn}>
+                    <Ionicons
+                        name={liked ? 'football' : 'football-outline'}
+                        size={16}
+                        color={liked ? '#E4002B' : '#A8A29B'}
+                    />
+                    {likesCount > 0 && (
+                        <Text style={[styles.commentLikeCount, liked && { color: '#E4002B' }]}>
+                            {likesCount}
+                        </Text>
+                    )}
                 </TouchableOpacity>
-            )}
+                {comment.author_id === currentUserId ? (
+                    <TouchableOpacity onPress={() => onDelete(comment.id)} style={styles.commentActionBtn}>
+                        <Ionicons name="trash-outline" size={15} color="#A8A29B" />
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity onPress={() => onReport(comment.id)} style={styles.commentActionBtn}>
+                        <Ionicons name="flag-outline" size={15} color="#A8A29B" />
+                    </TouchableOpacity>
+                )}
+            </View>
         </View>
     )
 }
@@ -124,6 +161,39 @@ export default function PostDetailScreen({ route, navigation }) {
                 }
             }
         ])
+    }
+
+    async function handleLikeComment(commentId) {
+        const res = await client.post(`/comments/${commentId}/like/`, {}, { headers })
+        return res.data
+    }
+
+    function handleReportComment(commentId) {
+        Alert.alert(
+            'Signaler ce commentaire',
+            'Pourquoi signales-tu ce commentaire ?',
+            [
+                { text: 'Annuler', style: 'cancel' },
+                {
+                    text: 'Spam',
+                    onPress: async () => {
+                        try {
+                            await client.post(`/comments/${commentId}/report/`, { reason: 'spam' }, { headers })
+                            Alert.alert('Signalement envoyé', 'Merci. Notre équipe va examiner ce commentaire.')
+                        } catch {}
+                    }
+                },
+                {
+                    text: 'Contenu inapproprié',
+                    onPress: async () => {
+                        try {
+                            await client.post(`/comments/${commentId}/report/`, { reason: 'inappropriate' }, { headers })
+                            Alert.alert('Signalement envoyé', 'Merci. Notre équipe va examiner ce commentaire.')
+                        } catch {}
+                    }
+                },
+            ]
+        )
     }
 
     return (
@@ -215,6 +285,8 @@ export default function PostDetailScreen({ route, navigation }) {
                                 comment={comment}
                                 currentUserId={user?.id}
                                 onDelete={handleDeleteComment}
+                                onLike={handleLikeComment}
+                                onReport={handleReportComment}
                             />
                         ))
                     )}
@@ -291,7 +363,16 @@ const styles = StyleSheet.create({
     },
     commentAuthor: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: '#1A1614' },
     commentContent: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: '#1A1614' },
-    commentDelete: { padding: 4, marginTop: 6 },
+    commentActions: {
+        flexDirection: 'column', alignItems: 'center', gap: 6, paddingTop: 4,
+    },
+    commentLikeBtn: {
+        alignItems: 'center', gap: 2,
+    },
+    commentLikeCount: {
+        fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 10, color: '#A8A29B',
+    },
+    commentActionBtn: { padding: 2 },
     inputBar: {
         flexDirection: 'row', alignItems: 'center', gap: 10,
         backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 10,

@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from posts.models import Post
 from users.models import User
-from .models import Like, Comment, Follow, Block, Report
+from .models import Like, Comment, Follow, Block, Report, CommentLike, CommentReport
 from .serializers import CommentSerializer, FollowSerializer
 
 
@@ -98,3 +98,29 @@ class ReportPostView(APIView):
             defaults={'reason': reason}
         )
         return Response({'detail': 'Contenu signalé. Notre équipe va examiner ce signalement.'})
+
+
+class CommentLikeToggleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, comment_id):
+        comment = get_object_or_404(Comment, id=comment_id)
+        like, created = CommentLike.objects.get_or_create(user=request.user, comment=comment)
+        if not created:
+            like.delete()
+            return Response({'liked': False, 'likes_count': comment.likes.count()})
+        return Response({'liked': True, 'likes_count': comment.likes.count()})
+
+
+class ReportCommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, comment_id):
+        comment = get_object_or_404(Comment, id=comment_id)
+        reason = request.data.get('reason', 'inappropriate')
+        CommentReport.objects.get_or_create(
+            reporter=request.user,
+            comment=comment,
+            defaults={'reason': reason}
+        )
+        return Response({'detail': 'Commentaire signalé. Notre équipe va examiner ce signalement.'})
