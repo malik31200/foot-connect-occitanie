@@ -7,11 +7,13 @@ import {
 import OccitanCross from '../components/OccitanCross'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
 export default function LoginScreen({ navigation }) {
     const { login } = useAuth()
+    const insets = useSafeAreaInsets()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
@@ -53,7 +55,7 @@ export default function LoginScreen({ navigation }) {
                         <Text style={styles.tagline}>LE RÉSEAU SOCIAL DU FOOT OCCITAN</Text>
                     </View>
 
-                    <View style={styles.card}>
+                    <View style={[styles.card, { paddingBottom: Math.max(insets.bottom + 16, 40) }]}>
                     <Text style={styles.cardTitle}>CONNEXION</Text>
 
                     <Text style={styles.label}>Email</Text>
@@ -151,7 +153,7 @@ export default function LoginScreen({ navigation }) {
         borderTopLeftRadius: 32,
         borderTopRightRadius: 32,
         padding: 28,
-        paddingBottom: 40,
+        paddingBottom: 0,
     },
     cardTitle: {
         fontFamily: 'Anton_400Regular',

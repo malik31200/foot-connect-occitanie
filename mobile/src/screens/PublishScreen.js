@@ -84,16 +84,25 @@ export default function PublishScreen() {
                 const finished = (finishedRes.data.results || finishedRes.data)
                 const scheduled = (scheduledRes.data.results || scheduledRes.data)
 
-                // Trier : terminés par date DESC (le + récent en premier), à venir par date ASC
-                const sortedFinished = [...finished].sort((a, b) => new Date(b.date_time) - new Date(a.date_time))
-                const sortedScheduled = [...scheduled].sort((a, b) => new Date(a.date_time) - new Date(b.date_time))
+                // Dernière journée terminée seulement
+                const lastMatchday = finished.length > 0
+                    ? Math.max(...finished.map(m => m.matchday || 0))
+                    : null
+                const lastFinished = lastMatchday !== null
+                    ? finished.filter(m => m.matchday === lastMatchday)
+                        .sort((a, b) => new Date(b.date_time) - new Date(a.date_time))
+                    : []
 
-                // Tous les matchs terminés (du plus récent) + tous les matchs à venir
-                const options = [
-                    ...sortedFinished,
-                    ...sortedScheduled,
-                ]
-                setMatchOptions(options)
+                // Prochaine journée à venir seulement
+                const nextMatchday = scheduled.length > 0
+                    ? Math.min(...scheduled.map(m => m.matchday || 999))
+                    : null
+                const nextScheduled = nextMatchday !== null
+                    ? scheduled.filter(m => m.matchday === nextMatchday)
+                        .sort((a, b) => new Date(a.date_time) - new Date(b.date_time))
+                    : []
+
+                setMatchOptions([...lastFinished, ...nextScheduled])
             }).catch(() => {}).finally(() => setLoadingMatches(false))
         }, [category, poule, token])
     )

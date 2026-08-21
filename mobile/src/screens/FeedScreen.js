@@ -134,7 +134,6 @@ function PostCard({ post, onLike, onComment, onDelete, onReport, currentUserId, 
                                 { text: 'Annuler', style: 'cancel' },
                                 { text: 'Spam', onPress: () => onReport(post.id, 'spam') },
                                 { text: 'Contenu inapproprié', onPress: () => onReport(post.id, 'inappropriate') },
-                                { text: 'Harcèlement', onPress: () => onReport(post.id, 'harassment') },
                             ]
                         )}
                     >

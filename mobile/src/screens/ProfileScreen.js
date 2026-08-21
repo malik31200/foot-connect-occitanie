@@ -70,8 +70,11 @@ export default function ProfileScreen({ route, navigation }) {
                     onPress: async () => {
                         try {
                             await client.post(`/users/${profile.id}/block/`, {}, { headers })
-                            Alert.alert('Utilisateur bloqué', `@${profile.username} a été bloqué.`)
-                            navigation.goBack()
+                            Alert.alert(
+                                'Utilisateur bloqué',
+                                `@${profile.username} a été bloqué. Ses publications ont été retirées de ton feed.`,
+                                [{ text: 'OK', onPress: () => navigation.popToTop() }]
+                            )
                         } catch {
                             Alert.alert('Erreur', 'Impossible de bloquer cet utilisateur.')
                         }
