@@ -128,13 +128,7 @@ function MainNavigator() {
       <Stack.Screen
         name="PostDetail"
         component={PostDetailScreen}
-        options={{
-          title: 'Publication',
-          headerStyle: { backgroundColor: '#fff' },
-          headerTintColor: '#1A1614',
-          headerTitleStyle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 18 },
-          headerBackTitleVisible: false,
-        }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="EditProfile"

@@ -81,8 +81,9 @@ class BlockToggleView(APIView):
         if not created:
             block.delete()
             return Response({'blocked': False})
-        # Retirer le follow si existant
+        # Retirer les follows dans les deux sens
         Follow.objects.filter(follower=request.user, following=target).delete()
+        Follow.objects.filter(follower=target, following=request.user).delete()
         return Response({'blocked': True})
 
 
