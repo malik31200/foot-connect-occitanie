@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 from .models import User, PasswordResetToken
 from .serializers import RegisterSerializer, UserSerializer, UserProfileSerializer, UpdateProfileSerializer
-from interactions.models import Follow
+from interactions.models import Follow, Block
 import secrets
 import requests as http_requests
 
@@ -78,13 +78,19 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(UserSerializer(request.user).data)
+        data = UserSerializer(request.user).data
+        data['followers_count'] = request.user.followers.count()
+        data['following_count'] = request.user.following.count()
+        return Response(data)
 
     def patch(self, request):
         serializer = UpdateProfileSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(UserSerializer(request.user).data)
+            data = UserSerializer(request.user).data
+            data['followers_count'] = request.user.followers.count()
+            data['following_count'] = request.user.following.count()
+            return Response(data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
@@ -154,5 +160,8 @@ class UserProfileView(APIView):
         data = serializer.data
         data['is_following'] = Follow.objects.filter(
             follower=request.user, following=user
+        ).exists()
+        data['is_blocked'] = Block.objects.filter(
+            blocker=request.user, blocked=user
         ).exists()
         return Response(data)
