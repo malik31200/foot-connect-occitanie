@@ -16,7 +16,7 @@ import client from '../api/client'
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 
 // ─── Lecteur vidéo ─────────────────────────────────────────────────────────────
-function VideoItem({ uri, isActive }) {
+function VideoItem({ uri, isActive, height }) {
     const player = useVideoPlayer(uri, p => { p.loop = true })
     useEffect(() => {
         isActive ? player.play() : player.pause()
@@ -24,7 +24,7 @@ function VideoItem({ uri, isActive }) {
     return (
         <VideoView
             player={player}
-            style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+            style={{ width: SCREEN_WIDTH, height: height || SCREEN_HEIGHT }}
             contentFit="contain"
             nativeControls={false}
         />
@@ -32,13 +32,14 @@ function VideoItem({ uri, isActive }) {
 }
 
 // ─── Une carte post style TikTok ───────────────────────────────────────────────
-function PostCard({ post, onLike, onOpenComments, onDelete, onReport, currentUserId, navigation, isActive, onBack }) {
+function PostCard({ post, onLike, onOpenComments, onDelete, onReport, currentUserId, navigation, isActive, onBack, itemHeight }) {
     const medias = post.medias || []
     const [currentIndex, setCurrentIndex] = useState(0)
     const [liked, setLiked] = useState(post.is_liked ?? false)
     const [likesCount, setLikesCount] = useState(post.likes_count ?? 0)
     const [commentsCount, setCommentsCount] = useState(post.comments_count ?? 0)
     const insets = useSafeAreaInsets()
+    const cardH = itemHeight || SCREEN_HEIGHT
 
     function handleLikePress() {
         const wasLiked = liked
@@ -48,7 +49,7 @@ function PostCard({ post, onLike, onOpenComments, onDelete, onReport, currentUse
     }
 
     return (
-        <View style={[styles.card, { height: SCREEN_HEIGHT }]}>
+        <View style={[styles.card, { height: cardH }]}>
             {/* Médias */}
             <FlatList
                 data={medias.length > 0 ? medias : [null]}
@@ -63,11 +64,11 @@ function PostCard({ post, onLike, onOpenComments, onDelete, onReport, currentUse
                 scrollEventThrottle={16}
                 renderItem={({ item }) => {
                     if (!item) return (
-                        <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: '#1A1614' }} />
+                        <View style={{ width: SCREEN_WIDTH, height: cardH, backgroundColor: '#1A1614' }} />
                     )
                     if (item.media_type === 'photo') {
                         return (
-                            <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: '#0E0B0A' }}>
+                            <View style={{ width: SCREEN_WIDTH, height: cardH, backgroundColor: '#0E0B0A' }}>
                                 <Image
                                     source={{ uri: item.media_url }}
                                     style={StyleSheet.absoluteFill}
@@ -76,13 +77,13 @@ function PostCard({ post, onLike, onOpenComments, onDelete, onReport, currentUse
                                 />
                                 <Image
                                     source={{ uri: item.media_url }}
-                                    style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+                                    style={{ width: SCREEN_WIDTH, height: cardH }}
                                     resizeMode="contain"
                                 />
                             </View>
                         )
                     }
-                    return <VideoItem uri={item.media_url} isActive={isActive} />
+                    return <VideoItem uri={item.media_url} isActive={isActive} height={cardH} />
                 }}
             />
 
@@ -329,6 +330,8 @@ export default function PostDetailScreen({ route, navigation }) {
     const [posts, setPosts] = useState(postList?.length > 0 ? postList : [initialPost])
     const [activeIndex, setActiveIndex] = useState(initialIndex ?? 0)
     const [commentPostId, setCommentPostId] = useState(null)
+    // Hauteur réelle du FlatList mesurée via onLayout
+    const [itemHeight, setItemHeight] = useState(SCREEN_HEIGHT)
 
     const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 60 })
     const onViewableItemsChanged = useRef(({ viewableItems }) => {
@@ -398,16 +401,18 @@ export default function PostDetailScreen({ route, navigation }) {
                         navigation={navigation}
                         isActive={index === activeIndex}
                         onBack={() => navigation.goBack()}
+                        itemHeight={itemHeight}
                     />
                 )}
+                onLayout={e => setItemHeight(e.nativeEvent.layout.height)}
                 onViewableItemsChanged={onViewableItemsChanged.current}
                 viewabilityConfig={viewabilityConfig.current}
-                snapToInterval={SCREEN_HEIGHT}
+                snapToInterval={itemHeight}
                 decelerationRate="fast"
                 showsVerticalScrollIndicator={false}
                 getItemLayout={(_, index) => ({
-                    length: SCREEN_HEIGHT,
-                    offset: SCREEN_HEIGHT * index,
+                    length: itemHeight,
+                    offset: itemHeight * index,
                     index,
                 })}
             />
