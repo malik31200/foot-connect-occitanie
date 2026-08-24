@@ -1,10 +1,10 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useRef } from 'react'
 import {
     View, Text, Image, StyleSheet, ScrollView, FlatList,
     TouchableOpacity, TextInput, KeyboardAvoidingView,
     Platform, ActivityIndicator, Alert, Dimensions
 } from 'react-native'
-import { useFocusEffect } from '@react-navigation/native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { VideoView, useVideoPlayer } from 'expo-video'
 import { useAuth } from '../context/AuthContext'
@@ -89,26 +89,56 @@ function CommentItem({ comment, currentUserId, onDelete, onLike, onReport }) {
     )
 }
 
-export default function PostDetailScreen({ route, navigation }) {
-    const { post: initialPost } = route.params
-    const { token, user } = useAuth()
+// ─── Vue TikTok : liste verticale paginée des posts d'un profil ───────────────
+function PostListView({ posts, initialIndex, navigation, token, user }) {
     const headers = { Authorization: `Bearer ${token}` }
+    const flatRef = useRef(null)
 
-    const [post, setPost] = useState(initialPost)
-    const [liked, setLiked] = useState(initialPost.is_liked || false)
-    const [likesCount, setLikesCount] = useState(initialPost.likes_count || 0)
+    React.useEffect(() => {
+        if (initialIndex > 0) {
+            setTimeout(() => {
+                flatRef.current?.scrollToIndex({ index: initialIndex, animated: false })
+            }, 100)
+        }
+    }, [])
 
-    const [comments, setComments] = useState([])
-    const [loadingComments, setLoadingComments] = useState(true)
-    const [commentText, setCommentText] = useState('')
-    const [sending, setSending] = useState(false)
+    function renderPost({ item }) {
+        return <PostSingleView post={item} navigation={navigation} token={token} user={user} headers={headers} />
+    }
+
+    return (
+        <FlatList
+            ref={flatRef}
+            data={posts}
+            keyExtractor={item => item.id.toString()}
+            renderItem={renderPost}
+            pagingEnabled
+            showsVerticalScrollIndicator={false}
+            initialScrollIndex={initialIndex}
+            getItemLayout={(_, index) => ({
+                length: SCREEN_WIDTH * 1.6,
+                offset: SCREEN_WIDTH * 1.6 * index,
+                index,
+            })}
+        />
+    )
+}
+
+// ─── Un post dans la liste (utilisé par PostListView et PostDetailScreen) ──────
+function PostSingleView({ post: initialPost, navigation, token, user, headers }) {
+    const insets = useSafeAreaInsets()
+    const [post, setPost] = React.useState(initialPost)
+    const [liked, setLiked] = React.useState(initialPost.is_liked || false)
+    const [likesCount, setLikesCount] = React.useState(initialPost.likes_count || 0)
+    const [comments, setComments] = React.useState([])
+    const [loadingComments, setLoadingComments] = React.useState(true)
+    const [commentText, setCommentText] = React.useState('')
+    const [sending, setSending] = React.useState(false)
     const inputRef = useRef(null)
 
-    useFocusEffect(
-        useCallback(() => {
-            loadComments()
-        }, [post.id])
-    )
+    React.useEffect(() => {
+        loadComments()
+    }, [post.id])
 
     async function loadComments() {
         setLoadingComments(true)
@@ -135,17 +165,13 @@ export default function PostDetailScreen({ route, navigation }) {
         if (!commentText.trim()) return
         setSending(true)
         try {
-            const res = await client.post(`/posts/${post.id}/comments/`, {
-                content: commentText.trim()
-            }, { headers })
+            const res = await client.post(`/posts/${post.id}/comments/`, { content: commentText.trim() }, { headers })
             setComments(prev => [res.data, ...prev])
             setCommentText('')
             inputRef.current?.blur()
         } catch {
             Alert.alert('Erreur', 'Impossible d\'envoyer le commentaire.')
-        } finally {
-            setSending(false)
-        }
+        } finally { setSending(false) }
     }
 
     async function handleDeleteComment(commentId) {
@@ -169,31 +195,11 @@ export default function PostDetailScreen({ route, navigation }) {
     }
 
     function handleReportComment(commentId) {
-        Alert.alert(
-            'Signaler ce commentaire',
-            'Pourquoi signales-tu ce commentaire ?',
-            [
-                { text: 'Annuler', style: 'cancel' },
-                {
-                    text: 'Spam',
-                    onPress: async () => {
-                        try {
-                            await client.post(`/comments/${commentId}/report/`, { reason: 'spam' }, { headers })
-                            Alert.alert('Signalement envoyé', 'Merci. Notre équipe va examiner ce commentaire.')
-                        } catch {}
-                    }
-                },
-                {
-                    text: 'Contenu inapproprié',
-                    onPress: async () => {
-                        try {
-                            await client.post(`/comments/${commentId}/report/`, { reason: 'inappropriate' }, { headers })
-                            Alert.alert('Signalement envoyé', 'Merci. Notre équipe va examiner ce commentaire.')
-                        } catch {}
-                    }
-                },
-            ]
-        )
+        Alert.alert('Signaler ce commentaire', 'Pourquoi signales-tu ce commentaire ?', [
+            { text: 'Annuler', style: 'cancel' },
+            { text: 'Spam', onPress: async () => { try { await client.post(`/comments/${commentId}/report/`, { reason: 'spam' }, { headers }); Alert.alert('Signalement envoyé', 'Merci.') } catch {} } },
+            { text: 'Contenu inapproprié', onPress: async () => { try { await client.post(`/comments/${commentId}/report/`, { reason: 'inappropriate' }, { headers }); Alert.alert('Signalement envoyé', 'Merci.') } catch {} } },
+        ])
     }
 
     return (
@@ -203,76 +209,43 @@ export default function PostDetailScreen({ route, navigation }) {
             keyboardVerticalOffset={90}
         >
             <ScrollView style={styles.screen} bounces={false} keyboardShouldPersistTaps="handled">
-                {/* Médias */}
                 {post.medias?.map((media, i) => (
                     <View key={i}>
                         {media.media_type === 'photo' ? (
-                            <Image
-                                source={{ uri: media.media_url }}
-                                style={styles.media}
-                                resizeMode="cover"
-                            />
+                            <Image source={{ uri: media.media_url }} style={styles.media} resizeMode="cover" />
                         ) : (
                             <VideoBlock uri={media.media_url} />
                         )}
                     </View>
                 ))}
-
                 <View style={styles.info}>
-                    {/* Auteur */}
-                    <TouchableOpacity
-                        style={styles.authorRow}
-                        onPress={() => navigation.navigate('Profile', {
-                            userId: post.author_id,
-                            username: post.author_username
-                        })}
-                    >
+                    <TouchableOpacity style={styles.authorRow} onPress={() => navigation.navigate('Profile', { userId: post.author_id, username: post.author_username })}>
                         {post.author_avatar_url ? (
                             <Image source={{ uri: post.author_avatar_url }} style={styles.avatar} />
                         ) : (
                             <View style={styles.avatarPlaceholder}>
-                                <Text style={styles.avatarLetter}>
-                                    {post.author_username?.[0]?.toUpperCase()}
-                                </Text>
+                                <Text style={styles.avatarLetter}>{post.author_username?.[0]?.toUpperCase()}</Text>
                             </View>
                         )}
                         <Text style={styles.username}>@{post.author_username}</Text>
                     </TouchableOpacity>
-
-                    {/* Caption */}
-                    {post.caption ? (
-                        <Text style={styles.caption}>{post.caption}</Text>
-                    ) : null}
-
-                    {/* Match */}
+                    {post.caption ? <Text style={styles.caption}>{post.caption}</Text> : null}
                     {post.match_info && (
                         <View style={styles.matchPill}>
                             <Ionicons name="football-outline" size={13} color="#E4002B" />
-                            <Text style={styles.matchText}>
-                                {post.match_info.home_team} · {post.match_info.away_team}
-                            </Text>
+                            <Text style={styles.matchText}>{post.match_info.home_team} · {post.match_info.away_team}</Text>
                         </View>
                     )}
-
-                    {/* Actions like */}
                     <View style={styles.actionsRow}>
                         <TouchableOpacity style={styles.actionBtn} onPress={handleLike}>
-                            <Ionicons
-                                name={liked ? 'heart' : 'heart-outline'}
-                                size={24}
-                                color={liked ? '#E4002B' : '#5C564F'}
-                            />
-                            <Text style={[styles.actionCount, liked && { color: '#E4002B' }]}>
-                                {likesCount}
-                            </Text>
+                            <Ionicons name={liked ? 'heart' : 'heart-outline'} size={24} color={liked ? '#E4002B' : '#5C564F'} />
+                            <Text style={[styles.actionCount, liked && { color: '#E4002B' }]}>{likesCount}</Text>
                         </TouchableOpacity>
                         <View style={styles.actionBtn}>
                             <Ionicons name="chatbubble-outline" size={22} color="#5C564F" />
                             <Text style={styles.actionCount}>{comments.length}</Text>
                         </View>
                     </View>
-
-                    {/* Commentaires */}
                     <Text style={styles.commentsTitle}>Commentaires</Text>
                     {loadingComments ? (
                         <ActivityIndicator color="#E4002B" style={{ marginVertical: 12 }} />
@@ -293,9 +266,7 @@ export default function PostDetailScreen({ route, navigation }) {
                     <View style={{ height: 80 }} />
                 </View>
             </ScrollView>
-
-            {/* Champ commentaire */}
-            <View style={styles.inputBar}>
+            <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
                 <TextInput
                     ref={inputRef}
                     style={styles.input}
@@ -310,14 +281,37 @@ export default function PostDetailScreen({ route, navigation }) {
                     disabled={sending || !commentText.trim()}
                     style={[styles.sendBtn, (!commentText.trim() || sending) && { opacity: 0.4 }]}
                 >
-                    {sending ? (
-                        <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                        <Ionicons name="send" size={18} color="#fff" />
-                    )}
+                    {sending ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="send" size={18} color="#fff" />}
                 </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
+    )
+}
+
+export default function PostDetailScreen({ route, navigation }) {
+    const { post: initialPost, posts: postList, initialIndex } = route.params
+    const { token, user } = useAuth()
+
+    if (postList && postList.length > 0) {
+        return (
+            <PostListView
+                posts={postList}
+                initialIndex={initialIndex ?? 0}
+                navigation={navigation}
+                token={token}
+                user={user}
+            />
+        )
+    }
+
+    return (
+        <PostSingleView
+            post={initialPost}
+            navigation={navigation}
+            token={token}
+            user={user}
+            headers={{ Authorization: `Bearer ${token}` }}
+        />
     )
 }
 

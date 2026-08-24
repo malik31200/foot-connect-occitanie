@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "fr.footconnect.occitanie",
-      "buildNumber": "5",
+      "buildNumber": "7",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -27,7 +27,7 @@
       },
       "softwareKeyboardLayoutMode": "pan",
       "package": "fr.footconnect.occitanie",
-      "versionCode": 5
+      "versionCode": 7
     },
     "web": {
       "favicon": "./assets/favicon.png"
