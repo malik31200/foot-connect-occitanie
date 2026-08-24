@@ -22,7 +22,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'sport_role', 'avatar_url']
+        fields = ['id', 'username', 'email', 'role', 'sport_role', 'avatar_url', 'club_name']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -31,7 +31,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'sport_role', 'avatar_url',
+        fields = ['id', 'username', 'email', 'role', 'sport_role', 'avatar_url', 'club_name',
                   'followers_count', 'following_count']
 
     def get_followers_count(self, obj):
@@ -44,9 +44,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UpdateProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'sport_role', 'avatar_url']
+        fields = ['username', 'sport_role', 'avatar_url', 'club_name']
         extra_kwargs = {
             'username': {'required': False},
             'sport_role': {'required': False},
             'avatar_url': {'required': False},
+            'club_name': {'required': False},
         }

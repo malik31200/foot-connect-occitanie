@@ -165,3 +165,39 @@ class UserProfileView(APIView):
             blocker=request.user, blocked=user
         ).exists()
         return Response(data)
+
+
+class FollowersListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        followers = User.objects.filter(following__following=user)
+        data = [
+            {
+                'id': u.id,
+                'username': u.username,
+                'avatar_url': u.avatar_url,
+                'sport_role': u.sport_role,
+            }
+            for u in followers
+        ]
+        return Response(data)
+
+
+class FollowingListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        following = User.objects.filter(followers__follower=user)
+        data = [
+            {
+                'id': u.id,
+                'username': u.username,
+                'avatar_url': u.avatar_url,
+                'sport_role': u.sport_role,
+            }
+            for u in following
+        ]
+        return Response(data)

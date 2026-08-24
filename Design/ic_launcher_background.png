@@ -1,0 +1,17 @@
+# Icône Android — Foot Connect Occitanie
+
+Générée à partir du logo (croix occitane rouge/or).
+
+## Contenu
+- `ic_launcher-playstore.png` (512×512) — à uploader dans Play Console (fiche du store).
+- `adaptive/ic_launcher_foreground.png` + `ic_launcher_background.png` (432×432) — icône adaptative Android 8+ (fond blanc uni + croix, le système applique la forme cercle/squircle/carré selon le launcher).
+- `res/mipmap-anydpi-v26/ic_launcher.xml` — déclaration adaptive-icon à copier dans le projet.
+- `legacy/mipmap-*/ic_launcher.png` + `ic_launcher_round.png` — icônes classiques pour Android < 8 (mdpi 48 → xxxhdpi 192).
+
+## Installation dans le projet Android
+1. Copier `adaptive/ic_launcher_foreground.png` → `res/mipmap-anydpi-v26/ic_launcher_foreground.png` (idem pour `_background`), ou générer les variantes par densité (108/162/216/324/432) via Android Studio → *Image Asset*.
+2. Copier `res/mipmap-anydpi-v26/ic_launcher.xml` tel quel.
+3. Copier chaque `legacy/mipmap-<densité>/ic_launcher*.png` dans `res/mipmap-<densité>/`.
+4. Vérifier dans `AndroidManifest.xml` : `android:icon="@mipmap/ic_launcher"` `android:roundIcon="@mipmap/ic_launcher_round"`.
+
+Le plus simple reste d'importer `adaptive/ic_launcher_foreground.png` (calque premier plan) dans l'outil **Image Asset** d'Android Studio (clic droit sur `res` → New → Image Asset → Launcher Icons Adaptive) : il régénère toutes les densités et le legacy automatiquement.

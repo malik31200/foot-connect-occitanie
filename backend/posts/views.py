@@ -65,11 +65,14 @@ class FeedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Feed = tous les posts, triés par date
-        # Les abonnements sont utilisés pour le réseau social (compteurs, is_following)
-        # mais ne filtrent pas le feed pour ne pas cacher du contenu
+        blocked_ids = Block.objects.filter(
+            blocker=request.user
+        ).values_list('blocked_id', flat=True)
+
         posts = Post.objects.all().select_related(
             'author', 'match__home_team', 'match__away_team'
-        ).prefetch_related('medias', 'likes').order_by('-created_at')
+        ).prefetch_related('medias', 'likes').exclude(
+            author_id__in=blocked_ids
+        ).order_by('-created_at')
 
         return Response(PostSerializer(posts, many=True, context={'request': request}).data)

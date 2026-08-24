@@ -16,6 +16,7 @@ import ConversationScreen from './src/screens/ConversationScreen'
 import EditProfileScreen from './src/screens/EditProfileScreen'
 import PostDetailScreen from './src/screens/PostDetailScreen'
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen'
+import FollowListScreen from './src/screens/FollowListScreen'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import { useFonts } from 'expo-font'
@@ -145,6 +146,11 @@ function MainNavigator() {
           headerTitleStyle: { fontFamily: 'Anton_400Regular', fontSize: 20 },
           headerBackTitleVisible: false,
         }}
+      />
+      <Stack.Screen
+        name="FollowList"
+        component={FollowListScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   )

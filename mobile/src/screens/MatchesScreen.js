@@ -40,24 +40,34 @@ function TeamLogo({ name, logoUrl }) {
 
 function MatchCard({ item, showScore }) {
     const dt = new Date(item.date_time)
-    const dateStr = dt.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+    const dateStr = dt.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })
     const timeStr = dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 
     return (
         <View style={styles.matchCard}>
-            <View style={styles.matchHeader}>
-                <Text style={styles.matchday}>J{item.matchday}</Text>
-                <Text style={styles.matchDate}>{dateStr} · {timeStr}</Text>
+            {/* Tags catégorie + poule */}
+            <View style={styles.matchTags}>
+                <View style={styles.tagCat}>
+                    <Text style={styles.tagCatText}>{item.category}</Text>
+                </View>
+                {item.group_name ? (
+                    <View style={styles.tagPoule}>
+                        <Text style={styles.tagPouleText}>{item.group_name}</Text>
+                    </View>
+                ) : null}
+                <Text style={styles.matchdayTag}>J{item.matchday}</Text>
             </View>
+
+            {/* Équipes */}
             <View style={styles.matchTeams}>
                 <View style={styles.teamSide}>
                     <TeamLogo name={item.home_team.name} logoUrl={item.home_team.logo_url} />
                     <Text style={styles.teamName} numberOfLines={2}>{item.home_team.name}</Text>
                 </View>
                 {showScore && item.status === 'finished' ? (
-                    <Text style={styles.score}>{item.home_score} - {item.away_score}</Text>
+                    <Text style={styles.score}>{item.home_score} – {item.away_score}</Text>
                 ) : (
-                    <Text style={styles.vs}>VS</Text>
+                    <Text style={styles.vs}>vs</Text>
                 )}
                 <View style={[styles.teamSide, { alignItems: 'flex-end' }]}>
                     <TeamLogo name={item.away_team.name} logoUrl={item.away_team.logo_url} />
@@ -66,9 +76,20 @@ function MatchCard({ item, showScore }) {
                     </Text>
                 </View>
             </View>
-            {item.venue ? (
-                <Text style={styles.venue}>📍 {item.venue}</Text>
-            ) : null}
+
+            {/* Date + lieu */}
+            <View style={styles.matchMeta}>
+                <View style={styles.metaRow}>
+                    <Ionicons name="calendar-outline" size={13} color="#E4002B" />
+                    <Text style={styles.metaText}>{dateStr} · {timeStr}</Text>
+                </View>
+                {item.venue ? (
+                    <View style={styles.metaRow}>
+                        <Ionicons name="location-outline" size={13} color="#A8A29B" />
+                        <Text style={styles.metaText}>{item.venue}</Text>
+                    </View>
+                ) : null}
+            </View>
         </View>
     )
 }
@@ -286,19 +307,28 @@ const styles = StyleSheet.create({
     list: { padding: 12, gap: 8 },
     empty: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60, gap: 12 },
     emptyText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, color: '#A8A29B' },
-    matchCard: { backgroundColor: '#fff', borderRadius: 12, padding: 14 },
-    matchHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-    matchday: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: '#A8A29B' },
-    matchDate: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: '#5C564F' },
-    matchTeams: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
+    matchCard: {
+        backgroundColor: '#fff', borderRadius: 16, padding: 16,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    },
+    matchTags: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
+    tagCat: { backgroundColor: '#F5C518', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+    tagCatText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 11, color: '#1A1614' },
+    tagPoule: { backgroundColor: '#E4002B', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+    tagPouleText: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 11, color: '#fff' },
+    matchdayTag: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: '#A8A29B', marginLeft: 2 },
+    matchTeams: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
     teamSide: { flex: 1, alignItems: 'flex-start', gap: 6 },
     teamLogo: { width: 36, height: 36, borderRadius: 18 },
     teamLogoPlaceholder: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#F4F1EC', justifyContent: 'center', alignItems: 'center' },
     teamLogoLetter: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 14, color: '#E4002B' },
-    teamName: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: '#1A1614' },
-    score: { fontFamily: 'Anton_400Regular', fontSize: 20, color: '#E4002B', marginHorizontal: 12, minWidth: 60, textAlign: 'center' },
-    vs: { fontFamily: 'Anton_400Regular', fontSize: 14, color: '#A8A29B', marginHorizontal: 12, minWidth: 40, textAlign: 'center' },
-    venue: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 11, color: '#A8A29B', marginTop: 6 },
+    teamName: { flex: 1, fontFamily: 'PlusJakartaSans_700Bold', fontSize: 13, color: '#1A1614' },
+    score: { fontFamily: 'Anton_400Regular', fontSize: 24, color: '#E4002B', marginHorizontal: 12, minWidth: 64, textAlign: 'center' },
+    vs: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 13, color: '#A8A29B', marginHorizontal: 12, minWidth: 28, textAlign: 'center' },
+    matchMeta: { gap: 4, borderTopWidth: 1, borderTopColor: '#F4F1EC', paddingTop: 10 },
+    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    metaText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: '#5C564F' },
     standingHeader: {
         flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14,
         paddingVertical: 10, backgroundColor: '#F4F1EC', borderRadius: 10, marginBottom: 4,

@@ -278,6 +278,45 @@ export default function FeedScreen({ navigation }) {
         ])
     }
 
+    async function handleLikeComment(commentId) {
+        try {
+            const res = await client.post(`/comments/${commentId}/like/`, {}, { headers })
+            setComments(prev => prev.map(c =>
+                c.id === commentId
+                    ? { ...c, is_liked: res.data.liked, likes_count: res.data.likes_count }
+                    : c
+            ))
+        } catch {}
+    }
+
+    function handleReportComment(commentId) {
+        Alert.alert(
+            'Signaler ce commentaire',
+            'Pourquoi signales-tu ce commentaire ?',
+            [
+                { text: 'Annuler', style: 'cancel' },
+                {
+                    text: 'Spam',
+                    onPress: async () => {
+                        try {
+                            await client.post(`/comments/${commentId}/report/`, { reason: 'spam' }, { headers })
+                            Alert.alert('Signalement envoyé', 'Merci. Notre équipe va examiner ce commentaire.')
+                        } catch {}
+                    }
+                },
+                {
+                    text: 'Contenu inapproprié',
+                    onPress: async () => {
+                        try {
+                            await client.post(`/comments/${commentId}/report/`, { reason: 'inappropriate' }, { headers })
+                            Alert.alert('Signalement envoyé', 'Merci. Notre équipe va examiner ce commentaire.')
+                        } catch {}
+                    }
+                },
+            ]
+        )
+    }
+
     async function handleLike(postId) {
         try {
             await client.post(`/posts/${postId}/like/`, {}, { headers })
@@ -372,22 +411,40 @@ export default function FeedScreen({ navigation }) {
                         <Text style={styles.modalEmpty}>Sois le premier à commenter</Text>
                     }
                     renderItem={({ item }) => (
-                        <TouchableOpacity
-                            onLongPress={item.author_username === currentUsername ? () => deleteComment(item.id) : null}
-                            activeOpacity={1}
-                        >
-                            <View style={styles.commentRow}>
-                                <View style={styles.commentAvatar}>
-                                    <Text style={styles.commentAvatarText}>
-                                        {item.author_username?.[0]?.toUpperCase()}
-                                    </Text>
-                                </View>
-                                <View style={styles.commentBubble}>
-                                    <Text style={styles.commentAuthor}>{item.author_username}</Text>
-                                    <Text style={styles.commentContent}>{item.content}</Text>
-                                </View>
+                        <View style={styles.commentRow}>
+                            <View style={styles.commentAvatar}>
+                                <Text style={styles.commentAvatarText}>
+                                    {item.author_username?.[0]?.toUpperCase()}
+                                </Text>
                             </View>
-                        </TouchableOpacity>
+                            <View style={styles.commentBubble}>
+                                <Text style={styles.commentAuthor}>{item.author_username}</Text>
+                                <Text style={styles.commentContent}>{item.content}</Text>
+                            </View>
+                            <View style={styles.commentActions}>
+                                <TouchableOpacity onPress={() => handleLikeComment(item.id)} style={styles.commentLikeBtn}>
+                                    <Ionicons
+                                        name={item.is_liked ? 'football' : 'football-outline'}
+                                        size={15}
+                                        color={item.is_liked ? '#E4002B' : '#A8A29B'}
+                                    />
+                                    {(item.likes_count ?? 0) > 0 && (
+                                        <Text style={[styles.commentLikeCount, item.is_liked && { color: '#E4002B' }]}>
+                                            {item.likes_count}
+                                        </Text>
+                                    )}
+                                </TouchableOpacity>
+                                {item.author_username === currentUsername ? (
+                                    <TouchableOpacity onPress={() => deleteComment(item.id)} style={styles.commentActionBtn}>
+                                        <Ionicons name="trash-outline" size={14} color="#A8A29B" />
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity onPress={() => handleReportComment(item.id)} style={styles.commentActionBtn}>
+                                        <Ionicons name="flag-outline" size={14} color="#A8A29B" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        </View>
                     )}
                 />
                 <View style={styles.commentInputRow}>
@@ -628,6 +685,16 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#1A1614',
     },
+    commentActions: {
+        flexDirection: 'column', alignItems: 'center', gap: 6, paddingTop: 2,
+    },
+    commentLikeBtn: {
+        alignItems: 'center', gap: 1,
+    },
+    commentLikeCount: {
+        fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 10, color: '#A8A29B',
+    },
+    commentActionBtn: { padding: 2 },
     commentInputRow: {
         flexDirection: 'row',
         alignItems: 'flex-end',

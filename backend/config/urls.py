@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from users.views import UserProfileView
+from users.views import UserProfileView, FollowersListView, FollowingListView
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),
@@ -29,5 +29,7 @@ urlpatterns = [
     path('api/', include('posts.urls')),
     path('api/', include('interactions.urls')),
     path('api/users/<int:user_id>/', UserProfileView.as_view()),
+    path('api/users/<int:user_id>/followers/', FollowersListView.as_view()),
+    path('api/users/<int:user_id>/following/', FollowingListView.as_view()),
     path('api/', include('messaging.urls')),
 ]

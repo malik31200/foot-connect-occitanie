@@ -26,10 +26,13 @@ export default function EditProfileScreen({ navigation }) {
 
     const [username, setUsername] = useState('')
     const [sportRole, setSportRole] = useState('supporter')
+    const [clubName, setClubName] = useState('')
     const [avatarUrl, setAvatarUrl] = useState('')
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [uploading, setUploading] = useState(false)
+
+    const showClubField = ['joueur', 'coach', 'supporter'].includes(sportRole)
 
     useEffect(() => {
         client.get('/auth/me/', { headers })
@@ -37,6 +40,7 @@ export default function EditProfileScreen({ navigation }) {
                 setUsername(res.data.username || '')
                 setSportRole(res.data.sport_role || 'supporter')
                 setAvatarUrl(res.data.avatar_url || '')
+                setClubName(res.data.club_name || '')
             })
             .finally(() => setLoading(false))
     }, [])
@@ -93,6 +97,7 @@ export default function EditProfileScreen({ navigation }) {
                 username: username.trim(),
                 sport_role: sportRole,
                 avatar_url: avatarUrl || null,
+                club_name: showClubField ? (clubName.trim() || null) : null,
             }, { headers })
             Alert.alert('Succès', 'Profil mis à jour !', [
                 { text: 'OK', onPress: () => navigation.goBack() }
@@ -187,6 +192,25 @@ export default function EditProfileScreen({ navigation }) {
                     ))}
                 </View>
             </View>
+
+            {/* Club (conditionnel : joueur / coach / supporter) */}
+            {showClubField && (
+                <View style={styles.field}>
+                    <Text style={styles.label}>Mon club</Text>
+                    <View style={styles.inputWrap}>
+                        <Ionicons name="shield-outline" size={18} color="#A8A29B" style={styles.inputIcon} />
+                        <TextInput
+                            style={styles.input}
+                            value={clubName}
+                            onChangeText={setClubName}
+                            autoCapitalize="words"
+                            autoCorrect={false}
+                            placeholder="Nom de ton club (optionnel)"
+                            placeholderTextColor="#A8A29B"
+                        />
+                    </View>
+                </View>
+            )}
 
             {/* Bouton sauvegarder */}
             <LinearGradient
