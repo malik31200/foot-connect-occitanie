@@ -53,7 +53,7 @@ export default function PublishScreen() {
         }, [token])
     )
 
-    // Charger les poules quand la catégorie change
+    // Charger les poules puis les matchs quand la catégorie change
     useFocusEffect(
         useCallback(() => {
             if (!category) return
@@ -61,51 +61,56 @@ export default function PublishScreen() {
                 .then(res => {
                     const g = res.data.groups || []
                     setGroups(g)
-                    setPoule(g.length > 0 ? g[0] : null)
+                    const firstPoule = g.length > 0 ? g[0] : null
+                    setPoule(firstPoule)
+                    // Charger les matchs immédiatement avec la bonne poule
+                    loadMatches(category, firstPoule)
                 })
                 .catch(() => {})
         }, [category, token])
     )
 
-    // Charger les matchs quand catégorie + poule changent
-    useFocusEffect(
-        useCallback(() => {
-            if (!category) return
-            setLoadingMatches(true)
-            setSelectedMatch(null)
+    // Recharger les matchs quand la poule change manuellement
+    const prevPouleRef = React.useRef(null)
+    React.useEffect(() => {
+        if (poule !== prevPouleRef.current) {
+            prevPouleRef.current = poule
+            if (category) loadMatches(category, poule)
+        }
+    }, [poule])
 
-            const base = `/matches/?season=${encodeURIComponent(SEASON)}&category=${encodeURIComponent(category)}`
-            const groupParam = poule ? `&group_name=${encodeURIComponent(poule)}` : ''
+    function loadMatches(cat, grp) {
+        setLoadingMatches(true)
+        setSelectedMatch(null)
+        const base = `/matches/?season=${encodeURIComponent(SEASON)}&category=${encodeURIComponent(cat)}`
+        const groupParam = grp ? `&group_name=${encodeURIComponent(grp)}` : ''
 
-            Promise.all([
-                client.get(`${base}${groupParam}&status=finished`, { headers }),
-                client.get(`${base}${groupParam}&status=scheduled`, { headers }),
-            ]).then(([finishedRes, scheduledRes]) => {
-                const finished = (finishedRes.data.results || finishedRes.data)
-                const scheduled = (scheduledRes.data.results || scheduledRes.data)
+        Promise.all([
+            client.get(`${base}${groupParam}&status=finished`, { headers }),
+            client.get(`${base}${groupParam}&status=scheduled`, { headers }),
+        ]).then(([finishedRes, scheduledRes]) => {
+            const finished = (finishedRes.data.results || finishedRes.data)
+            const scheduled = (scheduledRes.data.results || scheduledRes.data)
 
-                // Dernière journée terminée seulement
-                const lastMatchday = finished.length > 0
-                    ? Math.max(...finished.map(m => m.matchday || 0))
-                    : null
-                const lastFinished = lastMatchday !== null
-                    ? finished.filter(m => m.matchday === lastMatchday)
-                        .sort((a, b) => new Date(b.date_time) - new Date(a.date_time))
-                    : []
+            const lastMatchday = finished.length > 0
+                ? Math.max(...finished.map(m => m.matchday || 0))
+                : null
+            const lastFinished = lastMatchday !== null
+                ? finished.filter(m => m.matchday === lastMatchday)
+                    .sort((a, b) => new Date(b.date_time) - new Date(a.date_time))
+                : []
 
-                // Prochaine journée à venir seulement
-                const nextMatchday = scheduled.length > 0
-                    ? Math.min(...scheduled.map(m => m.matchday || 999))
-                    : null
-                const nextScheduled = nextMatchday !== null
-                    ? scheduled.filter(m => m.matchday === nextMatchday)
-                        .sort((a, b) => new Date(a.date_time) - new Date(b.date_time))
-                    : []
+            const nextMatchday = scheduled.length > 0
+                ? Math.min(...scheduled.map(m => m.matchday || 999))
+                : null
+            const nextScheduled = nextMatchday !== null
+                ? scheduled.filter(m => m.matchday === nextMatchday)
+                    .sort((a, b) => new Date(a.date_time) - new Date(b.date_time))
+                : []
 
-                setMatchOptions([...lastFinished, ...nextScheduled])
-            }).catch(() => {}).finally(() => setLoadingMatches(false))
-        }, [category, poule, token])
-    )
+            setMatchOptions([...lastFinished, ...nextScheduled])
+        }).catch(() => {}).finally(() => setLoadingMatches(false))
+    }
 
     async function pickPhotos() {
         const result = await ImagePicker.launchImageLibraryAsync({
