@@ -7,6 +7,8 @@ class CommentSerializer(serializers.ModelSerializer):
     author_avatar_url = serializers.CharField(source='author.avatar_url', read_only=True, allow_null=True)
     likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    parent_id = serializers.IntegerField(source='parent.id', read_only=True, allow_null=True)
+    replies = serializers.SerializerMethodField()
 
     def get_likes_count(self, obj):
         return obj.likes.count()
@@ -17,9 +19,18 @@ class CommentSerializer(serializers.ModelSerializer):
             return obj.likes.filter(user=request.user).exists()
         return False
 
+    def get_replies(self, obj):
+        # Seulement pour les commentaires de premier niveau
+        if obj.parent_id is not None:
+            return []
+        qs = obj.replies.select_related('author').prefetch_related('likes').all()
+        return CommentSerializer(qs, many=True, context=self.context).data
+
     class Meta:
         model = Comment
-        fields = ['id', 'author_id', 'author_username', 'author_avatar_url', 'content', 'is_edited', 'created_at', 'updated_at', 'likes_count', 'is_liked']
+        fields = ['id', 'author_id', 'author_username', 'author_avatar_url',
+                  'content', 'is_edited', 'parent_id', 'replies',
+                  'created_at', 'updated_at', 'likes_count', 'is_liked']
         read_only_fields = ['is_edited', 'created_at', 'updated_at']
 
 

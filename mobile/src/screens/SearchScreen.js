@@ -116,7 +116,7 @@ export default function SearchScreen({ navigation }) {
     }
 
     function goToPost(post) {
-        navigation.navigate('PostDetail', { postId: post.id })
+        navigation.navigate('PostDetail', { post, posts: [post], initialIndex: 0 })
     }
 
     // Données pour FlatList unifiée

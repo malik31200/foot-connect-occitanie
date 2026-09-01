@@ -49,9 +49,13 @@ function TabNavigator() {
         tabBarActiveTintColor: '#E4002B',
         tabBarInactiveTintColor: '#A8A29B',
         tabBarStyle: {
-          height: 80 + insets.bottom,
-          paddingBottom: 10 + insets.bottom,
-          backgroundColor: '#fff',
+          position: 'absolute',
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom,
+          backgroundColor: 'rgba(255,255,255,0.92)',
+          borderTopWidth: 0.5,
+          borderTopColor: '#EDE9E4',
+          elevation: 0,
         },
       }}
     >
@@ -62,6 +66,16 @@ function TabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
+          tabBarStyle: {
+            position: 'absolute',
+            height: 60 + insets.bottom,
+            paddingBottom: insets.bottom,
+            backgroundColor: 'rgba(14,11,10,0.72)',
+            borderTopWidth: 0,
+            elevation: 0,
+          },
+          tabBarActiveTintColor: '#fff',
+          tabBarInactiveTintColor: 'rgba(255,255,255,0.6)',
         }}
       />
       <Tab.Screen

@@ -13,6 +13,7 @@
 | Sprint 4 — Réseau social complet | ✅ Terminé | `main` (PR #5) |
 | Sprint 5 — Stabilisation + déploiement VPS | ✅ Terminé | `main` (PR #6) |
 | Sprint 6 — Corrections bugs + builds stores | ✅ Terminé | `main` |
+| Sprint 7 — Apple review + R2 + Search | ✅ Terminé | `main` |
 
 **Branche active :** `main`
 
@@ -27,6 +28,51 @@
 | API FFF bloquée (403) depuis juin 2026 | ⚠️ Toujours bloquée (protection JS cookie) |
 | Déploiement VPS Hetzner (CPX12, Helsinki, 95.217.154.83) | ✅ Terminé |
 | SSL Let's Encrypt + domaine footconnect-occitanie.fr | ✅ Terminé |
+
+### Avancement Sprint 7 (terminé le 01/09/2026)
+
+#### Refus Apple App Store — corrections requises
+
+| Guideline Apple | Requis | Statut |
+|-----------------|--------|--------|
+| 1.2 — UGC | CGU/EULA cochée avant inscription | ✅ Implémenté |
+| 1.2 — UGC | Signaler un contenu | ✅ Déjà fait |
+| 1.2 — UGC | Bloquer un utilisateur | ✅ Déjà fait |
+| 5.1.1(v) — Données | Suppression de compte | ✅ Implémenté |
+
+**Vidéo de démo requise** (à filmer sur iPhone physique) :
+1. Inscription avec case CGU cochée
+2. Signaler un post (les 3 points → Signaler)
+3. Bloquer un utilisateur (profil → Bloquer)
+4. Supprimer son compte (Profil → Modifier → Supprimer mon compte)
+→ Upload dans App Store Connect → App Review Information → Notes
+
+#### Migration Cloudinary → Cloudflare R2
+
+| Élément | Détail |
+|---------|--------|
+| Bucket | `foot-connect-media` |
+| Public URL | `https://pub-0edabdb62a3641eb961617ef694ad950.r2.dev` |
+| Endpoint presign | `POST /api/media/presign/` |
+| Upload mobile | `fetch(uri)` → blob → PUT sur presigned URL |
+| Fichiers modifiés | `PublishScreen.js`, `EditProfileScreen.js`, `posts/views.py`, `config/settings.py`, `config/urls.py` |
+
+#### Nouvelles fonctionnalités
+
+| Feature | Fichiers |
+|---------|----------|
+| Recherche par mot-clé (users + posts par équipe/auteur) | `SearchScreen.js`, `posts/views.py` (SearchView), `posts/urls.py` |
+| Loupe de recherche dans le feed | `FeedScreen.js` header |
+| Abonnés/abonnements cliquables → FollowListScreen | `ProfileScreen.js`, `FollowListScreen.js` |
+
+#### Build stores
+
+| Platform | Version | Build | Statut |
+|----------|---------|-------|--------|
+| iOS | 1.0.4 | 9 | 🔄 Build EAS en cours |
+| Android | 1.0.4 | 9 (versionCode) | 🔄 Build EAS en cours |
+
+---
 
 ### Avancement Sprint 6 (terminé le 19/08/2026)
 

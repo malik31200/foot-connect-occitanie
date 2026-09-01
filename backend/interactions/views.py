@@ -34,11 +34,16 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
-        return Comment.objects.filter(post=post)
-    
+        # Seulement les commentaires de premier niveau (pas les réponses)
+        return Comment.objects.filter(post=post, parent=None).select_related('author').prefetch_related('likes', 'replies__author', 'replies__likes')
+
     def perform_create(self, serializer):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
-        serializer.save(author=self.request.user, post=post)
+        parent_id = self.request.data.get('parent_id')
+        parent = None
+        if parent_id:
+            parent = get_object_or_404(Comment, id=parent_id, post=post)
+        serializer.save(author=self.request.user, post=post, parent=parent)
 
     def perform_update(self, serializer):
         serializer.save(is_edited=True)

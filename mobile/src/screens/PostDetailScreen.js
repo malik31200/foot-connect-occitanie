@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react'
 import {
     View, Text, Image, StyleSheet, FlatList,
-    TouchableOpacity, TextInput, KeyboardAvoidingView,
-    Platform, ActivityIndicator, Alert, Dimensions,
+    TouchableOpacity, TextInput, Platform,
+    ActivityIndicator, Alert, Dimensions,
     Modal, Keyboard
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -193,25 +193,53 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
     const headers = { Authorization: `Bearer ${token}` }
     const [comments, setComments] = useState([])
     const [commentText, setCommentText] = useState('')
+    const [replyingTo, setReplyingTo] = useState(null) // { id, username }
+    const commentInputRef = useRef(null)
+    const [keyboardOffset, setKeyboardOffset] = useState(0)
     const insets = useSafeAreaInsets()
+
+    useEffect(() => {
+        const show = Keyboard.addListener('keyboardDidShow', e => setKeyboardOffset(e.endCoordinates.height))
+        const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardOffset(0))
+        return () => { show.remove(); hide.remove() }
+    }, [])
 
     useEffect(() => {
         if (!postId) return
         setComments([])
+        setReplyingTo(null)
         client.get(`/posts/${postId}/comments/`, { headers })
             .then(res => setComments(res.data.results || res.data))
             .catch(() => {})
     }, [postId])
 
+    function handleReply(comment) {
+        setReplyingTo({ id: comment.id, username: comment.author_username })
+        setCommentText(`@${comment.author_username} `)
+        setTimeout(() => commentInputRef.current?.focus(), 100)
+    }
+
     async function sendComment() {
         const content = commentText.trim()
         if (!content) return
+        const parentId = replyingTo?.id || null
         setCommentText('')
+        setReplyingTo(null)
         Keyboard.dismiss()
         try {
-            const res = await client.post(`/posts/${postId}/comments/`, { content }, { headers })
-            setComments(prev => [...prev, res.data])
-            onCommentCountChange?.(postId, 1)
+            const body = { content }
+            if (parentId) body.parent_id = parentId
+            const res = await client.post(`/posts/${postId}/comments/`, body, { headers })
+            if (parentId) {
+                setComments(prev => prev.map(c =>
+                    c.id === parentId
+                        ? { ...c, replies: [...(c.replies || []), res.data] }
+                        : c
+                ))
+            } else {
+                setComments(prev => [...prev, res.data])
+                onCommentCountChange?.(postId, 1)
+            }
         } catch {}
     }
 
@@ -248,13 +276,10 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
     }
 
     return (
-        <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-                style={{ flex: 1, justifyContent: 'flex-end' }}
-            >
-            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => { Keyboard.dismiss(); onClose() }} />
-            <View style={styles.modalSheet}>
+        <Modal visible={visible} animationType="slide" transparent onRequestClose={() => { setReplyingTo(null); onClose() }}>
+            <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => { Keyboard.dismiss(); setReplyingTo(null); onClose() }} />
+            <View style={[styles.modalSheet, { paddingBottom: keyboardOffset > 0 ? keyboardOffset : 0 }]}>
                 <View style={styles.modalHandle} />
                 <Text style={styles.modalTitle}>Commentaires</Text>
                 <FlatList
@@ -264,46 +289,79 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
                     contentContainerStyle={{ padding: 16, gap: 12 }}
                     ListEmptyComponent={<Text style={styles.modalEmpty}>Sois le premier à commenter ✍️</Text>}
                     renderItem={({ item }) => (
-                        <View style={styles.commentRow}>
-                            {item.author_avatar_url ? (
-                                <Image source={{ uri: item.author_avatar_url }} style={styles.commentAvatar} />
-                            ) : (
-                                <View style={styles.commentAvatar}>
-                                    <Text style={styles.commentAvatarText}>{item.author_username?.[0]?.toUpperCase()}</Text>
-                                </View>
-                            )}
-                            <View style={styles.commentBubble}>
-                                <Text style={styles.commentAuthor}>{item.author_username}</Text>
-                                <Text style={styles.commentContent}>{item.content}</Text>
-                            </View>
-                            <View style={styles.commentActions}>
-                                <TouchableOpacity onPress={() => handleLikeComment(item.id)} style={styles.commentLikeBtn}>
-                                    <Ionicons
-                                        name={item.is_liked ? 'football' : 'football-outline'}
-                                        size={15}
-                                        color={item.is_liked ? '#E4002B' : '#A8A29B'}
-                                    />
-                                    {(item.likes_count ?? 0) > 0 && (
-                                        <Text style={[styles.commentLikeCount, item.is_liked && { color: '#E4002B' }]}>
-                                            {item.likes_count}
-                                        </Text>
-                                    )}
-                                </TouchableOpacity>
-                                {item.author_username === currentUsername ? (
-                                    <TouchableOpacity onPress={() => deleteComment(item.id)} style={styles.commentActionBtn}>
-                                        <Ionicons name="trash-outline" size={14} color="#A8A29B" />
-                                    </TouchableOpacity>
+                        <View>
+                            <View style={styles.commentRow}>
+                                {item.author_avatar_url ? (
+                                    <Image source={{ uri: item.author_avatar_url }} style={styles.commentAvatar} />
                                 ) : (
-                                    <TouchableOpacity onPress={() => handleReportComment(item.id)} style={styles.commentActionBtn}>
-                                        <Ionicons name="flag-outline" size={14} color="#A8A29B" />
-                                    </TouchableOpacity>
+                                    <View style={styles.commentAvatar}>
+                                        <Text style={styles.commentAvatarText}>{item.author_username?.[0]?.toUpperCase()}</Text>
+                                    </View>
                                 )}
+                                <View style={styles.commentBubble}>
+                                    <Text style={styles.commentAuthor}>{item.author_username}</Text>
+                                    <Text style={styles.commentContent}>{item.content}</Text>
+                                    <TouchableOpacity onPress={() => handleLikeComment(item.id)} style={styles.commentLikeBtn}>
+                                        <Ionicons
+                                            name={item.is_liked ? 'football' : 'football-outline'}
+                                            size={20}
+                                            color={item.is_liked ? '#E4002B' : '#A8A29B'}
+                                        />
+                                        {(item.likes_count ?? 0) > 0 && (
+                                            <Text style={[styles.commentLikeCount, item.is_liked && { color: '#E4002B' }]}>
+                                                {item.likes_count}
+                                            </Text>
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={styles.commentActions}>
+                                    {item.author_username === currentUsername ? (
+                                        <TouchableOpacity onPress={() => deleteComment(item.id)} style={styles.commentActionBtn}>
+                                            <Ionicons name="trash-outline" size={20} color="#A8A29B" />
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <TouchableOpacity onPress={() => handleReportComment(item.id)} style={styles.commentActionBtn}>
+                                            <Ionicons name="flag-outline" size={20} color="#A8A29B" />
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
                             </View>
+                            {/* Footer répondre */}
+                            <View style={styles.commentFooter}>
+                                <TouchableOpacity onPress={() => handleReply(item)} style={styles.replyBtn}>
+                                    <Text style={styles.replyBtnText}>Répondre</Text>
+                                </TouchableOpacity>
+                            </View>
+                            {/* Réponses indentées */}
+                            {(item.replies || []).map(reply => (
+                                <View key={reply.id} style={[styles.commentRow, { marginLeft: 44, marginTop: 8 }]}>
+                                    {reply.author_avatar_url ? (
+                                        <Image source={{ uri: reply.author_avatar_url }} style={styles.replyAvatar} />
+                                    ) : (
+                                        <View style={styles.replyAvatar}>
+                                            <Text style={styles.commentAvatarText}>{reply.author_username?.[0]?.toUpperCase()}</Text>
+                                        </View>
+                                    )}
+                                    <View style={styles.replyBubble}>
+                                        <Text style={styles.commentAuthor}>{reply.author_username}</Text>
+                                        <Text style={styles.commentContent}>{reply.content}</Text>
+                                    </View>
+                                </View>
+                            ))}
                         </View>
                     )}
                 />
+                {replyingTo && (
+                    <View style={styles.replyingToBar}>
+                        <Text style={styles.replyingToText}>↩ En réponse à @{replyingTo.username}</Text>
+                        <TouchableOpacity onPress={() => { setReplyingTo(null); setCommentText('') }}>
+                            <Ionicons name="close" size={16} color="#5C564F" />
+                        </TouchableOpacity>
+                    </View>
+                )}
                 <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
                     <TextInput
+                        ref={commentInputRef}
                         style={styles.input}
                         placeholder="Ajouter un commentaire..."
                         placeholderTextColor="#A8A29B"
@@ -320,7 +378,7 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
                     </TouchableOpacity>
                 </View>
             </View>
-            </KeyboardAvoidingView>
+            </View>
         </Modal>
     )
 }
@@ -539,9 +597,27 @@ const styles = StyleSheet.create({
     commentAuthor: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 12, color: '#1A1614' },
     commentContent: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, color: '#1A1614' },
     commentActions: { flexDirection: 'column', alignItems: 'center', gap: 6, paddingTop: 4 },
-    commentLikeBtn: { alignItems: 'center', gap: 2 },
+    commentLikeBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
     commentLikeCount: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 10, color: '#A8A29B' },
     commentActionBtn: { padding: 2 },
+    commentFooter: { flexDirection: 'row', marginLeft: 44, marginTop: 4 },
+    replyBtn: { paddingVertical: 2, paddingHorizontal: 4 },
+    replyBtnText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, color: '#5C564F' },
+    replyAvatar: {
+        width: 26, height: 26, borderRadius: 13,
+        backgroundColor: '#F5C518',
+        justifyContent: 'center', alignItems: 'center',
+        overflow: 'hidden',
+    },
+    replyBubble: {
+        flex: 1, backgroundColor: '#F6F3EE', borderRadius: 10, padding: 8, gap: 2,
+    },
+    replyingToBar: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        paddingHorizontal: 16, paddingVertical: 6,
+        backgroundColor: '#F4F1EC', borderTopWidth: 1, borderTopColor: '#E0DBDA',
+    },
+    replyingToText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 12, color: '#5C564F' },
     inputBar: {
         flexDirection: 'row', alignItems: 'center', gap: 10,
         backgroundColor: '#fff', paddingHorizontal: 16, paddingTop: 10,
