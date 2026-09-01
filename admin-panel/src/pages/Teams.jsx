@@ -196,10 +196,10 @@ export default function Teams() {
                                             </div>
                                         ) : (
                                             <button
-                                                onClick={() => { setVenueTeamId(team.id); setVenueInput(''); setFillEmptyOnly(true) }}
+                                                onClick={() => { setVenueTeamId(team.id); setVenueInput(team.home_venue || ''); setFillEmptyOnly(true) }}
                                                 style={{ fontSize: 12, padding: '3px 8px', cursor: 'pointer' }}
                                             >
-                                                🏟️ Définir le stade
+                                                🏟️ {team.home_venue ? 'Modifier le stade' : 'Définir le stade'}
                                             </button>
                                         )}
                                     </td>
