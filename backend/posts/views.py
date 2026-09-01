@@ -5,6 +5,10 @@ from rest_framework.response import Response
 from .models import Post, PostMedia
 from .serializers import PostSerializer
 from interactions.models import Follow, Block
+import boto3
+from botocore.config import Config
+import uuid
+from django.conf import settings as django_settings
 
 
 
@@ -64,6 +68,40 @@ class PostViewSet(viewsets.ModelViewSet):
         post.delete()
         return Response(status=204)
     
+
+class MediaPresignView(APIView):
+    """Génère une URL pré-signée pour uploader un fichier directement vers Cloudflare R2."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        file_name = request.data.get('file_name', 'upload')
+        content_type = request.data.get('content_type', 'application/octet-stream')
+
+        ext = file_name.rsplit('.', 1)[-1] if '.' in file_name else 'bin'
+        key = f"uploads/{uuid.uuid4()}.{ext}"
+
+        s3 = boto3.client(
+            's3',
+            endpoint_url=f'https://{django_settings.R2_ACCOUNT_ID}.r2.cloudflarestorage.com',
+            aws_access_key_id=django_settings.R2_ACCESS_KEY_ID,
+            aws_secret_access_key=django_settings.R2_SECRET_ACCESS_KEY,
+            config=Config(signature_version='s3v4'),
+            region_name='auto',
+        )
+
+        upload_url = s3.generate_presigned_url(
+            'put_object',
+            Params={
+                'Bucket': django_settings.R2_BUCKET_NAME,
+                'Key': key,
+                'ContentType': content_type,
+            },
+            ExpiresIn=3600,
+        )
+
+        public_url = f"{django_settings.R2_PUBLIC_URL}/{key}"
+        return Response({'upload_url': upload_url, 'public_url': public_url})
+
 
 class FeedView(APIView):
     permission_classes = [IsAuthenticated]

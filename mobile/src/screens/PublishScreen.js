@@ -10,8 +10,6 @@ import * as ImagePicker from 'expo-image-picker'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
-const CLOUD_NAME = 'du7oifrll'
-const UPLOAD_PRESET = 'foot_occitanie'
 const SEASON = '2026/2027'
 
 function Chip({ label, selected, onPress }) {
@@ -130,22 +128,29 @@ export default function PublishScreen() {
         if (!result.canceled) setAssets(result.assets)
     }
 
-    async function uploadToCloudinary(uri, isVideo) {
-        const formData = new FormData()
-        formData.append('file', {
-            uri,
-            type: isVideo ? 'video/mp4' : 'image/jpeg',
-            name: isVideo ? 'video.mp4' : 'photo.jpg',
+    async function uploadToR2(uri, isVideo) {
+        const contentType = isVideo ? 'video/mp4' : 'image/jpeg'
+        const fileName = `${Date.now()}.${isVideo ? 'mp4' : 'jpg'}`
+
+        // 1. Demander une URL pré-signée au backend
+        const presignRes = await client.post('/media/presign/', {
+            file_name: fileName,
+            content_type: contentType,
+        }, { headers })
+
+        const { upload_url, public_url } = presignRes.data
+
+        // 2. Lire le fichier local en blob puis uploader directement vers R2
+        const fileRes = await fetch(uri)
+        const blob = await fileRes.blob()
+        const uploadRes = await fetch(upload_url, {
+            method: 'PUT',
+            headers: { 'Content-Type': contentType },
+            body: blob,
         })
-        formData.append('upload_preset', UPLOAD_PRESET)
-        const endpoint = isVideo ? 'video' : 'image'
-        const res = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${endpoint}/upload`,
-            { method: 'POST', body: formData },
-        )
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error?.message || 'Upload échoué')
-        return data.secure_url
+        if (!uploadRes.ok) throw new Error(`Upload R2 échoué: ${uploadRes.status}`)
+
+        return public_url
     }
 
     async function handlePublish() {
@@ -158,7 +163,7 @@ export default function PublishScreen() {
             const medias = []
             for (const asset of assets) {
                 const isVideo = asset.type === 'video'
-                const url = await uploadToCloudinary(asset.uri, isVideo)
+                const url = await uploadToR2(asset.uri, isVideo)
                 medias.push({ media_type: isVideo ? 'video' : 'photo', media_url: url })
             }
             await client.post('/posts/', {

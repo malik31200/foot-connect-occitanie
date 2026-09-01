@@ -9,9 +9,6 @@ import { LinearGradient } from 'expo-linear-gradient'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
-const CLOUD_NAME = 'du7oifrll'
-const UPLOAD_PRESET = 'foot_occitanie'
-
 const SPORT_ROLES = [
     { value: 'joueur', label: 'Joueur', icon: 'football-outline' },
     { value: 'coach', label: 'Coach', icon: 'ribbon-outline' },
@@ -62,7 +59,7 @@ export default function EditProfileScreen({ navigation }) {
         const asset = result.assets[0]
         setUploading(true)
         try {
-            const url = await uploadToCloudinary(asset.uri)
+            const url = await uploadToR2(asset.uri)
             setAvatarUrl(url)
         } catch (e) {
             Alert.alert('Erreur', 'Impossible d\'uploader la photo.')
@@ -71,19 +68,29 @@ export default function EditProfileScreen({ navigation }) {
         }
     }
 
-    async function uploadToCloudinary(uri) {
-        const formData = new FormData()
-        const filename = uri.split('/').pop()
-        const ext = filename.split('.').pop()
-        formData.append('file', { uri, name: filename, type: `image/${ext}` })
-        formData.append('upload_preset', UPLOAD_PRESET)
-        const res = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-            { method: 'POST', body: formData }
-        )
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error?.message || 'Upload échoué')
-        return data.secure_url
+    async function uploadToR2(uri) {
+        const contentType = 'image/jpeg'
+        const fileName = `avatar_${Date.now()}.jpg`
+
+        // 1. Demander une URL pré-signée au backend
+        const presignRes = await client.post('/media/presign/', {
+            file_name: fileName,
+            content_type: contentType,
+        }, { headers })
+
+        const { upload_url, public_url } = presignRes.data
+
+        // 2. Lire le fichier local en blob puis uploader directement vers R2
+        const fileRes = await fetch(uri)
+        const blob = await fileRes.blob()
+        const uploadRes = await fetch(upload_url, {
+            method: 'PUT',
+            headers: { 'Content-Type': contentType },
+            body: blob,
+        })
+        if (!uploadRes.ok) throw new Error(`Upload R2 échoué: ${uploadRes.status}`)
+
+        return public_url
     }
 
     async function handleSave() {

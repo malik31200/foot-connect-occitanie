@@ -221,3 +221,10 @@ LOGGING = {
 }
 # Resend — envoi emails transactionnels
 RESEND_API_KEY = config("RESEND_API_KEY", default="")
+
+# Cloudflare R2 — stockage médias
+R2_ACCOUNT_ID = config("R2_ACCOUNT_ID", default="")
+R2_ACCESS_KEY_ID = config("R2_ACCESS_KEY_ID", default="")
+R2_SECRET_ACCESS_KEY = config("R2_SECRET_ACCESS_KEY", default="")
+R2_BUCKET_NAME = config("R2_BUCKET_NAME", default="foot-connect-media")
+R2_PUBLIC_URL = config("R2_PUBLIC_URL", default="https://pub-0edabdb62a3641eb961617ef694ad950.r2.dev")
