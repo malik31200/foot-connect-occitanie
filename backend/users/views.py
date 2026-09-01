@@ -201,3 +201,52 @@ class FollowingListView(APIView):
             for u in following
         ]
         return Response(data)
+
+
+class AdminUserListView(APIView):
+    """Liste tous les utilisateurs + ban/delete — admin uniquement."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not (request.user.is_authenticated and request.user.role == 'admin'):
+            return Response({'detail': 'Accès réservé aux administrateurs.'}, status=403)
+        users = User.objects.all().order_by('-date_joined')
+        data = [{
+            'id': u.id, 'username': u.username, 'email': u.email,
+            'role': u.role, 'is_active': u.is_active,
+            'sport_role': u.sport_role, 'avatar_url': u.avatar_url,
+            'date_joined': u.date_joined,
+        } for u in users]
+        return Response(data)
+
+
+class AdminUserActionView(APIView):
+    """Ban (désactiver) ou supprimer un utilisateur — admin uniquement."""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, user_id):
+        if not (request.user.is_authenticated and request.user.role == 'admin'):
+            return Response({'detail': 'Accès réservé aux administrateurs.'}, status=403)
+        user = get_object_or_404(User, id=user_id)
+        if user == request.user:
+            return Response({'detail': 'Impossible de se modifier soi-même.'}, status=400)
+        action = request.data.get('action')
+        if action == 'ban':
+            user.is_active = False
+            user.save()
+            return Response({'detail': f'{user.username} banni.', 'is_active': False})
+        elif action == 'unban':
+            user.is_active = True
+            user.save()
+            return Response({'detail': f'{user.username} réactivé.', 'is_active': True})
+        return Response({'detail': 'Action inconnue.'}, status=400)
+
+    def delete(self, request, user_id):
+        if not (request.user.is_authenticated and request.user.role == 'admin'):
+            return Response({'detail': 'Accès réservé aux administrateurs.'}, status=403)
+        user = get_object_or_404(User, id=user_id)
+        if user == request.user:
+            return Response({'detail': 'Impossible de se supprimer soi-même.'}, status=400)
+        username = user.username
+        user.delete()
+        return Response({'detail': f'Utilisateur {username} supprimé.'})

@@ -130,3 +130,42 @@ class ReportCommentView(APIView):
             defaults={'reason': reason}
         )
         return Response({'detail': 'Commentaire signalé. Notre équipe va examiner ce signalement.'})
+
+
+def is_admin(user):
+    return user.is_authenticated and user.role == 'admin'
+
+
+class ReportsListView(APIView):
+    """Liste tous les signalements (posts + commentaires) — admin uniquement."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not is_admin(request.user):
+            return Response({'detail': 'Accès réservé aux administrateurs.'}, status=403)
+        post_reports = Report.objects.select_related('reporter', 'post', 'post__author').order_by('-created_at')
+        comment_reports = CommentReport.objects.select_related('reporter', 'comment', 'comment__author', 'comment__post').order_by('-created_at')
+        post_data = [{
+            'id': r.id, 'type': 'post', 'reason': r.reason,
+            'reporter': r.reporter.username, 'created_at': r.created_at,
+            'post_id': r.post.id, 'post_author': r.post.author.username,
+            'post_caption': r.post.caption or '',
+        } for r in post_reports]
+        comment_data = [{
+            'id': r.id, 'type': 'comment', 'reason': r.reason,
+            'reporter': r.reporter.username, 'created_at': r.created_at,
+            'comment_id': r.comment.id, 'comment_author': r.comment.author.username,
+            'comment_content': r.comment.content, 'post_id': r.comment.post.id,
+        } for r in comment_reports]
+        return Response({'post_reports': post_data, 'comment_reports': comment_data})
+
+    def delete(self, request):
+        if not is_admin(request.user):
+            return Response({'detail': 'Accès réservé aux administrateurs.'}, status=403)
+        report_type = request.query_params.get('type')
+        report_id = request.query_params.get('id')
+        if report_type == 'post':
+            Report.objects.filter(id=report_id).delete()
+        elif report_type == 'comment':
+            CommentReport.objects.filter(id=report_id).delete()
+        return Response({'detail': 'Signalement supprimé.'})
