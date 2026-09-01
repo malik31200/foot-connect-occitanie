@@ -29,6 +29,29 @@ class TeamViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(season=p['season'])
         return queryset
 
+    @action(detail=False, methods=['get'])
+    def categories(self, request):
+        """Retourne les catégories distinctes disponibles."""
+        season = request.query_params.get('season', '')
+        qs = Team.objects.all()
+        if season:
+            qs = qs.filter(season=season)
+        cats = list(qs.values_list('category', flat=True).distinct().order_by('category'))
+        return Response({'categories': cats})
+
+    @action(detail=False, methods=['get'])
+    def groups(self, request):
+        """Retourne les poules distinctes pour une catégorie/saison."""
+        season = request.query_params.get('season', '')
+        category = request.query_params.get('category', '')
+        qs = Team.objects.all()
+        if season:
+            qs = qs.filter(season=season)
+        if category:
+            qs = qs.filter(category=category)
+        groups = list(qs.values_list('group_name', flat=True).distinct().order_by('group_name'))
+        return Response({'groups': groups})
+
     @action(detail=True, methods=['post'])
     def set_home_venue(self, request, pk=None):
         """Applique une adresse à tous les matchs à domicile de cette équipe."""

@@ -5,6 +5,8 @@ export default function Teams() {
     const [teams, setTeams] = useState([])
     const [clubs, setClubs] = useState([])
     const [filters, setFilters] = useState({ club_id: '', category: '', group_name: '', season: '2026/2027' })
+    const [categories, setCategories] = useState([])
+    const [groups, setGroups] = useState([])
     const [form, setForm] = useState({ club_id: '', name: '', category: '', group_name: '', season: '2026/2027', fff_id: '' })
     const [error, setError] = useState('')
     const [editingId, setEditingId] = useState(null)
@@ -15,11 +17,26 @@ export default function Teams() {
     const [venueInput, setVenueInput] = useState('')
     const [fillEmptyOnly, setFillEmptyOnly] = useState(true)
 
-    useEffect(() => { fetchClubs(); fetchTeams() }, [])
+    useEffect(() => { fetchClubs(); fetchTeams(); fetchCategories() }, [])
 
     const fetchClubs = async () => {
         const res = await client.get('/clubs/')
         setClubs(res.data)
+    }
+
+    const fetchCategories = async () => {
+        try {
+            const res = await client.get(`/teams/categories/?season=${filters.season}`)
+            setCategories(res.data.categories || [])
+        } catch {}
+    }
+
+    const fetchGroups = async () => {
+        if (!filters.category) { setGroups([]); return }
+        try {
+            const res = await client.get(`/teams/groups/?season=${filters.season}&category=${filters.category}`)
+            setGroups(res.data.groups || [])
+        } catch {}
     }
 
     const fetchTeams = async (f = filters) => {
@@ -33,9 +50,25 @@ export default function Teams() {
     }
 
     const handleFilterChange = (e) => {
-        const next = { ...filters, [e.target.name]: e.target.value }
+        const { name, value } = e.target
+        const next = { ...filters, [name]: value }
+        // Réinitialiser la poule si on change de catégorie
+        if (name === 'category') next.group_name = ''
         setFilters(next)
         fetchTeams(next)
+        if (name === 'category' || name === 'season') {
+            // Recharger les poules avec les nouvelles valeurs
+            if (name === 'category' && value) {
+                client.get(`/teams/groups/?season=${next.season}&category=${value}`)
+                    .then(res => setGroups(res.data.groups || [])).catch(() => {})
+            } else if (name === 'category' && !value) {
+                setGroups([])
+            }
+            if (name === 'season') {
+                client.get(`/teams/categories/?season=${value}`)
+                    .then(res => setCategories(res.data.categories || [])).catch(() => {})
+            }
+        }
     }
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
@@ -116,18 +149,22 @@ export default function Teams() {
                 </select>
                 <select name="category" value={filters.category} onChange={handleFilterChange}>
                     <option value="">Toutes catégories</option>
-                    {['U14', 'U16', 'U18', 'Seniors', 'Vétérans', 'Regional 1', 'Regional 2', 'Regional 3'].map(c =>
-                        <option key={c} value={c}>{c}</option>
-                    )}
+                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
-                <input name="group_name" placeholder="Poule (ex: Poule A)" value={filters.group_name} onChange={handleFilterChange} style={{ width: 140 }} />
+                <select name="group_name" value={filters.group_name} onChange={handleFilterChange} disabled={!filters.category}>
+                    <option value="">Toutes poules</option>
+                    {groups.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
                 <select name="club_id" value={filters.club_id} onChange={handleFilterChange}>
                     <option value="">Tous les clubs</option>
                     {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
-                <button onClick={() => { const reset = { club_id: '', category: '', group_name: '', season: '2026/2027' }; setFilters(reset); fetchTeams(reset) }}>
-                    Réinitialiser
-                </button>
+                <button onClick={() => {
+                    const reset = { club_id: '', category: '', group_name: '', season: '2026/2027' }
+                    setFilters(reset)
+                    fetchTeams(reset)
+                    fetchCategories()
+                }}>Réinitialiser</button>
             </div>
 
             <p style={{ margin: '8px 0' }}>{teams.length} équipe(s)</p>
