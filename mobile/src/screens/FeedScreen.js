@@ -442,11 +442,19 @@ export default function FeedScreen({ navigation }) {
                         <View>
                             {/* Commentaire principal */}
                             <View style={styles.commentRow}>
-                                <View style={styles.commentAvatar}>
-                                    <Text style={styles.commentAvatarText}>{item.author_username?.[0]?.toUpperCase()}</Text>
-                                </View>
+                                <TouchableOpacity onPress={() => navigation.navigate('Profile', { userId: item.author_id, username: item.author_username })}>
+                                    {item.author_avatar_url ? (
+                                        <Image source={{ uri: item.author_avatar_url }} style={styles.commentAvatar} />
+                                    ) : (
+                                        <View style={styles.commentAvatar}>
+                                            <Text style={styles.commentAvatarText}>{item.author_username?.[0]?.toUpperCase()}</Text>
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
                                 <View style={styles.commentBubble}>
-                                    <Text style={styles.commentAuthor}>{item.author_username}</Text>
+                                    <TouchableOpacity onPress={() => navigation.navigate('Profile', { userId: item.author_id, username: item.author_username })}>
+                                        <Text style={styles.commentAuthor}>{item.author_username}</Text>
+                                    </TouchableOpacity>
                                     <Text style={styles.commentContent}>{item.content}</Text>
                                     <View style={styles.commentFooter}>
                                         <TouchableOpacity onPress={() => handleLikeComment(item.id)} style={styles.commentLikeBtn}>
@@ -476,11 +484,19 @@ export default function FeedScreen({ navigation }) {
                             {/* Réponses indentées */}
                             {(item.replies || []).map(reply => (
                                 <View key={reply.id} style={[styles.commentRow, styles.replyRow]}>
-                                    <View style={[styles.commentAvatar, styles.replyAvatar]}>
-                                        <Text style={styles.commentAvatarText}>{reply.author_username?.[0]?.toUpperCase()}</Text>
-                                    </View>
+                                    <TouchableOpacity onPress={() => navigation.navigate('Profile', { userId: reply.author_id, username: reply.author_username })}>
+                                        {reply.author_avatar_url ? (
+                                            <Image source={{ uri: reply.author_avatar_url }} style={[styles.commentAvatar, styles.replyAvatar]} />
+                                        ) : (
+                                            <View style={[styles.commentAvatar, styles.replyAvatar]}>
+                                                <Text style={styles.commentAvatarText}>{reply.author_username?.[0]?.toUpperCase()}</Text>
+                                            </View>
+                                        )}
+                                    </TouchableOpacity>
                                     <View style={[styles.commentBubble, styles.replyBubble]}>
-                                        <Text style={styles.commentAuthor}>{reply.author_username}</Text>
+                                        <TouchableOpacity onPress={() => navigation.navigate('Profile', { userId: reply.author_id, username: reply.author_username })}>
+                                            <Text style={styles.commentAuthor}>{reply.author_username}</Text>
+                                        </TouchableOpacity>
                                         <Text style={styles.commentContent}>{reply.content}</Text>
                                         <TouchableOpacity onPress={() => handleLikeComment(reply.id)} style={styles.commentLikeBtn}>
                                             <Ionicons name={reply.is_liked ? 'football' : 'football-outline'} size={16} color={reply.is_liked ? '#E4002B' : '#A8A29B'} />

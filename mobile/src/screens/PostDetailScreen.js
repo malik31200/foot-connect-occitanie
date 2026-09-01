@@ -189,7 +189,7 @@ function PostCard({ post, onLike, onOpenComments, onDelete, onReport, currentUse
 }
 
 // ─── Modal commentaires (identique au Feed) ────────────────────────────────────
-function CommentsModal({ visible, postId, onClose, token, currentUsername, currentUserId, onCommentCountChange }) {
+function CommentsModal({ visible, postId, onClose, token, currentUsername, currentUserId, onCommentCountChange, navigation }) {
     const headers = { Authorization: `Bearer ${token}` }
     const [comments, setComments] = useState([])
     const [commentText, setCommentText] = useState('')
@@ -291,15 +291,19 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
                     renderItem={({ item }) => (
                         <View>
                             <View style={styles.commentRow}>
-                                {item.author_avatar_url ? (
-                                    <Image source={{ uri: item.author_avatar_url }} style={styles.commentAvatar} />
-                                ) : (
-                                    <View style={styles.commentAvatar}>
-                                        <Text style={styles.commentAvatarText}>{item.author_username?.[0]?.toUpperCase()}</Text>
-                                    </View>
-                                )}
+                                <TouchableOpacity onPress={() => { onClose(); navigation.navigate('Profile', { userId: item.author_id, username: item.author_username }) }}>
+                                    {item.author_avatar_url ? (
+                                        <Image source={{ uri: item.author_avatar_url }} style={styles.commentAvatar} />
+                                    ) : (
+                                        <View style={styles.commentAvatar}>
+                                            <Text style={styles.commentAvatarText}>{item.author_username?.[0]?.toUpperCase()}</Text>
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
                                 <View style={styles.commentBubble}>
-                                    <Text style={styles.commentAuthor}>{item.author_username}</Text>
+                                    <TouchableOpacity onPress={() => { onClose(); navigation.navigate('Profile', { userId: item.author_id, username: item.author_username }) }}>
+                                        <Text style={styles.commentAuthor}>{item.author_username}</Text>
+                                    </TouchableOpacity>
                                     <Text style={styles.commentContent}>{item.content}</Text>
                                     <TouchableOpacity onPress={() => handleLikeComment(item.id)} style={styles.commentLikeBtn}>
                                         <Ionicons
@@ -335,15 +339,19 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
                             {/* Réponses indentées */}
                             {(item.replies || []).map(reply => (
                                 <View key={reply.id} style={[styles.commentRow, { marginLeft: 44, marginTop: 8 }]}>
-                                    {reply.author_avatar_url ? (
-                                        <Image source={{ uri: reply.author_avatar_url }} style={styles.replyAvatar} />
-                                    ) : (
-                                        <View style={styles.replyAvatar}>
-                                            <Text style={styles.commentAvatarText}>{reply.author_username?.[0]?.toUpperCase()}</Text>
-                                        </View>
-                                    )}
+                                    <TouchableOpacity onPress={() => { onClose(); navigation.navigate('Profile', { userId: reply.author_id, username: reply.author_username }) }}>
+                                        {reply.author_avatar_url ? (
+                                            <Image source={{ uri: reply.author_avatar_url }} style={styles.replyAvatar} />
+                                        ) : (
+                                            <View style={styles.replyAvatar}>
+                                                <Text style={styles.commentAvatarText}>{reply.author_username?.[0]?.toUpperCase()}</Text>
+                                            </View>
+                                        )}
+                                    </TouchableOpacity>
                                     <View style={styles.replyBubble}>
-                                        <Text style={styles.commentAuthor}>{reply.author_username}</Text>
+                                        <TouchableOpacity onPress={() => { onClose(); navigation.navigate('Profile', { userId: reply.author_id, username: reply.author_username }) }}>
+                                            <Text style={styles.commentAuthor}>{reply.author_username}</Text>
+                                        </TouchableOpacity>
                                         <Text style={styles.commentContent}>{reply.content}</Text>
                                     </View>
                                 </View>
@@ -491,6 +499,7 @@ export default function PostDetailScreen({ route, navigation }) {
                 currentUsername={user?.username}
                 currentUserId={user?.id}
                 onCommentCountChange={handleCommentCountChange}
+                navigation={navigation}
             />
         </View>
     )
