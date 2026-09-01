@@ -17,6 +17,7 @@ import EditProfileScreen from './src/screens/EditProfileScreen'
 import PostDetailScreen from './src/screens/PostDetailScreen'
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen'
 import FollowListScreen from './src/screens/FollowListScreen'
+import SearchScreen from './src/screens/SearchScreen'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import { useFonts } from 'expo-font'
@@ -144,6 +145,11 @@ function MainNavigator() {
       <Stack.Screen
         name="FollowList"
         component={FollowListScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Search"
+        component={SearchScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

@@ -115,7 +115,9 @@ function PostCard({ post, onLike, onComment, onDelete, onReport, currentUserId, 
             )}
 
             <View style={styles.header}>
-                <OccitanCross size={28} color="#F5C518" />
+                <TouchableOpacity onPress={() => navigation.navigate('Search')} style={styles.searchBtn}>
+                    <Ionicons name="search-outline" size={22} color="#fff" />
+                </TouchableOpacity>
                 <Text style={styles.logoText}>FOOT CONNECT</Text>
                 {currentUserId && post.author_id === currentUserId ? (
                     <TouchableOpacity
@@ -511,6 +513,12 @@ const styles = StyleSheet.create({
         fontFamily: 'Anton_400Regular',
         fontSize: 15,
         color: '#fff',
+    },
+    searchBtn: {
+        position: 'absolute',
+        left: 16,
+        top: 0,
+        padding: 6,
     },
     deleteBtn: {
         position: 'absolute',

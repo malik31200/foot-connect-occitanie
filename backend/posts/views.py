@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .models import Post, PostMedia
 from .serializers import PostSerializer
 from interactions.models import Follow, Block
+from django.db.models import Q
 import boto3
 from botocore.config import Config
 import uuid
@@ -101,6 +102,55 @@ class MediaPresignView(APIView):
 
         public_url = f"{django_settings.R2_PUBLIC_URL}/{key}"
         return Response({'upload_url': upload_url, 'public_url': public_url})
+
+
+class SearchView(APIView):
+    """Recherche par mot-clé : utilisateurs + publications (équipes / auteurs)."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        q = request.query_params.get('q', '').strip()
+        if len(q) < 2:
+            return Response({'users': [], 'posts': []})
+
+        from users.models import User
+
+        # Exclure les utilisateurs bloqués dans les deux sens
+        blocked_ids = Block.objects.filter(blocker=request.user).values_list('blocked_id', flat=True)
+        blocker_ids = Block.objects.filter(blocked=request.user).values_list('blocker_id', flat=True)
+        hidden_ids = set(list(blocked_ids) + list(blocker_ids))
+
+        # Utilisateurs dont le pseudo correspond
+        users = User.objects.filter(
+            username__icontains=q
+        ).exclude(id__in=hidden_ids).exclude(id=request.user.id)[:10]
+
+        # Posts : auteur correspond OU équipe dom/ext correspond
+        posts = Post.objects.filter(
+            Q(author__username__icontains=q) |
+            Q(match__home_team__name__icontains=q) |
+            Q(match__away_team__name__icontains=q)
+        ).exclude(
+            author_id__in=hidden_ids
+        ).select_related(
+            'author', 'match__home_team', 'match__away_team'
+        ).prefetch_related('medias', 'likes').order_by('-created_at')[:30]
+
+        users_data = [
+            {
+                'id': u.id,
+                'username': u.username,
+                'avatar_url': u.avatar_url,
+                'sport_role': u.sport_role,
+                'club_name': getattr(u, 'club_name', None),
+            }
+            for u in users
+        ]
+
+        return Response({
+            'users': users_data,
+            'posts': PostSerializer(posts, many=True, context={'request': request}).data,
+        })
 
 
 class FeedView(APIView):
