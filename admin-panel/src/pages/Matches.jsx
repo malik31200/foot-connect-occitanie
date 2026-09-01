@@ -4,7 +4,9 @@ import client from '../api/client'
 export default function Matches() {
     const [matches, setMatches] = useState([])
     const [teams, setTeams] = useState([])
-    const [filters, setFilters] = useState({ status: '', category: '', season: '2026/2027' })
+    const [filters, setFilters] = useState({ status: '', category: '', group_name: '', season: '2026/2027' })
+    const [categories, setCategories] = useState([])
+    const [groups, setGroups] = useState([])
     const [editingMatch, setEditingMatch] = useState(null)
     const [scoreForm, setScoreForm] = useState({ home_score: '', away_score: '', status: 'finished' })
     const [createForm, setCreateForm] = useState({
@@ -21,33 +23,71 @@ export default function Matches() {
     const [createError, setCreateError] = useState('')
     const [editingId, setEditingId] = useState(null)
     const [editForm, setEditForm] = useState({ date_time: '', venue: '', status: '', group_name: '', matchday: '' })
+    const [editingVenueId, setEditingVenueId] = useState(null)
+    const [venueInput, setVenueInput] = useState('')
 
     useEffect(() => {
         fetchMatches()
         fetchTeams()
+        fetchCategories()
     }, [])
+
+    // Recharger les poules quand la catégorie change
+    useEffect(() => {
+        fetchGroups(filters.category)
+        setFilters(f => ({ ...f, group_name: '' }))
+    }, [filters.category])
 
     const fetchTeams = async () => {
         const res = await client.get('/teams/')
         setTeams(res.data)
     }
 
+    const fetchCategories = async () => {
+        try {
+            const res = await client.get(`/matches/filters/?season=${filters.season}`)
+            setCategories(res.data.categories || [])
+        } catch {}
+    }
+
+    const fetchGroups = async (category) => {
+        if (!category) { setGroups([]); return }
+        try {
+            const res = await client.get(`/matches/groups/?season=${filters.season}&category=${category}`)
+            setGroups(res.data.groups || [])
+        } catch {}
+    }
+
     const fetchMatches = async () => {
         const params = new URLSearchParams()
         if (filters.status) params.append('status', filters.status)
         if (filters.category) params.append('category', filters.category)
+        if (filters.group_name) params.append('group_name', filters.group_name)
         if (filters.season) params.append('season', filters.season)
         const res = await client.get(`/matches/?${params.toString()}`)
         setMatches(res.data)
     }
 
     const handleFilterChange = (e) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value })
+        setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }))
     }
 
     const handleFilterSubmit = (e) => {
         e.preventDefault()
         fetchMatches()
+    }
+
+    const handleVenueEdit = (match) => {
+        setEditingVenueId(match.id)
+        setVenueInput(match.venue || '')
+    }
+
+    const handleVenueSave = async (id) => {
+        try {
+            await client.patch(`/matches/${id}/`, { venue: venueInput })
+            setEditingVenueId(null)
+            fetchMatches()
+        } catch { alert('Erreur lors de la sauvegarde du lieu.') }
     }
 
     const handleCreateChange = (e) => {
@@ -155,14 +195,29 @@ export default function Matches() {
             {createError && <p style={{ color: 'red' }}>{createError}</p>}
 
             {/* --- Filtres --- */}
-            <form onSubmit={handleFilterSubmit} style={{ marginBottom: 24, display: 'flex', gap: 12 }}>
+            <form onSubmit={handleFilterSubmit} style={{ marginBottom: 24, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                <select name="season" value={filters.season} onChange={handleFilterChange}>
+                    <option value="2026/2027">2026/2027</option>
+                    <option value="2025/2026">2025/2026</option>
+                    <option value="2024/2025">2024/2025</option>
+                </select>
+                <select name="category" value={filters.category} onChange={handleFilterChange}>
+                    <option value="">Toutes catégories</option>
+                    {categories.length > 0
+                        ? categories.map(c => <option key={c} value={c}>{c}</option>)
+                        : ['U14', 'U16', 'U18', 'Seniors', 'Vétérans'].map(c => <option key={c} value={c}>{c}</option>)
+                    }
+                </select>
+                <select name="group_name" value={filters.group_name} onChange={handleFilterChange} disabled={!filters.category}>
+                    <option value="">Toutes poules</option>
+                    {groups.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
                 <select name="status" value={filters.status} onChange={handleFilterChange}>
-                    <option value="">Tous status</option>
+                    <option value="">Tous statuts</option>
                     <option value="scheduled">À venir</option>
                     <option value="finished">Terminés</option>
+                    <option value="postponed">Reportés</option>
                 </select>
-                <input name="season" placeholder="Saison" value={filters.season} onChange={handleFilterChange} style={{ width: 90 }} />
-                <input name="category" placeholder="Catégorie" value={filters.category} onChange={handleFilterChange} />
                 <button type="submit">Filtrer</button>
             </form>
 
@@ -250,7 +305,32 @@ export default function Matches() {
                             <td>{match.away_team.name}</td>
                             <td>{match.category}</td>
                             <td>{match.group_name}</td>
-                            <td>{match.venue || '-'}</td>
+                            <td>
+                                {editingVenueId === match.id ? (
+                                    <span style={{ display: 'flex', gap: 4 }}>
+                                        <input
+                                            value={venueInput}
+                                            onChange={e => setVenueInput(e.target.value)}
+                                            placeholder="Adresse du stade"
+                                            style={{ width: 180 }}
+                                            autoFocus
+                                        />
+                                        <button onClick={() => handleVenueSave(match.id)} style={{ color: 'green' }}>✓</button>
+                                        <button onClick={() => setEditingVenueId(null)}>✗</button>
+                                    </span>
+                                ) : (
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <span style={{ color: match.venue ? '#1A1614' : '#aaa' }}>
+                                            {match.venue || 'Non renseigné'}
+                                        </span>
+                                        <button
+                                            onClick={() => handleVenueEdit(match)}
+                                            style={{ fontSize: 12, padding: '1px 5px', cursor: 'pointer' }}
+                                            title="Modifier le lieu"
+                                        >✏️</button>
+                                    </span>
+                                )}
+                            </td>
                             <td>{match.status}</td>
                             <td style={{ display: 'flex', gap: 4 }}>
                                 <button onClick={() => handleEditStart(match)}>Modifier</button>
