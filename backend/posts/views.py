@@ -26,8 +26,8 @@ class PostViewSet(viewsets.ModelViewSet):
         if author_id:
             qs = qs.filter(author_id=author_id)
         else:
-            # Exclure les posts des utilisateurs bloqués ET ceux qui ont bloqué l'utilisateur connecté
-            if self.request.user.is_authenticated:
+            # Exclure les posts des utilisateurs bloqués (sauf pour les admins)
+            if self.request.user.is_authenticated and getattr(self.request.user, 'role', '') != 'admin':
                 blocked_ids = Block.objects.filter(
                     blocker=self.request.user
                 ).values_list('blocked_id', flat=True)
