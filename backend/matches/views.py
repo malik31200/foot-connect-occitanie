@@ -84,6 +84,21 @@ class MatchViewSet(viewsets.ModelViewSet):
         match.save()
         return Response({'id': match.id, 'is_locked': match.is_locked})
     
+    @action(detail=False, methods=['post'])
+    def fill_venues(self, request):
+        """Remplit les venues manquantes depuis le stade du club de l'équipe domicile."""
+        if not is_admin(request.user):
+            return Response({'detail': 'Accès réservé aux administrateurs.'}, status=status.HTTP_403_FORBIDDEN)
+        matches = Match.objects.filter(venue__isnull=True) | Match.objects.filter(venue='')
+        filled = 0
+        for match in matches:
+            stadium = getattr(match.home_team.club, 'stadium', None) if match.home_team and match.home_team.club else None
+            if stadium:
+                match.venue = stadium
+                match.save(update_fields=['venue'])
+                filled += 1
+        return Response({'filled': filled, 'message': f'{filled} match(s) mis à jour.'})
+
     @action(detail=False, methods=['get'])
     def filters(self, request):
         season = request.query_params.get('season', '2025')

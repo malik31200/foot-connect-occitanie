@@ -5,7 +5,7 @@ from .models import Club
 class ClubSerializer(serializers.ModelSerializer):
     class Meta:
         model = Club
-        fields = ['id', 'name', 'city', 'logo_url', 'fff_id', 'created_at']
+        fields = ['id', 'name', 'city', 'logo_url', 'fff_id', 'stadium', 'created_at']
         read_only_fields = ['created_at']
 
     def validate_fff_id(self, value):

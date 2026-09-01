@@ -221,7 +221,22 @@ export default function Matches() {
                 <button type="submit">Filtrer</button>
             </form>
 
-            <p>{matches.length} match(s)</p>
+            <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
+                <p style={{ margin: 0 }}>{matches.length} match(s)</p>
+                <button
+                    onClick={async () => {
+                        if (!window.confirm('Remplir automatiquement les lieux manquants depuis l\'adresse du stade de chaque club domicile ?')) return
+                        try {
+                            const res = await client.post('/matches/fill_venues/')
+                            alert(res.data.message)
+                            fetchMatches()
+                        } catch { alert('Erreur lors du remplissage.') }
+                    }}
+                    style={{ backgroundColor: '#1a7a1a', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: 6, cursor: 'pointer' }}
+                >
+                    🏟️ Remplir les lieux manquants
+                </button>
+            </div>
 
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
