@@ -383,6 +383,10 @@ export default function FeedScreen({ navigation }) {
             snapToInterval={itemHeight}
             decelerationRate="fast"
             showsVerticalScrollIndicator={false}
+            removeClippedSubviews
+            windowSize={3}
+            maxToRenderPerBatch={2}
+            initialNumToRender={1}
         />
 
         <Modal
@@ -391,15 +395,12 @@ export default function FeedScreen({ navigation }) {
             transparent
             onRequestClose={closeComments}
         >
-            {/* Toucher en dehors ferme le modal ET le clavier */}
-            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeComments} />
-
-            {/* Sur iOS : padding pousse le contenu. Sur Android : height réduit la hauteur */}
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={0}
-                style={styles.modalSheet}
+                behavior="padding"
+                style={{ flex: 1, justifyContent: 'flex-end' }}
             >
+            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeComments} />
+            <View style={styles.modalSheet}>
                 <View style={styles.modalHandle} />
                 <Text style={styles.modalTitle}>Commentaires</Text>
                 <FlatList
@@ -463,6 +464,7 @@ export default function FeedScreen({ navigation }) {
                         <Ionicons name="send" size={18} color="#fff" />
                     </TouchableOpacity>
                 </View>
+            </View>
             </KeyboardAvoidingView>
         </Modal>
         </>

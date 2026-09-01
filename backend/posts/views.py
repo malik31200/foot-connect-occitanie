@@ -21,12 +21,16 @@ class PostViewSet(viewsets.ModelViewSet):
         if author_id:
             qs = qs.filter(author_id=author_id)
         else:
-            # Exclure les posts des utilisateurs bloqués par l'utilisateur connecté
+            # Exclure les posts des utilisateurs bloqués ET ceux qui ont bloqué l'utilisateur connecté
             if self.request.user.is_authenticated:
                 blocked_ids = Block.objects.filter(
                     blocker=self.request.user
                 ).values_list('blocked_id', flat=True)
-                qs = qs.exclude(author_id__in=blocked_ids)
+                blocker_ids = Block.objects.filter(
+                    blocked=self.request.user
+                ).values_list('blocker_id', flat=True)
+                hidden_ids = set(list(blocked_ids) + list(blocker_ids))
+                qs = qs.exclude(author_id__in=hidden_ids)
         return qs
 
     def create(self, request, *args, **kwargs):
@@ -65,14 +69,19 @@ class FeedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # Exclure les posts des utilisateurs bloqués ET ceux qui ont bloqué l'utilisateur connecté
         blocked_ids = Block.objects.filter(
             blocker=request.user
         ).values_list('blocked_id', flat=True)
+        blocker_ids = Block.objects.filter(
+            blocked=request.user
+        ).values_list('blocker_id', flat=True)
+        hidden_ids = set(list(blocked_ids) + list(blocker_ids))
 
         posts = Post.objects.all().select_related(
             'author', 'match__home_team', 'match__away_team'
         ).prefetch_related('medias', 'likes').exclude(
-            author_id__in=blocked_ids
+            author_id__in=hidden_ids
         ).order_by('-created_at')
 
         return Response(PostSerializer(posts, many=True, context={'request': request}).data)

@@ -69,12 +69,15 @@ function PostCard({ post, onLike, onOpenComments, onDelete, onReport, currentUse
                     if (item.media_type === 'photo') {
                         return (
                             <View style={{ width: SCREEN_WIDTH, height: cardH, backgroundColor: '#0E0B0A' }}>
-                                <Image
-                                    source={{ uri: item.media_url }}
-                                    style={StyleSheet.absoluteFill}
-                                    resizeMode="cover"
-                                    blurRadius={18}
-                                />
+                                {/* Blur désactivé sur Android (trop gourmand en mémoire) */}
+                                {Platform.OS === 'ios' && (
+                                    <Image
+                                        source={{ uri: item.media_url }}
+                                        style={StyleSheet.absoluteFill}
+                                        resizeMode="cover"
+                                        blurRadius={18}
+                                    />
+                                )}
                                 <Image
                                     source={{ uri: item.media_url }}
                                     style={{ width: SCREEN_WIDTH, height: cardH }}
@@ -246,11 +249,12 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
 
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => { Keyboard.dismiss(); onClose() }} />
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.modalSheet}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+                style={{ flex: 1, justifyContent: 'flex-end' }}
             >
+            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => { Keyboard.dismiss(); onClose() }} />
+            <View style={styles.modalSheet}>
                 <View style={styles.modalHandle} />
                 <Text style={styles.modalTitle}>Commentaires</Text>
                 <FlatList
@@ -315,6 +319,7 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
                         <Ionicons name="send" size={18} color="#fff" />
                     </TouchableOpacity>
                 </View>
+            </View>
             </KeyboardAvoidingView>
         </Modal>
     )
@@ -410,6 +415,10 @@ export default function PostDetailScreen({ route, navigation }) {
                 snapToInterval={itemHeight}
                 decelerationRate="fast"
                 showsVerticalScrollIndicator={false}
+                removeClippedSubviews
+                windowSize={3}
+                maxToRenderPerBatch={2}
+                initialNumToRender={1}
                 getItemLayout={(_, index) => ({
                     length: itemHeight,
                     offset: itemHeight * index,
