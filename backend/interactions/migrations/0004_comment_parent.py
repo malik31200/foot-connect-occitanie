@@ -5,7 +5,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('interactions', '0002_commentlike_commentreport'),
+        ('interactions', '0003_comment_like_comment_report'),
     ]
 
     operations = [
