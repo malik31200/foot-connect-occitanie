@@ -5,6 +5,7 @@ import {
     StyleSheet, ActivityIndicator, Dimensions,
     Modal, TextInput, Platform, Alert, Keyboard
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { VideoView, useVideoPlayer } from 'expo-video'
@@ -198,6 +199,7 @@ function PostCard({ post, onLike, onComment, onDelete, onReport, currentUserId, 
 
 export default function FeedScreen({ navigation }) {
     const { token } = useAuth()
+    const insets = useSafeAreaInsets()
     const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
     const headers = { Authorization: `Bearer ${token}` }
@@ -439,7 +441,7 @@ export default function FeedScreen({ navigation }) {
         >
             <View style={{ flex: 1, justifyContent: 'flex-end' }}>
             <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={closeComments} />
-            <View style={[styles.modalSheet, { paddingBottom: keyboardOffset > 0 ? keyboardOffset : 24 }]}>
+            <View style={[styles.modalSheet, { paddingBottom: keyboardOffset > 0 ? keyboardOffset : 0 }]}>
                 <View style={styles.modalHandle} />
                 <Text style={styles.modalTitle}>Commentaires</Text>
                 <FlatList
@@ -541,7 +543,7 @@ export default function FeedScreen({ navigation }) {
                         </TouchableOpacity>
                     </View>
                 )}
-                <View style={styles.commentInputRow}>
+                <View style={[styles.commentInputRow, { paddingBottom: Math.max(insets.bottom, 10) }]}>
                     <TextInput
                         ref={commentInputRef}
                         style={styles.commentInput}
@@ -724,8 +726,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
-        maxHeight: '70%',
-        paddingBottom: 24,
+        maxHeight: SCREEN_HEIGHT * 0.75,
     },
     modalHandle: {
         width: 40,
