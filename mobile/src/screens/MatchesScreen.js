@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import {
     View, Text, FlatList, StyleSheet, ActivityIndicator,
     TouchableOpacity, ScrollView, Image
@@ -98,21 +98,25 @@ function AvenirTab() {
     const { category, poule } = useContext(FiltersContext)
     const [matches, setMatches] = useState([])
     const [loading, setLoading] = useState(true)
+    const flatRef = useRef(null)
 
     useEffect(() => {
         if (!category) return
-        if (matches.length === 0) setLoading(true)
+        setLoading(true)
         let url = `/matches/?status=scheduled&season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
-            .then(res => setMatches(res.data.results || res.data))
+            .then(res => {
+                setMatches(res.data.results || res.data)
+                flatRef.current?.scrollToOffset({ offset: 0, animated: false })
+            })
             .finally(() => setLoading(false))
     }, [category, poule])
 
     if (loading) return <ActivityIndicator color="#E4002B" style={{ marginTop: 40 }} />
     if (matches.length === 0) return <EmptyState message="Aucun match à venir" />
     return (
-        <FlatList data={matches} keyExtractor={item => item.id.toString()}
+        <FlatList ref={flatRef} data={matches} keyExtractor={item => item.id.toString()}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => <MatchCard item={item} showScore={false} />} />
     )
@@ -122,21 +126,27 @@ function TerminesTab() {
     const { category, poule } = useContext(FiltersContext)
     const [matches, setMatches] = useState([])
     const [loading, setLoading] = useState(true)
+    const flatRef = useRef(null)
 
     useEffect(() => {
         if (!category) return
-        if (matches.length === 0) setLoading(true)
+        setLoading(true)
         let url = `/matches/?status=finished&season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
-            .then(res => setMatches(res.data.results || res.data))
+            .then(res => {
+                // Plus récents en premier (dernière journée visible directement)
+                const data = [...(res.data.results || res.data)].reverse()
+                setMatches(data)
+                flatRef.current?.scrollToOffset({ offset: 0, animated: false })
+            })
             .finally(() => setLoading(false))
     }, [category, poule])
 
     if (loading) return <ActivityIndicator color="#E4002B" style={{ marginTop: 40 }} />
     if (matches.length === 0) return <EmptyState message="Aucun résultat disponible" />
     return (
-        <FlatList data={matches} keyExtractor={item => item.id.toString()}
+        <FlatList ref={flatRef} data={matches} keyExtractor={item => item.id.toString()}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => <MatchCard item={item} showScore={true} />} />
     )
@@ -146,14 +156,18 @@ function ClassementTab() {
     const { category, poule } = useContext(FiltersContext)
     const [standings, setStandings] = useState([])
     const [loading, setLoading] = useState(true)
+    const flatRef = useRef(null)
 
     useEffect(() => {
         if (!category) return
-        if (standings.length === 0) setLoading(true)
+        setLoading(true)
         let url = `/standings/?season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
-            .then(res => setStandings(res.data.results || res.data))
+            .then(res => {
+                setStandings(res.data.results || res.data)
+                flatRef.current?.scrollToOffset({ offset: 0, animated: false })
+            })
             .finally(() => setLoading(false))
     }, [category, poule])
 
@@ -161,7 +175,7 @@ function ClassementTab() {
     if (standings.length === 0) return <EmptyState message="Classement indisponible" />
 
     return (
-        <FlatList data={standings} keyExtractor={item => item.id.toString()}
+        <FlatList ref={flatRef} data={standings} keyExtractor={item => item.id.toString()}
             contentContainerStyle={styles.list}
             ListHeaderComponent={() => (
                 <View style={styles.standingHeader}>
@@ -196,21 +210,25 @@ function CalendrierTab() {
     const { category, poule } = useContext(FiltersContext)
     const [matches, setMatches] = useState([])
     const [loading, setLoading] = useState(true)
+    const flatRef = useRef(null)
 
     useEffect(() => {
         if (!category) return
-        if (matches.length === 0) setLoading(true)
+        setLoading(true)
         let url = `/matches/?season=2026/2027&category=${encodeURIComponent(category)}`
         if (poule) url += `&group_name=${encodeURIComponent(poule)}`
         client.get(url)
-            .then(res => setMatches(res.data.results || res.data))
+            .then(res => {
+                setMatches(res.data.results || res.data)
+                flatRef.current?.scrollToOffset({ offset: 0, animated: false })
+            })
             .finally(() => setLoading(false))
     }, [category, poule])
 
     if (loading) return <ActivityIndicator color="#E4002B" style={{ marginTop: 40 }} />
     if (matches.length === 0) return <EmptyState message="Calendrier indisponible" />
     return (
-        <FlatList data={matches} keyExtractor={item => item.id.toString()}
+        <FlatList ref={flatRef} data={matches} keyExtractor={item => item.id.toString()}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => <MatchCard item={item} showScore={true} />} />
     )
