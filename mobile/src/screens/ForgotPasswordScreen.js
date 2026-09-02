@@ -254,9 +254,9 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     codeInput: {
-        fontSize: 28,
+        fontSize: 24,
         fontFamily: 'Anton_400Regular',
-        letterSpacing: 12,
+        letterSpacing: 6,
         textAlign: 'center',
     },
     inputWrapper: {
