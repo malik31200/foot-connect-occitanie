@@ -92,14 +92,22 @@ export default function Moderation() {
         const action = isActive ? 'ban' : 'unban'
         const label = isActive ? 'Bannir' : 'Réactiver'
         if (!window.confirm(`${label} cet utilisateur ?`)) return
-        await client.patch(`/auth/admin/users/${userId}/`, { action })
-        fetchUsers()
+        try {
+            await client.patch(`/auth/admin/users/${userId}/`, { action })
+            fetchUsers()
+        } catch (e) {
+            alert(`Erreur : ${e.response?.data?.detail || e.message}`)
+        }
     }
 
     const deleteUser = async (userId, username) => {
         if (!window.confirm(`Supprimer définitivement l'utilisateur "${username}" et tout son contenu ?`)) return
-        await client.delete(`/auth/admin/users/${userId}/`)
-        fetchUsers()
+        try {
+            await client.delete(`/auth/admin/users/${userId}/`)
+            setUsers(prev => prev.filter(u => u.id !== userId))
+        } catch (e) {
+            alert(`Erreur : ${e.response?.data?.detail || e.message}`)
+        }
     }
 
     const filteredUsers = users.filter(u =>
