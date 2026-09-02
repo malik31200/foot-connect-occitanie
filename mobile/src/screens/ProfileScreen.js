@@ -148,9 +148,6 @@ export default function ProfileScreen({ route, navigation }) {
             <View>
                 {/* Bandeau rouge */}
                 <LinearGradient colors={['#FF2A3C', '#E4002B', '#B80020']} style={styles.header}>
-                    <View style={styles.headerCross}>
-                        <OccitanCross size={28} color="#F5C518" />
-                    </View>
                     <View style={styles.profileRow}>
                         {profile?.avatar_url ? (
                             <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
@@ -173,15 +170,19 @@ export default function ProfileScreen({ route, navigation }) {
                                 </View>
                             ) : null}
                         </View>
+                        {/* Croix + Modifier regroupés en haut à droite */}
+                        <View style={styles.headerRight}>
+                            <OccitanCross size={24} color="#F5C518" />
+                            {isOwnProfile && (
+                                <TouchableOpacity
+                                    style={styles.editBtnHeader}
+                                    onPress={() => navigation.navigate('EditProfile')}
+                                >
+                                    <Text style={styles.editBtnHeaderText}>Modifier</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
-                    {isOwnProfile && (
-                        <TouchableOpacity
-                            style={styles.editBtnHeader}
-                            onPress={() => navigation.navigate('EditProfile')}
-                        >
-                            <Text style={styles.editBtnHeaderText}>Modifier</Text>
-                        </TouchableOpacity>
-                    )}
                 </LinearGradient>
 
                 {/* Carte blanche */}
@@ -392,14 +393,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingBottom: 24,
     },
-    headerCross: {
-        position: 'absolute', top: 52, right: 20,
-    },
     profileRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 14,
-        marginTop: 8,
+    },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        marginLeft: 'auto',
     },
     avatar: {
         width: 72,
@@ -441,8 +444,6 @@ const styles = StyleSheet.create({
         color: 'rgba(255,255,255,0.9)',
     },
     editBtnHeader: {
-        alignSelf: 'flex-end',
-        marginTop: 12,
         borderWidth: 1.5,
         borderColor: '#fff',
         borderRadius: 20,
