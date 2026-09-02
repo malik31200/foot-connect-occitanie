@@ -15,7 +15,6 @@ import { useAuth } from '../context/AuthContext'
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 
-const TAB_BAR_HEIGHT = 60
 const CARD_HEIGHT = SCREEN_HEIGHT
 
 // --- Lecteur vidéo natif avec expo-video ---
