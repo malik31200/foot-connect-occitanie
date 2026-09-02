@@ -62,7 +62,7 @@ export default function Moderation() {
 
     const deleteReportedComment = async (commentId, postId, reportId) => {
         if (!window.confirm('Supprimer ce commentaire ?')) return
-        await client.delete(`/comments/${commentId}/`)
+        await client.delete(`/posts/${postId}/comments/${commentId}/`)
         await client.delete(`/reports/?type=comment&id=${reportId}`)
         fetchReports()
     }
@@ -83,7 +83,7 @@ export default function Moderation() {
 
     const deleteComment = async (commentId, postId) => {
         if (!window.confirm('Supprimer ce commentaire ?')) return
-        await client.delete(`/comments/${commentId}/`)
+        await client.delete(`/posts/${postId}/comments/${commentId}/`)
         setComments(prev => ({ ...prev, [postId]: prev[postId].filter(c => c.id !== commentId) }))
     }
 
