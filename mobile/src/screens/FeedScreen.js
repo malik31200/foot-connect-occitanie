@@ -301,7 +301,16 @@ export default function FeedScreen({ navigation }) {
                 text: 'Supprimer', style: 'destructive', onPress: async () => {
                     try {
                         await client.delete(`/posts/${commentPostId}/comments/${commentId}/`, { headers })
-                        setComments(prev => prev.filter(c => c.id !== commentId))
+                        setComments(prev => {
+                            // Commentaire de premier niveau
+                            const filtered = prev.filter(c => c.id !== commentId)
+                            if (filtered.length < prev.length) return filtered
+                            // C'est une réponse — la retirer du tableau replies du parent
+                            return prev.map(c => ({
+                                ...c,
+                                replies: (c.replies || []).filter(r => r.id !== commentId)
+                            }))
+                        })
                         setPosts(prev => prev.map(p =>
                             p.id === commentPostId ? { ...p, comments_count: Math.max(0, (p.comments_count ?? 0) - 1) } : p
                         ))

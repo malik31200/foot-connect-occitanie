@@ -249,8 +249,17 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
             {
                 text: 'Supprimer', style: 'destructive', onPress: async () => {
                     try {
-                        await client.delete(`/comments/${commentId}/`, { headers })
-                        setComments(prev => prev.filter(c => c.id !== commentId))
+                        await client.delete(`/posts/${postId}/comments/${commentId}/`, { headers })
+                        setComments(prev => {
+                            // Commentaire de premier niveau
+                            const filtered = prev.filter(c => c.id !== commentId)
+                            if (filtered.length < prev.length) return filtered
+                            // C'est une réponse — la retirer du tableau replies du parent
+                            return prev.map(c => ({
+                                ...c,
+                                replies: (c.replies || []).filter(r => r.id !== commentId)
+                            }))
+                        })
                         onCommentCountChange?.(postId, -1)
                     } catch {}
                 }
