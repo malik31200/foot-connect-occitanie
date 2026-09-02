@@ -173,15 +173,15 @@ export default function ProfileScreen({ route, navigation }) {
                                 </View>
                             ) : null}
                         </View>
-                        {isOwnProfile && (
-                            <TouchableOpacity
-                                style={styles.editBtnHeader}
-                                onPress={() => navigation.navigate('EditProfile')}
-                            >
-                                <Text style={styles.editBtnHeaderText}>Modifier</Text>
-                            </TouchableOpacity>
-                        )}
                     </View>
+                    {isOwnProfile && (
+                        <TouchableOpacity
+                            style={styles.editBtnHeader}
+                            onPress={() => navigation.navigate('EditProfile')}
+                        >
+                            <Text style={styles.editBtnHeaderText}>Modifier</Text>
+                        </TouchableOpacity>
+                    )}
                 </LinearGradient>
 
                 {/* Carte blanche */}
@@ -441,6 +441,8 @@ const styles = StyleSheet.create({
         color: 'rgba(255,255,255,0.9)',
     },
     editBtnHeader: {
+        alignSelf: 'flex-end',
+        marginTop: 12,
         borderWidth: 1.5,
         borderColor: '#fff',
         borderRadius: 20,
