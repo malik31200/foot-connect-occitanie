@@ -261,9 +261,22 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
     async function handleLikeComment(commentId) {
         try {
             const res = await client.post(`/comments/${commentId}/like/`, {}, { headers })
-            setComments(prev => prev.map(c =>
-                c.id === commentId ? { ...c, is_liked: res.data.liked, likes_count: res.data.likes_count } : c
-            ))
+            setComments(prev => prev.map(c => {
+                if (c.id === commentId) {
+                    return { ...c, is_liked: res.data.liked, likes_count: res.data.likes_count }
+                }
+                if (c.replies?.some(r => r.id === commentId)) {
+                    return {
+                        ...c,
+                        replies: c.replies.map(r =>
+                            r.id === commentId
+                                ? { ...r, is_liked: res.data.liked, likes_count: res.data.likes_count }
+                                : r
+                        )
+                    }
+                }
+                return c
+            }))
         } catch {}
     }
 
@@ -353,6 +366,18 @@ function CommentsModal({ visible, postId, onClose, token, currentUsername, curre
                                             <Text style={styles.commentAuthor}>{reply.author_username}</Text>
                                         </TouchableOpacity>
                                         <Text style={styles.commentContent}>{reply.content}</Text>
+                                        <TouchableOpacity onPress={() => handleLikeComment(reply.id)} style={styles.commentLikeBtn}>
+                                            <Ionicons
+                                                name={reply.is_liked ? 'football' : 'football-outline'}
+                                                size={16}
+                                                color={reply.is_liked ? '#E4002B' : '#A8A29B'}
+                                            />
+                                            {(reply.likes_count ?? 0) > 0 && (
+                                                <Text style={[styles.commentLikeCount, reply.is_liked && { color: '#E4002B' }]}>
+                                                    {reply.likes_count}
+                                                </Text>
+                                            )}
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
                             ))}

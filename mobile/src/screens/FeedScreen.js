@@ -312,11 +312,23 @@ export default function FeedScreen({ navigation }) {
     async function handleLikeComment(commentId) {
         try {
             const res = await client.post(`/comments/${commentId}/like/`, {}, { headers })
-            setComments(prev => prev.map(c =>
-                c.id === commentId
-                    ? { ...c, is_liked: res.data.liked, likes_count: res.data.likes_count }
-                    : c
-            ))
+            setComments(prev => prev.map(c => {
+                if (c.id === commentId) {
+                    return { ...c, is_liked: res.data.liked, likes_count: res.data.likes_count }
+                }
+                // Chercher dans les replies
+                if (c.replies?.some(r => r.id === commentId)) {
+                    return {
+                        ...c,
+                        replies: c.replies.map(r =>
+                            r.id === commentId
+                                ? { ...r, is_liked: res.data.liked, likes_count: res.data.likes_count }
+                                : r
+                        )
+                    }
+                }
+                return c
+            }))
         } catch {}
     }
 
