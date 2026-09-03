@@ -88,14 +88,14 @@ function VideoItem({ uri, width, height, isActive }) {
                 )}
             </Pressable>
 
-            {/* Slider en dehors du Pressable → ses touches ne sont pas bloquées */}
+            {/* Slider en dehors du Pressable — pointerEvents="box-none" laisse passer les touches vers le Slider */}
             {duration > 0 && (
-                <View style={styles.seekContainer}>
+                <View style={styles.seekContainer} pointerEvents="box-none">
                     <Slider
                         style={styles.slider}
                         minimumValue={0}
                         maximumValue={duration}
-                        value={currentTime}
+                        value={Math.min(currentTime, duration)}
                         onSlidingStart={() => setIsSeeking(true)}
                         onValueChange={val => setCurrentTime(val)}
                         onSlidingComplete={val => {
@@ -682,14 +682,14 @@ const styles = StyleSheet.create({
         bottom: 85,
         left: 10,
         right: 10,
-        height: 40,
+        height: 50,
         justifyContent: 'center',
-        zIndex: 100,
-        elevation: 100,
+        zIndex: 9999,
+        elevation: 9999,
     },
     slider: {
         width: '100%',
-        height: 40,
+        height: 50,
     },
     // --- Styles communs ---
     loading: {
