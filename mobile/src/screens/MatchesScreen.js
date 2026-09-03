@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     chipSelected: { backgroundColor: '#E4002B' },
     chipText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 13, color: '#5C564F' },
     chipTextSelected: { color: '#fff' },
-    list: { padding: 12, gap: 8 },
+    list: { padding: 12, gap: 8, paddingBottom: 90 },
     empty: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60, gap: 12 },
     emptyText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15, color: '#A8A29B' },
     matchCard: {

@@ -341,7 +341,7 @@ export default function PublishScreen() {
 
 const styles = StyleSheet.create({
     screen: { flex: 1, backgroundColor: '#F6F3EE' },
-    content: { paddingBottom: 40 },
+    content: { paddingBottom: 110 },
     header: {
         backgroundColor: '#fff',
         paddingTop: 56, paddingBottom: 16, paddingHorizontal: 20,

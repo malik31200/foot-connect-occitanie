@@ -3,7 +3,7 @@ import {
     View, Text, Image, StyleSheet, FlatList,
     TouchableOpacity, TextInput, Platform,
     ActivityIndicator, Alert, Dimensions,
-    Modal, Keyboard
+    Modal, Keyboard, Share
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -153,6 +153,17 @@ function PostCard({ post, onLike, onOpenComments, onDelete, onReport, currentUse
                         <Ionicons name="chatbubble-ellipses" size={22} color="#fff" />
                     </View>
                     <Text style={styles.actionCount}>{commentsCount}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.actionBtn}
+                    onPress={() => Share.share({
+                        message: `Regarde cette publication sur Foot Connect Occitanie !\n${post.caption || ''}`,
+                    })}
+                >
+                    <View style={styles.actionCircle}>
+                        <Ionicons name="share-social" size={22} color="#fff" />
+                    </View>
+                    <Text style={styles.actionCount}> </Text>
                 </TouchableOpacity>
             </View>
 

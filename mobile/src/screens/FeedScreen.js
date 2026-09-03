@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import {
     View, Text, FlatList, Image, TouchableOpacity,
     StyleSheet, ActivityIndicator, Dimensions,
-    Modal, TextInput, Platform, Alert, Keyboard
+    Modal, TextInput, Platform, Alert, Keyboard, Share
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -18,11 +18,10 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 const CARD_HEIGHT = SCREEN_HEIGHT
 
 // --- Lecteur vidéo natif avec expo-video ---
-// isActive = false → on met en pause (scroll ou changement d'onglet)
+// nativeControls={true} : pause/play/seek natifs, s'affichent au tap, se cachent seuls
+// isActive = false → pause automatique (scroll ou changement d'onglet)
 function VideoItem({ uri, width, height, isActive }) {
-    const player = useVideoPlayer(uri, p => {
-        p.loop = true
-    })
+    const player = useVideoPlayer(uri || '', p => { p.loop = true })
 
     useEffect(() => {
         if (isActive) {
@@ -37,7 +36,7 @@ function VideoItem({ uri, width, height, isActive }) {
             player={player}
             style={{ width, height }}
             contentFit="contain"
-            nativeControls={false}
+            nativeControls={true}
         />
     )
 }
@@ -96,6 +95,7 @@ function PostCard({ post, onLike, onComment, onDelete, onReport, currentUserId, 
                             </View>
                         )
                     }
+                    if (!item.media_url) return null
                     return <VideoItem uri={item.media_url} width={SCREEN_WIDTH} height={itemHeight} isActive={isActive} />
                 }}
             />
@@ -160,6 +160,17 @@ function PostCard({ post, onLike, onComment, onDelete, onReport, currentUserId, 
                         <Ionicons name="chatbubble-ellipses" size={22} color="#fff" />
                     </View>
                     <Text style={styles.actionCount}>{post.comments_count ?? 0}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.actionBtn}
+                    onPress={() => Share.share({
+                        message: `Regarde cette publication sur Foot Connect Occitanie !\n${post.caption || ''}`,
+                    })}
+                >
+                    <View style={styles.actionCircle}>
+                        <Ionicons name="share-social" size={22} color="#fff" />
+                    </View>
+                    <Text style={styles.actionCount}> </Text>
                 </TouchableOpacity>
             </View>
 
