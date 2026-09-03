@@ -1,15 +1,15 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import {
-    View, Text, FlatList, Image, TouchableOpacity,
+    View, Text, FlatList, Image, TouchableOpacity, Pressable,
     StyleSheet, ActivityIndicator, Dimensions,
-    Modal, TextInput, Platform, Alert, Keyboard, Share,
-    PanResponder, Animated
+    Modal, TextInput, Platform, Alert, Keyboard, Share
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
-import Video from 'react-native-video'
+import { VideoView, useVideoPlayer } from 'expo-video'
+import Slider from '@react-native-community/slider'
 import OccitanCross from '../components/OccitanCross'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -19,133 +19,78 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 const CARD_HEIGHT = SCREEN_HEIGHT
 
 // --- Lecteur vidéo style TikTok ---
-// Par défaut : pas de contrôles visibles
+// nativeControls={false} → ExoPlayer ne capte plus les touches → Pressable fonctionne
 // Tap → affiche icône pause/play 3s puis disparaît
-// Press + glisser horizontalement → barre de seek + delta en secondes
+// Slider en bas → seek (glisser)
 function VideoItem({ uri, width, height, isActive }) {
-    const videoRef = useRef(null)
+    const player = useVideoPlayer(uri || '', p => { p.loop = true })
     const [paused, setPaused] = useState(false)
-    const [showControls, setShowControls] = useState(false)
-    const [seeking, setSeeking] = useState(false)
-    const [seekPct, setSeekPct] = useState(0)
-    const [seekDelta, setSeekDelta] = useState(0)
-
-    // Valeurs courantes stockées en ref (pas de re-render inutile)
-    const currentTimeRef = useRef(0)
-    const durationRef = useRef(1)
-    const seekStartTimeRef = useRef(0)
+    const [showIcon, setShowIcon] = useState(false)
+    const [currentTime, setCurrentTime] = useState(0)
+    const [duration, setDuration] = useState(0)
     const hideTimer = useRef(null)
-    const isSeeking = useRef(false)
 
     // Play/pause selon scroll (isActive)
     useEffect(() => {
-        setPaused(!isActive)
-        if (!isActive) {
-            setShowControls(false)
-            setSeeking(false)
-            isSeeking.current = false
+        if (isActive) {
+            player.play()
+            setPaused(false)
+        } else {
+            player.pause()
+            setPaused(true)
+            setShowIcon(false)
             if (hideTimer.current) clearTimeout(hideTimer.current)
         }
     }, [isActive])
 
-    // Cache automatiquement les contrôles après 3s
-    function scheduleHide() {
+    // Progression en temps réel
+    useEffect(() => {
+        const sub = player.addListener('timeUpdate', ({ currentTime: t }) => {
+            setCurrentTime(t)
+        })
+        return () => sub.remove()
+    }, [player])
+
+    // Durée dès que la vidéo est prête
+    useEffect(() => {
+        const sub = player.addListener('statusChange', ({ status }) => {
+            if (status === 'readyToPlay') setDuration(player.duration)
+        })
+        return () => sub.remove()
+    }, [player])
+
+    // Tap : toggle pause + icône 3s
+    function handleTap() {
+        if (paused) {
+            player.play()
+            setPaused(false)
+        } else {
+            player.pause()
+            setPaused(true)
+        }
+        setShowIcon(true)
         if (hideTimer.current) clearTimeout(hideTimer.current)
-        hideTimer.current = setTimeout(() => setShowControls(false), 3000)
+        hideTimer.current = setTimeout(() => setShowIcon(false), 3000)
     }
 
-    // PanResponder : tap = pause/play, glisser gauche/droite = seek
-    const panResponder = useRef(
-        PanResponder.create({
-            onStartShouldSetPanResponder: () => true,
-            onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8,
-
-            onPanResponderGrant: () => {
-                // On commence un geste : mémorise la position courante
-                seekStartTimeRef.current = currentTimeRef.current
-                isSeeking.current = false
-            },
-
-            onPanResponderMove: (_, g) => {
-                if (Math.abs(g.dx) > 8) {
-                    // Seek : 1 seconde par 10px, max ±60s
-                    isSeeking.current = true
-                    setSeeking(true)
-                    if (hideTimer.current) clearTimeout(hideTimer.current)
-
-                    const deltaSeconds = (g.dx / 10) * 1
-                    const clamped = Math.max(
-                        -60,
-                        Math.min(60, deltaSeconds)
-                    )
-                    const newTime = Math.max(
-                        0,
-                        Math.min(durationRef.current, seekStartTimeRef.current + clamped)
-                    )
-                    setSeekDelta(Math.round(clamped))
-                    setSeekPct(durationRef.current > 0 ? newTime / durationRef.current : 0)
-                }
-            },
-
-            onPanResponderRelease: (_, g) => {
-                if (isSeeking.current) {
-                    // Applique le seek
-                    const deltaSeconds = (g.dx / 10) * 1
-                    const newTime = Math.max(
-                        0,
-                        Math.min(durationRef.current, seekStartTimeRef.current + deltaSeconds)
-                    )
-                    videoRef.current?.seek(newTime)
-                    setSeeking(false)
-                    isSeeking.current = false
-                    setShowControls(true)
-                    scheduleHide()
-                } else {
-                    // C'était un tap simple : toggle pause
-                    setPaused(prev => {
-                        const next = !prev
-                        setShowControls(true)
-                        scheduleHide()
-                        return next
-                    })
-                }
-            },
-
-            onPanResponderTerminate: () => {
-                setSeeking(false)
-                isSeeking.current = false
-            },
-        })
-    ).current
+    // Seek via slider
+    function handleSeek(value) {
+        player.currentTime = value
+        setCurrentTime(value)
+    }
 
     return (
         <View style={{ width, height, backgroundColor: '#000' }}>
-            <Video
-                ref={videoRef}
-                source={{ uri }}
-                style={{ width, height }}
-                resizeMode="contain"
-                repeat
-                paused={paused || !isActive}
-                controls={false}
-                ignoreSilentSwitch="ignore"
-                playInBackground={false}
-                onProgress={({ currentTime, seekableDuration }) => {
-                    currentTimeRef.current = currentTime
-                    if (seekableDuration > 0) durationRef.current = seekableDuration
-                }}
-                onLoad={({ duration }) => {
-                    if (duration > 0) durationRef.current = duration
-                }}
-            />
-
-            {/* Zone tactile transparente par-dessus la vidéo */}
-            <View
-                style={StyleSheet.absoluteFill}
-                {...panResponder.panHandlers}
-            >
-                {/* Icône pause/play (visible 3s après tap) */}
-                {showControls && !seeking && (
+            {/* Pressable enveloppe la vidéo → capte les taps */}
+            <Pressable style={StyleSheet.absoluteFill} onPress={handleTap}>
+                <VideoView
+                    player={player}
+                    style={{ width, height }}
+                    contentFit="contain"
+                    nativeControls={false}
+                />
+                {/* Icône pause/play (disparaît après 3s) */}
+                {showIcon && (
                     <View style={styles.vidControlCenter} pointerEvents="none">
                         <View style={styles.vidControlCircle}>
                             <Ionicons
@@ -156,19 +101,20 @@ function VideoItem({ uri, width, height, isActive }) {
                         </View>
                     </View>
                 )}
+            </Pressable>
 
-                {/* Barre de seek + delta TikTok (visible pendant le glissement) */}
-                {seeking && (
-                    <View style={styles.seekContainer} pointerEvents="none">
-                        <Text style={styles.seekDeltaText}>
-                            {seekDelta >= 0 ? `+${seekDelta}s` : `${seekDelta}s`}
-                        </Text>
-                        <View style={styles.seekBarTrack}>
-                            <View style={[styles.seekBarFill, { width: `${Math.round(seekPct * 100)}%` }]} />
-                            <View style={[styles.seekBarThumb, { left: `${Math.round(seekPct * 100)}%` }]} />
-                        </View>
-                    </View>
-                )}
+            {/* Barre de progression TikTok — en dehors du Pressable pour capter ses propres touches */}
+            <View style={styles.seekContainer} pointerEvents="box-none">
+                <Slider
+                    style={{ width: '100%', height: 30 }}
+                    minimumValue={0}
+                    maximumValue={duration || 1}
+                    value={currentTime}
+                    onValueChange={handleSeek}
+                    minimumTrackTintColor="#fff"
+                    maximumTrackTintColor="rgba(255,255,255,0.3)"
+                    thumbTintColor="#fff"
+                />
             </View>
         </View>
     )
@@ -740,39 +686,10 @@ const styles = StyleSheet.create({
     seekContainer: {
         position: 'absolute',
         bottom: 90,
-        left: 20,
-        right: 20,
-        alignItems: 'center',
-    },
-    seekDeltaText: {
-        color: '#fff',
-        fontSize: 22,
-        fontFamily: 'PlusJakartaSans_700Bold',
-        marginBottom: 8,
-        textShadowColor: 'rgba(0,0,0,0.8)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 4,
-    },
-    seekBarTrack: {
-        width: '100%',
-        height: 4,
-        backgroundColor: 'rgba(255,255,255,0.35)',
-        borderRadius: 2,
-        position: 'relative',
-    },
-    seekBarFill: {
-        height: 4,
-        backgroundColor: '#fff',
-        borderRadius: 2,
-    },
-    seekBarThumb: {
-        position: 'absolute',
-        top: -5,
-        width: 14,
-        height: 14,
-        borderRadius: 7,
-        backgroundColor: '#fff',
-        marginLeft: -7,
+        left: 0,
+        right: 0,
+        height: 30,
+        justifyContent: 'center',
     },
     // --- Styles communs ---
     loading: {

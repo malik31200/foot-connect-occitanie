@@ -34,7 +34,7 @@
     },
     "plugins": [
       "expo-font",
-      "react-native-video",
+      "expo-video",
       "expo-secure-store"
     ],
     "extra": {
