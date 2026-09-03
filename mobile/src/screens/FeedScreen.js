@@ -19,15 +19,16 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 const CARD_HEIGHT = SCREEN_HEIGHT
 
 // --- Lecteur vidéo style TikTok ---
-// nativeControls={false} → ExoPlayer ne capte plus les touches → Pressable fonctionne
-// Tap → affiche icône pause/play 3s puis disparaît
-// Slider en bas → seek (glisser)
+// nativeControls={false} → pas de contrôles ExoPlayer
+// Pressable capte les taps → pause/play + icône 1.5s
+// Slider en dehors du Pressable → seek interactif
 function VideoItem({ uri, width, height, isActive }) {
     const player = useVideoPlayer(uri || '', p => { p.loop = true })
     const [paused, setPaused] = useState(false)
     const [showIcon, setShowIcon] = useState(false)
     const [currentTime, setCurrentTime] = useState(0)
     const [duration, setDuration] = useState(0)
+    const [isSeeking, setIsSeeking] = useState(false)
     const hideTimer = useRef(null)
 
     // Play/pause selon scroll (isActive)
@@ -41,15 +42,15 @@ function VideoItem({ uri, width, height, isActive }) {
             setShowIcon(false)
             if (hideTimer.current) clearTimeout(hideTimer.current)
         }
-    }, [isActive])
+    }, [isActive, player])
 
-    // Progression en temps réel
+    // Progression en temps réel (pause pendant le seek)
     useEffect(() => {
         const sub = player.addListener('timeUpdate', ({ currentTime: t }) => {
-            setCurrentTime(t)
+            if (!isSeeking) setCurrentTime(t)
         })
         return () => sub.remove()
-    }, [player])
+    }, [player, isSeeking])
 
     // Durée dès que la vidéo est prête
     useEffect(() => {
@@ -59,29 +60,18 @@ function VideoItem({ uri, width, height, isActive }) {
         return () => sub.remove()
     }, [player])
 
-    // Tap : toggle pause + icône 3s
+    // Tap : toggle pause + icône 1.5s
     function handleTap() {
-        if (paused) {
-            player.play()
-            setPaused(false)
-        } else {
-            player.pause()
-            setPaused(true)
-        }
+        if (paused) { player.play(); setPaused(false) }
+        else { player.pause(); setPaused(true) }
         setShowIcon(true)
         if (hideTimer.current) clearTimeout(hideTimer.current)
-        hideTimer.current = setTimeout(() => setShowIcon(false), 3000)
-    }
-
-    // Seek via slider
-    function handleSeek(value) {
-        player.currentTime = value
-        setCurrentTime(value)
+        hideTimer.current = setTimeout(() => setShowIcon(false), 1500)
     }
 
     return (
         <View style={{ width, height, backgroundColor: '#000' }}>
-            {/* Pressable enveloppe la vidéo → capte les taps */}
+            {/* Pressable capte les taps sur la vidéo */}
             <Pressable style={StyleSheet.absoluteFill} onPress={handleTap}>
                 <VideoView
                     player={player}
@@ -89,33 +79,36 @@ function VideoItem({ uri, width, height, isActive }) {
                     contentFit="contain"
                     nativeControls={false}
                 />
-                {/* Icône pause/play (disparaît après 3s) */}
                 {showIcon && (
                     <View style={styles.vidControlCenter} pointerEvents="none">
                         <View style={styles.vidControlCircle}>
-                            <Ionicons
-                                name={paused ? 'play' : 'pause'}
-                                size={36}
-                                color="#fff"
-                            />
+                            <Ionicons name={paused ? 'play' : 'pause'} size={36} color="#fff" />
                         </View>
                     </View>
                 )}
             </Pressable>
 
-            {/* Barre de progression TikTok — en dehors du Pressable pour capter ses propres touches */}
-            <View style={styles.seekContainer} pointerEvents="box-none">
-                <Slider
-                    style={{ width: '100%', height: 30 }}
-                    minimumValue={0}
-                    maximumValue={duration || 1}
-                    value={currentTime}
-                    onValueChange={handleSeek}
-                    minimumTrackTintColor="#fff"
-                    maximumTrackTintColor="rgba(255,255,255,0.3)"
-                    thumbTintColor="#fff"
-                />
-            </View>
+            {/* Slider en dehors du Pressable → ses touches ne sont pas bloquées */}
+            {duration > 0 && (
+                <View style={styles.seekContainer}>
+                    <Slider
+                        style={styles.slider}
+                        minimumValue={0}
+                        maximumValue={duration}
+                        value={currentTime}
+                        onSlidingStart={() => setIsSeeking(true)}
+                        onValueChange={val => setCurrentTime(val)}
+                        onSlidingComplete={val => {
+                            player.currentTime = val
+                            setCurrentTime(val)
+                            setIsSeeking(false)
+                        }}
+                        minimumTrackTintColor="#fff"
+                        maximumTrackTintColor="rgba(255,255,255,0.35)"
+                        thumbTintColor="#fff"
+                    />
+                </View>
+            )}
         </View>
     )
 }
@@ -183,6 +176,7 @@ function PostCard({ post, onLike, onComment, onDelete, onReport, currentUserId, 
                 colors={['rgba(14,11,10,0.55)', 'transparent', 'rgba(14,11,10,0.85)']}
                 locations={[0, 0.25, 1]}
                 style={styles.overlay}
+                pointerEvents="none"
             />
 
             {medias.length > 1 && (
@@ -685,11 +679,17 @@ const styles = StyleSheet.create({
     },
     seekContainer: {
         position: 'absolute',
-        bottom: 90,
-        left: 0,
-        right: 0,
-        height: 30,
+        bottom: 85,
+        left: 10,
+        right: 10,
+        height: 40,
         justifyContent: 'center',
+        zIndex: 100,
+        elevation: 100,
+    },
+    slider: {
+        width: '100%',
+        height: 40,
     },
     // --- Styles communs ---
     loading: {
