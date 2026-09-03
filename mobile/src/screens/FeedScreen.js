@@ -71,14 +71,19 @@ function VideoItem({ uri, width, height, isActive }) {
 
     return (
         <View style={{ width, height, backgroundColor: '#000' }}>
-            {/* Pressable capte les taps sur la vidéo */}
+            <VideoView
+                player={player}
+                style={{ width, height }}
+                contentFit="contain"
+                nativeControls={false}
+            />
+
+            {/* Pressable EN FRÈRE au-dessus de la VideoView (pas en parent) :
+                depuis le fix Android d'expo-video 2.1.0, VideoView redispatche
+                ses propres touches vers RN et peut voler le responder à un
+                Pressable parent. En sibling par-dessus, c'est lui qui capte
+                le tap en premier. */}
             <Pressable style={StyleSheet.absoluteFill} onPress={handleTap}>
-                <VideoView
-                    player={player}
-                    style={{ width, height }}
-                    contentFit="contain"
-                    nativeControls={false}
-                />
                 {showIcon && (
                     <View style={styles.vidControlCenter} pointerEvents="none">
                         <View style={styles.vidControlCircle}>
