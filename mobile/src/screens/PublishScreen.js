@@ -138,6 +138,18 @@ export default function PublishScreen() {
             return
         }
 
+        // Une vidéo courte mais en haute résolution peut quand même être énorme
+        // (fetch(uri) → blob() charge tout le fichier en mémoire avant l'upload).
+        const fileSize = result.assets[0]?.fileSize // en octets
+        const MAX_SIZE = 100 * 1024 * 1024 // 100 Mo
+        if (fileSize && fileSize > MAX_SIZE) {
+            Alert.alert(
+                'Vidéo trop volumineuse',
+                `Ta vidéo pèse ${Math.round(fileSize / (1024 * 1024))} Mo. La taille maximale est de 100 Mo. Essaie une résolution ou une qualité plus basse.`
+            )
+            return
+        }
+
         setAssets(result.assets)
     }
 
@@ -190,7 +202,10 @@ export default function PublishScreen() {
             setCaption('')
             setSelectedMatch(null)
         } catch (e) {
-            const detail = e.response?.data?.detail || e.message || 'Impossible de publier.'
+            const isNetworkError = e.message === 'Network request failed'
+            const detail = isNetworkError
+                ? 'Envoi impossible : fichier trop volumineux ou connexion instable. Réessaie avec un fichier plus léger ou une meilleure connexion.'
+                : e.response?.data?.detail || e.message || 'Impossible de publier.'
             Alert.alert('Erreur', detail)
         } finally {
             setUploading(false)
