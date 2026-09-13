@@ -125,7 +125,20 @@ export default function PublishScreen() {
             allowsMultipleSelection: false,
             videoMaxDuration: 60,
         })
-        if (!result.canceled) setAssets(result.assets)
+        if (result.canceled) return
+
+        // videoMaxDuration n'est qu'une préférence pour le picker natif,
+        // pas garantie (notamment sur Android) : on vérifie nous-mêmes.
+        const duration = result.assets[0]?.duration // en millisecondes
+        if (duration && duration > 60000) {
+            Alert.alert(
+                'Vidéo trop longue',
+                `Ta vidéo dure ${Math.round(duration / 1000)}s. La durée maximale est de 60 secondes.`
+            )
+            return
+        }
+
+        setAssets(result.assets)
     }
 
     async function uploadToR2(uri, isVideo) {
