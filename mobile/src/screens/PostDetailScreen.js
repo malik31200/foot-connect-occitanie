@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react'
 import {
     View, Text, Image, StyleSheet, FlatList,
-    TouchableOpacity, TextInput, Platform,
+    TouchableOpacity, Pressable, TextInput, Platform,
     ActivityIndicator, Alert, Dimensions,
     Modal, Keyboard, Share
 } from 'react-native'
@@ -9,25 +9,102 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { VideoView, useVideoPlayer } from 'expo-video'
+import Slider from '@react-native-community/slider'
 import OccitanCross from '../components/OccitanCross'
 import { useAuth } from '../context/AuthContext'
 import client from '../api/client'
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 
-// ─── Lecteur vidéo ─────────────────────────────────────────────────────────────
+// ─── Lecteur vidéo style TikTok ─────────────────────────────────────────────────
+// Pressable EN FRÈRE au-dessus de VideoView (pas en parent) : depuis le fix
+// Android d'expo-video 2.1.0, VideoView redispatche ses touches vers RN et peut
+// voler le responder à un Pressable parent. En sibling par-dessus, c'est lui
+// qui capte le tap en premier.
 function VideoItem({ uri, isActive, height }) {
     const player = useVideoPlayer(uri, p => { p.loop = true })
+    const [paused, setPaused] = useState(false)
+    const [showIcon, setShowIcon] = useState(false)
+    const [currentTime, setCurrentTime] = useState(0)
+    const [duration, setDuration] = useState(0)
+    const [isSeeking, setIsSeeking] = useState(false)
+    const hideTimer = useRef(null)
+    const itemHeight = height || SCREEN_HEIGHT
+
     useEffect(() => {
-        isActive ? player.play() : player.pause()
-    }, [isActive])
+        if (isActive) {
+            player.play()
+            setPaused(false)
+        } else {
+            player.pause()
+            setPaused(true)
+            setShowIcon(false)
+            if (hideTimer.current) clearTimeout(hideTimer.current)
+        }
+    }, [isActive, player])
+
+    useEffect(() => {
+        const sub = player.addListener('timeUpdate', ({ currentTime: t }) => {
+            if (!isSeeking) setCurrentTime(t)
+        })
+        return () => sub.remove()
+    }, [player, isSeeking])
+
+    useEffect(() => {
+        const sub = player.addListener('statusChange', ({ status }) => {
+            if (status === 'readyToPlay') setDuration(player.duration)
+        })
+        return () => sub.remove()
+    }, [player])
+
+    function handleTap() {
+        if (paused) { player.play(); setPaused(false) }
+        else { player.pause(); setPaused(true) }
+        setShowIcon(true)
+        if (hideTimer.current) clearTimeout(hideTimer.current)
+        hideTimer.current = setTimeout(() => setShowIcon(false), 1500)
+    }
+
     return (
-        <VideoView
-            player={player}
-            style={{ width: SCREEN_WIDTH, height: height || SCREEN_HEIGHT }}
-            contentFit="contain"
-            nativeControls={false}
-        />
+        <View style={{ width: SCREEN_WIDTH, height: itemHeight, backgroundColor: '#000' }}>
+            <VideoView
+                player={player}
+                style={{ width: SCREEN_WIDTH, height: itemHeight }}
+                contentFit="contain"
+                nativeControls={false}
+            />
+
+            <Pressable style={StyleSheet.absoluteFill} onPress={handleTap}>
+                {showIcon && (
+                    <View style={styles.vidControlCenter} pointerEvents="none">
+                        <View style={styles.vidControlCircle}>
+                            <Ionicons name={paused ? 'play' : 'pause'} size={36} color="#fff" />
+                        </View>
+                    </View>
+                )}
+            </Pressable>
+
+            {duration > 0 && (
+                <View style={styles.seekContainer} pointerEvents="box-none">
+                    <Slider
+                        style={styles.slider}
+                        minimumValue={0}
+                        maximumValue={duration}
+                        value={Math.min(currentTime, duration)}
+                        onSlidingStart={() => setIsSeeking(true)}
+                        onValueChange={val => setCurrentTime(val)}
+                        onSlidingComplete={val => {
+                            player.currentTime = val
+                            setCurrentTime(val)
+                            setIsSeeking(false)
+                        }}
+                        minimumTrackTintColor="#fff"
+                        maximumTrackTintColor="rgba(255,255,255,0.35)"
+                        thumbTintColor="#fff"
+                    />
+                </View>
+            )}
+        </View>
     )
 }
 
@@ -552,6 +629,35 @@ export default function PostDetailScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
     card: { width: SCREEN_WIDTH, backgroundColor: '#0E0B0A' },
+
+    // --- Contrôles vidéo TikTok ---
+    vidControlCenter: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    vidControlCircle: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        backgroundColor: 'rgba(0,0,0,0.55)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    seekContainer: {
+        position: 'absolute',
+        bottom: 85,
+        left: 10,
+        right: 10,
+        height: 50,
+        justifyContent: 'center',
+        zIndex: 9999,
+        elevation: 9999,
+    },
+    slider: {
+        width: '100%',
+        height: 50,
+    },
 
     dotsContainer: {
         position: 'absolute', top: 80,

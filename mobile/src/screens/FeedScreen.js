@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import {
-    View, Text, FlatList, Image, TouchableOpacity,
+    View, Text, FlatList, Image, TouchableOpacity, Pressable,
     StyleSheet, ActivityIndicator, Dimensions,
     Modal, TextInput, Platform, Alert, Keyboard, Share
 } from 'react-native'
@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { VideoView, useVideoPlayer } from 'expo-video'
+import Slider from '@react-native-community/slider'
 import OccitanCross from '../components/OccitanCross'
 import client from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -17,27 +18,103 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window')
 
 const CARD_HEIGHT = SCREEN_HEIGHT
 
-// --- Lecteur vidéo natif avec expo-video ---
-// nativeControls={true} : pause/play/seek natifs, s'affichent au tap, se cachent seuls
-// isActive = false → pause automatique (scroll ou changement d'onglet)
+// --- Lecteur vidéo style TikTok ---
+// nativeControls={false} → pas de contrôles ExoPlayer
+// Pressable capte les taps → pause/play + icône 1.5s
+// Slider en dehors du Pressable → seek interactif
 function VideoItem({ uri, width, height, isActive }) {
     const player = useVideoPlayer(uri || '', p => { p.loop = true })
+    const [paused, setPaused] = useState(false)
+    const [showIcon, setShowIcon] = useState(false)
+    const [currentTime, setCurrentTime] = useState(0)
+    const [duration, setDuration] = useState(0)
+    const [isSeeking, setIsSeeking] = useState(false)
+    const hideTimer = useRef(null)
 
+    // Play/pause selon scroll (isActive)
     useEffect(() => {
         if (isActive) {
             player.play()
+            setPaused(false)
         } else {
             player.pause()
+            setPaused(true)
+            setShowIcon(false)
+            if (hideTimer.current) clearTimeout(hideTimer.current)
         }
-    }, [isActive])
+    }, [isActive, player])
+
+    // Progression en temps réel (pause pendant le seek)
+    useEffect(() => {
+        const sub = player.addListener('timeUpdate', ({ currentTime: t }) => {
+            if (!isSeeking) setCurrentTime(t)
+        })
+        return () => sub.remove()
+    }, [player, isSeeking])
+
+    // Durée dès que la vidéo est prête
+    useEffect(() => {
+        const sub = player.addListener('statusChange', ({ status }) => {
+            if (status === 'readyToPlay') setDuration(player.duration)
+        })
+        return () => sub.remove()
+    }, [player])
+
+    // Tap : toggle pause + icône 1.5s
+    function handleTap() {
+        if (paused) { player.play(); setPaused(false) }
+        else { player.pause(); setPaused(true) }
+        setShowIcon(true)
+        if (hideTimer.current) clearTimeout(hideTimer.current)
+        hideTimer.current = setTimeout(() => setShowIcon(false), 1500)
+    }
 
     return (
-        <VideoView
-            player={player}
-            style={{ width, height }}
-            contentFit="contain"
-            nativeControls={true}
-        />
+        <View style={{ width, height, backgroundColor: '#000' }}>
+            <VideoView
+                player={player}
+                style={{ width, height }}
+                contentFit="contain"
+                nativeControls={false}
+            />
+
+            {/* Pressable EN FRÈRE au-dessus de la VideoView (pas en parent) :
+                depuis le fix Android d'expo-video 2.1.0, VideoView redispatche
+                ses propres touches vers RN et peut voler le responder à un
+                Pressable parent. En sibling par-dessus, c'est lui qui capte
+                le tap en premier. */}
+            <Pressable style={StyleSheet.absoluteFill} onPress={handleTap}>
+                {showIcon && (
+                    <View style={styles.vidControlCenter} pointerEvents="none">
+                        <View style={styles.vidControlCircle}>
+                            <Ionicons name={paused ? 'play' : 'pause'} size={36} color="#fff" />
+                        </View>
+                    </View>
+                )}
+            </Pressable>
+
+            {/* Slider en dehors du Pressable — pointerEvents="box-none" laisse passer les touches vers le Slider */}
+            {duration > 0 && (
+                <View style={styles.seekContainer} pointerEvents="box-none">
+                    <Slider
+                        style={styles.slider}
+                        minimumValue={0}
+                        maximumValue={duration}
+                        value={Math.min(currentTime, duration)}
+                        onSlidingStart={() => setIsSeeking(true)}
+                        onValueChange={val => setCurrentTime(val)}
+                        onSlidingComplete={val => {
+                            player.currentTime = val
+                            setCurrentTime(val)
+                            setIsSeeking(false)
+                        }}
+                        minimumTrackTintColor="#fff"
+                        maximumTrackTintColor="rgba(255,255,255,0.35)"
+                        thumbTintColor="#fff"
+                    />
+                </View>
+            )}
+        </View>
     )
 }
 
@@ -104,6 +181,7 @@ function PostCard({ post, onLike, onComment, onDelete, onReport, currentUserId, 
                 colors={['rgba(14,11,10,0.55)', 'transparent', 'rgba(14,11,10,0.85)']}
                 locations={[0, 0.25, 1]}
                 style={styles.overlay}
+                pointerEvents="none"
             />
 
             {medias.length > 1 && (
@@ -590,6 +668,35 @@ export default function FeedScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    // --- Contrôles vidéo TikTok ---
+    vidControlCenter: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    vidControlCircle: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        backgroundColor: 'rgba(0,0,0,0.55)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    seekContainer: {
+        position: 'absolute',
+        bottom: 85,
+        left: 10,
+        right: 10,
+        height: 50,
+        justifyContent: 'center',
+        zIndex: 9999,
+        elevation: 9999,
+    },
+    slider: {
+        width: '100%',
+        height: 50,
+    },
+    // --- Styles communs ---
     loading: {
         flex: 1,
         backgroundColor: '#0E0B0A',
