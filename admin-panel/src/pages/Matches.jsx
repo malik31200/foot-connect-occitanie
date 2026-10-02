@@ -170,7 +170,7 @@ export default function Matches() {
     }
 
     return (
-        <div style={{ padding: 24 }}>
+        <div className="admin-page">
             <h1>Matchs</h1>
 
             {/* --- Formulaire création match --- */}

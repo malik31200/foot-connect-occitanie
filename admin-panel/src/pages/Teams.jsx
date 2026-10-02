@@ -121,7 +121,7 @@ export default function Teams() {
     }
 
     return (
-        <div style={{ padding: 24 }}>
+        <div className="admin-page">
             <h1>Équipes</h1>
 
             <h2>Ajouter une équipe</h2>

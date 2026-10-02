@@ -23,7 +23,7 @@ export default function Login({ onLogin }) {
     }
 
     return (
-        <div style={{ maxWidth: 400, margin: '100px auto', padding: 24 }}>
+        <div className="admin-login-box" style={{ maxWidth: 400, margin: '100px auto', padding: 24 }}>
             <h1>Admin - Foot Connect Occitanie</h1>
             <form onSubmit={handleSubmit}>
                 <div>

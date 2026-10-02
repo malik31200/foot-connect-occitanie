@@ -130,7 +130,7 @@ export default function Moderation() {
     ) : null
 
     return (
-        <div style={{ padding: 24 }}>
+        <div className="admin-page">
             <h1>Modération</h1>
 
             {/* ── Onglets ── */}

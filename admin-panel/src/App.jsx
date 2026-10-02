@@ -10,16 +10,16 @@ import Moderation from './pages/Moderation'
 
 function Nav({ onLogout }) {
   return (
-    <nav style={{ padding: '12px 24px', background: '#1f1f1f', display: 'flex', gap: 24 }}>
-      <Link to="/" style={{ color: 'white' }}>Dashboard</Link>
-      <Link to="/clubs" style={{ color: 'white' }}>Clubs</Link>
-      <Link to="/teams" style={{ color: 'white' }}>Équipes</Link>
-      <Link to="/matches" style={{ color: 'white' }}>Matchs</Link>
-      <Link to="/standings" style={{ color: 'white' }}>Classements</Link>
-      <Link to="/moderation" style={{ color: 'white' }}>Modération</Link>
-    <button onClick={onLogout} style={{ marginLeft: 'auto', color: 'white', background: 'none', border: 'none', cursor: 'pointer' }}>
-      Déconnexion
-    </button>
+    <nav className="admin-nav">
+      <Link to="/" className="admin-nav-link">Dashboard</Link>
+      <Link to="/clubs" className="admin-nav-link">Clubs</Link>
+      <Link to="/teams" className="admin-nav-link">Équipes</Link>
+      <Link to="/matches" className="admin-nav-link">Matchs</Link>
+      <Link to="/standings" className="admin-nav-link">Classements</Link>
+      <Link to="/moderation" className="admin-nav-link">Modération</Link>
+      <button onClick={onLogout} className="admin-nav-logout">
+        Déconnexion
+      </button>
     </nav>
   )
 }

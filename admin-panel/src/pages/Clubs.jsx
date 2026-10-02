@@ -52,7 +52,7 @@ export default function Clubs() {
     }
 
     return (
-        <div style={{ padding: 24 }}>
+        <div className="admin-page">
             <h1>Clubs</h1>
 
             <h2>Ajouter un club</h2>

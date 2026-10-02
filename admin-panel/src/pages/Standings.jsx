@@ -28,7 +28,7 @@ export default function Standings() {
     }
 
     return (
-        <div style={{ padding: 24 }}>
+        <div className="admin-page">
             <h1>Classement</h1>
 
             <form onSubmit={handleSubmit} style={{ marginBottom: 24, display: 'flex', gap: 12 }}>
