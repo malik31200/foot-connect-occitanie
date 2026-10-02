@@ -39,5 +39,10 @@ class PostSerializer(serializers.ModelSerializer):
             'home_team': obj.match.home_team.name,
             'away_team': obj.match.away_team.name,
             'date_time': obj.match.date_time,
+            'category': obj.match.category,
+            'group_name': obj.match.group_name,
+            'status': obj.match.status,
+            'home_score': obj.match.home_score,
+            'away_score': obj.match.away_score,
         }
 

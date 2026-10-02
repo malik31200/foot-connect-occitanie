@@ -279,8 +279,17 @@ function PostCard({ post, onLike, onComment, onDelete, onReport, currentUserId, 
                 {post.match_info && (
                     <View style={styles.matchPill}>
                         <Text style={styles.matchPillText}>
-                            {post.match_info.home_team} · {post.match_info.away_team}
+                            {post.match_info.home_team}
+                            {post.match_info.status === 'finished' && post.match_info.home_score !== null
+                                ? ` ${post.match_info.home_score} - ${post.match_info.away_score} `
+                                : ' · '}
+                            {post.match_info.away_team}
                         </Text>
+                        {(post.match_info.category || post.match_info.group_name) && (
+                            <Text style={styles.matchPillSubtext}>
+                                {[post.match_info.category, post.match_info.group_name].filter(Boolean).join(' · ')}
+                            </Text>
+                        )}
                     </View>
                 )}
             </View>
@@ -825,6 +834,12 @@ const styles = StyleSheet.create({
         fontFamily: 'PlusJakartaSans_700Bold',
         fontSize: 12,
         color: '#fff',
+    },
+    matchPillSubtext: {
+        fontFamily: 'PlusJakartaSans_600SemiBold',
+        fontSize: 10,
+        color: 'rgba(255,255,255,0.8)',
+        marginTop: 2,
     },
     dotsContainer: {
         position: 'absolute',

@@ -266,9 +266,20 @@ function PostCard({ post, onLike, onOpenComments, onDelete, onReport, currentUse
                 {post.match_info && (
                     <View style={styles.matchPill}>
                         <Ionicons name="football-outline" size={12} color="#F5C518" />
-                        <Text style={styles.matchPillText} numberOfLines={1}>
-                            {post.match_info.home_team} · {post.match_info.away_team}
-                        </Text>
+                        <View>
+                            <Text style={styles.matchPillText} numberOfLines={1}>
+                                {post.match_info.home_team}
+                                {post.match_info.status === 'finished' && post.match_info.home_score !== null
+                                    ? ` ${post.match_info.home_score} - ${post.match_info.away_score} `
+                                    : ' · '}
+                                {post.match_info.away_team}
+                            </Text>
+                            {(post.match_info.category || post.match_info.group_name) && (
+                                <Text style={styles.matchPillSubtext} numberOfLines={1}>
+                                    {[post.match_info.category, post.match_info.group_name].filter(Boolean).join(' · ')}
+                                </Text>
+                            )}
+                        </View>
                     </View>
                 )}
             </View>
@@ -721,6 +732,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start',
     },
     matchPillText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 11, color: '#F5C518' },
+    matchPillSubtext: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 9, color: 'rgba(255,255,255,0.65)', marginTop: 1 },
 
     // Modal commentaires
     modalOverlay: { flex: 1 },
