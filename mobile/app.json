@@ -2,7 +2,7 @@
   "expo": {
     "name": "Foot Connect Occitanie",
     "slug": "foot-connect-occitanie",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "fr.footconnect.occitanie",
-      "buildNumber": "17",
+      "buildNumber": "18",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -27,7 +27,7 @@
       },
       "softwareKeyboardLayoutMode": "pan",
       "package": "fr.footconnect.occitanie",
-      "versionCode": 17
+      "versionCode": 18
     },
     "web": {
       "favicon": "./assets/favicon.png"
