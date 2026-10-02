@@ -67,6 +67,7 @@ export default function Clubs() {
             {error && <p style={{ color: 'red' }}>{error}</p>}
 
             <h2>Liste des clubs ({clubs.length})</h2>
+            <div className="table-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
@@ -114,6 +115,7 @@ export default function Clubs() {
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     )
 }

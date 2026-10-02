@@ -40,6 +40,7 @@ export default function Standings() {
 
             <p>{standings.length} équipe(s)</p>
 
+            <div className="table-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                     <tr>
@@ -72,6 +73,7 @@ export default function Standings() {
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     )
 }

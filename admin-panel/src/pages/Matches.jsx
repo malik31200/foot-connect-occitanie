@@ -238,6 +238,7 @@ export default function Matches() {
                 </button>
             </div>
 
+            <div className="table-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
@@ -357,6 +358,7 @@ export default function Matches() {
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     )
 }

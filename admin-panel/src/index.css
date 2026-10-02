@@ -124,12 +124,20 @@ table {
   width: 100%;
 }
 
+/* ─── Tableaux scrollables sur mobile ──────────────────────────────────
+   Forcer display:block sur <table> casse le contexte de layout table
+   (thead/tbody/td gardent leur display d'origine) et donne un scroll
+   tactile peu fiable. On scroll un vrai <div> englobant à la place. */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 @media (max-width: 768px) {
-  table {
-    display: block;
-    overflow-x: auto;
+  .table-scroll td,
+  .table-scroll th {
     white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
   }
 }
 

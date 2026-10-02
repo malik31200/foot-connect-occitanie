@@ -64,6 +64,7 @@ export default function Dashboard() {
 
             <div style={{ marginTop: 32 }}>
                 <h2>Historique (30 derniers synchros)</h2>
+                <div className="table-scroll">
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr>
@@ -84,6 +85,7 @@ export default function Dashboard() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     )

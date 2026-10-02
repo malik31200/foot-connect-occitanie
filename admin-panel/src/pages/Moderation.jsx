@@ -158,6 +158,7 @@ export default function Moderation() {
                     {postReports.length > 0 && (
                         <>
                             <h2>Posts signalés ({postReports.length})</h2>
+                            <div className="table-scroll">
                             <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24 }}>
                                 <thead>
                                     <tr style={{ background: '#f9f9f9' }}>
@@ -187,12 +188,14 @@ export default function Moderation() {
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
                         </>
                     )}
 
                     {commentReports.length > 0 && (
                         <>
                             <h2>Commentaires signalés ({commentReports.length})</h2>
+                            <div className="table-scroll">
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ background: '#f9f9f9' }}>
@@ -222,6 +225,7 @@ export default function Moderation() {
                                     ))}
                                 </tbody>
                             </table>
+                            </div>
                         </>
                     )}
                 </div>
@@ -231,6 +235,7 @@ export default function Moderation() {
                 ONGLET POSTS
             ══════════════════════════════════════════════════ */}
             {tab === TAB.POSTS && (
+                <div className="table-scroll">
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ background: '#f9f9f9' }}>
@@ -269,6 +274,7 @@ export default function Moderation() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             )}
 
             {/* ══════════════════════════════════════════════════
@@ -282,6 +288,7 @@ export default function Moderation() {
                         onChange={e => setUserSearch(e.target.value)}
                         style={{ padding: '8px 14px', width: 280, borderRadius: 8, border: '1px solid #ddd', marginBottom: 16 }}
                     />
+                    <div className="table-scroll">
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: '#f9f9f9' }}>
@@ -322,6 +329,7 @@ export default function Moderation() {
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             )}
         </div>

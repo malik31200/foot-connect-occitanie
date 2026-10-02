@@ -169,6 +169,7 @@ export default function Teams() {
 
             <p style={{ margin: '8px 0' }}>{teams.length} équipe(s)</p>
 
+            <div className="table-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
@@ -250,6 +251,7 @@ export default function Teams() {
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     )
 }
