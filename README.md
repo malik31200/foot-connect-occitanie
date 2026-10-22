@@ -5,6 +5,35 @@ Application mobile dédiée au football amateur en Occitanie : suivi sportif (ma
 - **Mobile** : iOS (App Store) et Android (Play Store)
 - **Production** : <https://footconnect-occitanie.fr>
 
+## Aperçu
+
+<table>
+  <tr>
+    <td width="25%"><img src="docs/screenshots/feed.jpg" width="100%" alt="Feed vidéo" /></td>
+    <td width="25%"><img src="docs/screenshots/commentaires.jpg" width="100%" alt="Commentaires" /></td>
+    <td width="25%"><img src="docs/screenshots/matchs-a-venir.jpg" width="100%" alt="Matchs à venir" /></td>
+    <td width="25%"><img src="docs/screenshots/matchs-termines.jpg" width="100%" alt="Matchs terminés" /></td>
+  </tr>
+  <tr>
+    <td width="25%" align="center">Feed vidéo</td>
+    <td width="25%" align="center">Commentaires</td>
+    <td width="25%" align="center">Matchs à venir</td>
+    <td width="25%" align="center">Résultats</td>
+  </tr>
+  <tr>
+    <td width="25%"><img src="docs/screenshots/classement.jpg" width="100%" alt="Classement" /></td>
+    <td width="25%"><img src="docs/screenshots/publier.jpg" width="100%" alt="Publier" /></td>
+    <td width="25%"><img src="docs/screenshots/profil.jpg" width="100%" alt="Profil" /></td>
+    <td width="25%"><img src="docs/screenshots/messages.jpg" width="100%" alt="Messages" /></td>
+  </tr>
+  <tr>
+    <td width="25%" align="center">Classement</td>
+    <td width="25%" align="center">Publier un post</td>
+    <td width="25%" align="center">Profil</td>
+    <td width="25%" align="center">Messagerie</td>
+  </tr>
+</table>
+
 ## Stack technique
 
 ### Mobile — `mobile/`
