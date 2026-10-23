@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import client from '../api/client'
 
+// Le champ datetime-local travaille en heure locale (Paris), l'API en UTC.
+// Ces deux helpers font la conversion dans les deux sens.
+const isoToLocalInput = (iso) => {
+    if (!iso) return ''
+    const d = new Date(iso)
+    const pad = (n) => String(n).padStart(2, '0')
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+const localInputToIso = (value) => (value ? new Date(value).toISOString() : value)
+
 export default function Matches() {
     const [matches, setMatches] = useState([])
     const [teams, setTeams] = useState([])
@@ -100,6 +110,7 @@ export default function Matches() {
         try {
             await client.post('/matches/', {
                 ...createForm,
+                date_time: localInputToIso(createForm.date_time),
                 matchday: parseInt(createForm.matchday),
             })
             setCreateForm({
@@ -137,7 +148,7 @@ export default function Matches() {
     const handleEditStart = (match) => {
         setEditingId(match.id)
         setEditForm({
-            date_time: match.date_time ? match.date_time.slice(0, 16) : '',
+            date_time: isoToLocalInput(match.date_time),
             venue: match.venue || '',
             status: match.status || 'scheduled',
             group_name: match.group_name || '',
@@ -149,6 +160,7 @@ export default function Matches() {
         try {
             await client.patch(`/matches/${id}/`, {
                 ...editForm,
+                date_time: localInputToIso(editForm.date_time),
                 matchday: parseInt(editForm.matchday),
             })
             setEditingId(null)
