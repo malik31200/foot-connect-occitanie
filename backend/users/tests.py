@@ -55,3 +55,46 @@ class AuthTests(APITestCase):
         response = self.client.get('/api/auth/me')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+
+
+class StatsTests(APITestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        self.user = User.objects.create_user(username='joueur', email='j@test.com', password='Test1234!')
+        self.admin = User.objects.create_user(username='admin', email='a@test.com', password='Test1234!', role='admin')
+
+    def auth(self, user):
+        from rest_framework_simplejwt.tokens import RefreshToken
+        token = RefreshToken.for_user(user).access_token
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+
+    def test_activity_recorded_once_per_day(self):
+        from .models import DailyActivity
+        self.auth(self.user)
+        self.client.get('/api/auth/me/')
+        self.client.get('/api/auth/me/')
+        self.assertEqual(DailyActivity.objects.filter(user=self.user).count(), 1)
+
+    def test_admin_activity_not_recorded(self):
+        from .models import DailyActivity
+        self.auth(self.admin)
+        self.client.get('/api/auth/me/')
+        self.assertEqual(DailyActivity.objects.count(), 0)
+
+    def test_stats_admin_only(self):
+        self.auth(self.user)
+        response = self.client.get('/api/admin/stats/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_stats_content(self):
+        self.auth(self.user)
+        self.client.get('/api/auth/me/')  # le joueur utilise l'appli aujourd'hui
+        self.auth(self.admin)
+        response = self.client.get('/api/admin/stats/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['kpis']['users_total'], 1)  # admin exclu
+        self.assertEqual(response.data['kpis']['active_today'], 1)
+        self.assertEqual(len(response.data['daily']), 30)
+        self.assertEqual(response.data['daily'][-1]['active'], 1)
+        self.assertEqual(response.data['daily'][-1]['signups'], 1)

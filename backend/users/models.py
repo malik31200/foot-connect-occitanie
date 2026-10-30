@@ -40,3 +40,15 @@ class PasswordResetToken(models.Model):
 
     def __str__(self):
         return f"Reset token for {self.user.email}"
+
+
+class DailyActivity(models.Model):
+    """Une ligne par utilisateur et par jour où il a utilisé l'appli (heure de Paris)."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='daily_activity')
+    date = models.DateField(db_index=True)
+
+    class Meta:
+        unique_together = [('user', 'date')]
+
+    def __str__(self):
+        return f"{self.user} actif le {self.date}"

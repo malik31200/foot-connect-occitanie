@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from users.views import UserProfileView, FollowersListView, FollowingListView
 from posts.views import MediaPresignView
+from users.stats_views import AdminStatsView
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),
@@ -34,4 +35,5 @@ urlpatterns = [
     path('api/users/<int:user_id>/following/', FollowingListView.as_view()),
     path('api/', include('messaging.urls')),
     path('api/media/presign/', MediaPresignView.as_view()),
+    path('api/admin/stats/', AdminStatsView.as_view()),
 ]
