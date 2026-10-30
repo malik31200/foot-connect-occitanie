@@ -43,7 +43,13 @@ function DailyBars({ data, field, color = RED }) {
                         <rect x={x} y={H - h} width={bw} height={Math.max(h, d[field] ? 2 : 0)} rx="2" fill={color} />
                         {/* on écrit la date une barre sur 5 + la dernière */}
                         {(i % 5 === 0 || i === data.length - 1) && (
-                            <text x={x + bw / 2} y={H + 15} fontSize="11" textAnchor="middle" fill="currentColor">
+                            <text
+                                x={i === 0 ? x : i === data.length - 1 ? x + bw : x + bw / 2}
+                                y={H + 15}
+                                fontSize="11"
+                                textAnchor={i === 0 ? 'start' : i === data.length - 1 ? 'end' : 'middle'}
+                                fill="currentColor"
+                            >
                                 {fmtDay(d.date)}
                             </text>
                         )}
