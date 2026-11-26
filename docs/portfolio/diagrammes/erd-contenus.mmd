@@ -1,0 +1,67 @@
+erDiagram
+    USER ||--o{ POST : "publie"
+    USER ||--o{ COMMENT : "écrit"
+    USER ||--o{ LIKE : "donne"
+    USER ||--o{ COMMENT_LIKE : "donne"
+    USER ||--o{ REPORT : "signale"
+    USER ||--o{ COMMENT_REPORT : "signale"
+    MATCH |o--o{ POST : "illustré par"
+    POST ||--|{ POST_MEDIA : "contient"
+    POST ||--o{ COMMENT : "reçoit"
+    POST ||--o{ LIKE : "reçoit"
+    POST ||--o{ REPORT : "est signalé"
+    COMMENT |o--o{ COMMENT : "réponse à (parent)"
+    COMMENT ||--o{ COMMENT_LIKE : "reçoit"
+    COMMENT ||--o{ COMMENT_REPORT : "est signalé"
+    USER {
+        bigint id PK
+    }
+    MATCH {
+        bigint id PK
+    }
+    POST {
+        bigint id PK
+        bigint author_id FK
+        bigint match_id FK "nullable"
+        text caption
+        int likes_count
+        timestamp created_at
+    }
+    POST_MEDIA {
+        bigint id PK
+        bigint post_id FK
+        varchar media_type "photo | video"
+        varchar media_url "Cloudflare R2"
+        int order
+    }
+    COMMENT {
+        bigint id PK
+        bigint post_id FK
+        bigint author_id FK
+        bigint parent_id FK "nullable"
+        text content
+        bool is_edited
+        timestamp created_at
+    }
+    LIKE {
+        bigint id PK
+        bigint user_id FK "UK avec post_id"
+        bigint post_id FK
+    }
+    COMMENT_LIKE {
+        bigint id PK
+        bigint user_id FK "UK avec comment_id"
+        bigint comment_id FK
+    }
+    REPORT {
+        bigint id PK
+        bigint reporter_id FK "UK avec post_id"
+        bigint post_id FK
+        varchar reason "spam | inappropriate | harassment | other"
+    }
+    COMMENT_REPORT {
+        bigint id PK
+        bigint reporter_id FK "UK avec comment_id"
+        bigint comment_id FK
+        varchar reason
+    }

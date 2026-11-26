@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    actor U as Parent (appli mobile)
+    participant N as Nginx (HTTPS)
+    participant A as API Django
+    participant R as Cloudflare R2
+    participant D as PostgreSQL
+    U->>N: POST /api/media/presign/ + jeton JWT
+    N->>A: transmet la requête
+    A->>A: vérifie le jeton JWT
+    A-->>U: 200 — URL d'envoi signée (valable 1 heure)
+    U->>R: PUT du fichier photo ou vidéo
+    R-->>U: 200 — fichier stocké
+    U->>N: POST /api/posts/ (match_id, légende, URL des médias) + JWT
+    N->>A: transmet la requête
+    A->>A: valide les données (au moins un média)
+    A->>D: INSERT du post et de ses médias
+    D-->>A: post créé
+    A-->>U: 201 — post en JSON
+    Note over U: le post apparaît dans le fil et sur le profil

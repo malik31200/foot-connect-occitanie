@@ -1,0 +1,66 @@
+flowchart TB
+    subgraph USERS["Utilisateurs"]
+        direction LR
+        MOB["Application mobile<br/>React Native + Expo<br/>iOS et Android"]
+        ADM["Back-office admin<br/>React + Vite<br/>navigateur web"]
+    end
+
+    subgraph VPS["Serveur VPS Hetzner — Ubuntu 26.04 — footconnect-occitanie.fr"]
+        NGX["Nginx — HTTPS Let's Encrypt<br/>redirection HTTP → HTTPS"]
+        STATIC["Back-office<br/>(fichiers statiques)"]
+        GUN["Gunicorn (WSGI)"]
+        API["API REST Django + DRF<br/>authentification JWT · rôles"]
+        DB[("PostgreSQL 18")]
+        REDIS[("Redis 8")]
+        IMP["Import des calendriers<br/>exportés du site public FFF<br/>(commande Django)"]
+        CEL["Celery<br/>recalcul des classements"]
+    end
+
+    subgraph EXT["Services externes"]
+        direction LR
+        RES["Resend<br/>envoi d'emails"]
+        PUSH["Expo Push<br/>notifications (V1)"]
+        R2[("Cloudflare R2<br/>photos et vidéos<br/>chiffrées AES-256")]
+    end
+
+    subgraph BACKUP["Sauvegardes (V1)"]
+        direction LR
+        HBK["Sauvegarde Hetzner<br/>du serveur, quotidienne"]
+        DUMP["pg_dump quotidien<br/>chiffré AES-256"]
+    end
+
+    subgraph DEPLOY["Déploiement"]
+        direction LR
+        GH["GitHub"] --> EAS["Expo EAS Build"] --> STORES["App Store · Google Play"]
+    end
+
+    MOB -- "HTTPS + jeton JWT" --> NGX
+    ADM -- "HTTPS + jeton JWT" --> NGX
+    NGX -- "/" --> STATIC
+    NGX -- "/api/*" --> GUN --> API
+    API -- "ORM" --> DB
+    API -- "tâches" --> REDIS --> CEL --> DB
+    IMP --> DB
+    MOB -- "envoi et lecture des médias<br/>(URL signée par l'API)" --> R2
+    API -- "codes par email" --> RES
+    API -.-> PUSH -. "notifications" .-> MOB
+    DB -.-> DUMP -. "copie hors serveur" .-> R2
+    VPS -.-> HBK
+    GH -- "git pull + redémarrage" --> VPS
+    STORES -- "installation" --> MOB
+
+    classDef user fill:#FFE8EC,stroke:#E4002B,color:#1A1614
+    classDef srv fill:#FFFFFF,stroke:#5C564F,color:#1A1614
+    classDef ext fill:#E7F1FB,stroke:#3B6EA8,color:#1A1614
+    classDef bkp fill:#E5F4E4,stroke:#22A05A,color:#1A1614
+    classDef dep fill:#FFF6D6,stroke:#C9A100,color:#1A1614
+    class MOB,ADM user
+    class NGX,STATIC,GUN,API,DB,REDIS,CEL,IMP srv
+    class R2,RES,PUSH ext
+    class HBK,DUMP bkp
+    class GH,EAS,STORES dep
+    style USERS fill:#FAFAFA,stroke:#CCCCCC
+    style VPS fill:#F6F3EE,stroke:#5C564F
+    style EXT fill:#FAFAFA,stroke:#CCCCCC
+    style BACKUP fill:#FAFAFA,stroke:#CCCCCC
+    style DEPLOY fill:#FAFAFA,stroke:#CCCCCC

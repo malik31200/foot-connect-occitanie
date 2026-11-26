@@ -166,6 +166,27 @@ python manage.py collectstatic --noinput
 sudo systemctl restart gunicorn celery celerybeat
 ```
 
+## Tests
+
+[![Tests](https://github.com/malik31200/foot-connect-occitanie/actions/workflows/tests.yml/badge.svg)](https://github.com/malik31200/foot-connect-occitanie/actions/workflows/tests.yml)
+
+**87 tests automatiques** couvrent l'API Django (89 % du code back-end) : authentification, rôles et permissions admin, matchs, scores et calcul du classement, posts, commentaires, likes, abonnements, blocages, signalements et messagerie. Ils tournent automatiquement à chaque pull request grâce à GitHub Actions (avec PostgreSQL), qui vérifie aussi le build du back-office.
+
+```bash
+cd backend
+python manage.py test                      # lancer tous les tests (< 2 s)
+python manage.py test posts                # lancer les tests d'une seule application
+pip install coverage
+coverage run manage.py test && coverage report   # mesurer la couverture
+```
+
+| Document | Contenu |
+| --- | --- |
+| [docs/tests/rapport-tests.txt](docs/tests/rapport-tests.txt) | Résultat détaillé de la dernière exécution (87 tests, OK) |
+| [docs/tests/rapport-couverture.txt](docs/tests/rapport-couverture.txt) | Couverture du code, fichier par fichier |
+| [docs/tests/plan-tests-manuels.md](docs/tests/plan-tests-manuels.md) | Plan de tests manuels de l'appli mobile et du back-office (32 cas) |
+| [docs/tests/captures/](docs/tests/captures/) | Captures d'écran des tests manuels |
+
 ## Documentation
 
 - `CLAUDE.md` : cadrage produit, modèle de données, contrat API, architecture

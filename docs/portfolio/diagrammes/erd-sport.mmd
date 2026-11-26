@@ -1,0 +1,59 @@
+erDiagram
+    CLUB ||--o{ TEAM : "possède"
+    TEAM ||--o{ MATCH : "reçoit (home_team)"
+    TEAM ||--o{ MATCH : "se déplace (away_team)"
+    TEAM ||--o{ STANDING : "a un classement"
+    MATCH |o--o{ POST : "illustré par"
+    CLUB {
+        bigint id PK
+        varchar name
+        varchar city
+        varchar stadium
+        varchar logo_url
+        varchar fff_id UK
+    }
+    TEAM {
+        bigint id PK
+        bigint club_id FK
+        varchar name
+        varchar category
+        varchar group_name
+        varchar season
+        varchar fff_id UK
+    }
+    MATCH {
+        bigint id PK
+        bigint home_team_id FK
+        bigint away_team_id FK
+        varchar category
+        varchar season
+        varchar group_name
+        int matchday
+        timestamp date_time "UTC"
+        varchar venue
+        varchar status "scheduled | finished | postponed"
+        int home_score
+        int away_score
+        varchar source "fff | manual"
+        varchar fff_id UK
+        bool is_locked
+    }
+    STANDING {
+        bigint id PK
+        bigint team_id FK "UK avec category, season, group_name"
+        varchar category
+        varchar season
+        varchar group_name
+        int played
+        int won
+        int draw
+        int lost
+        int goals_for
+        int goals_against
+        int goal_diff
+        int points
+        int rank
+    }
+    POST {
+        bigint id PK
+    }

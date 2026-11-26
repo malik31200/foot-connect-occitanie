@@ -1,0 +1,145 @@
+Rapport d'exécution des tests du back-end — 26/11/2026 16:09
+Commande : python manage.py test -v 2
+
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Found 87 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: corsheaders, messages, rest_framework, staticfiles
+  Apply all migrations: admin, auth, clubs, contenttypes, interactions, matches, messaging, posts, scraper, sessions, standings, teams, users
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying users.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying clubs.0001_initial... OK
+  Applying clubs.0002_alter_club_fff_id... OK
+  Applying clubs.0003_club_stadium... OK
+  Applying teams.0001_initial... OK
+  Applying matches.0001_initial... OK
+  Applying matches.0002_delete_standing... OK
+  Applying posts.0001_initial... OK
+  Applying interactions.0001_initial... OK
+  Applying interactions.0002_block_report... OK
+  Applying interactions.0003_comment_like_comment_report... OK
+  Applying interactions.0004_comment_parent... OK
+  Applying messaging.0001_initial... OK
+  Applying posts.0002_alter_post_match... OK
+  Applying scraper.0001_initial... OK
+  Applying sessions.0001_initial... OK
+  Applying standings.0001_initial... OK
+  Applying teams.0002_alter_team_fff_id... OK
+  Applying users.0002_add_sport_role_and_avatar... OK
+  Applying users.0003_password_reset_token... OK
+  Applying users.0004_add_club_name... OK
+  Applying users.0005_alter_user_sport_role... OK
+ok
+ok
+test_author_edit_marks_comment_as_edited (interactions.tests.CommentTests.test_author_edit_marks_comment_as_edited) ... ok
+ok
+test_comment_like_toggle (interactions.tests.CommentTests.test_comment_like_toggle) ... ok
+test_create_comment_and_reply (interactions.tests.CommentTests.test_create_comment_and_reply) ... ok
+ok
+ok
+test_block_removes_follows_both_ways (interactions.tests.FollowAndBlockTests.test_block_removes_follows_both_ways) ... ok
+ok
+test_follow_toggle_and_counters (interactions.tests.FollowAndBlockTests.test_follow_toggle_and_counters) ... ok
+ok
+test_like_then_unlike (interactions.tests.LikeTests.test_like_then_unlike) ... ok
+ok
+test_admin_dismisses_report (interactions.tests.ReportTests.test_admin_dismisses_report) ... ok
+test_deleting_post_removes_its_reports (interactions.tests.ReportTests.test_deleting_post_removes_its_reports) ... ok
+test_report_post_once (interactions.tests.ReportTests.test_report_post_once) ... ok
+ok
+ok
+ok
+ok
+ok
+test_result_locks_match_and_updates_standings (matches.tests.MatchAdminTests.test_result_locks_match_and_updates_standings) ... ok
+ok
+ok
+test_categories_and_groups_lists (matches.tests.MatchReadTests.test_categories_and_groups_lists) ... ok
+test_dates_are_returned_in_utc (matches.tests.MatchReadTests.test_dates_are_returned_in_utc) ... ok
+test_filters_by_group_and_status (matches.tests.MatchReadTests.test_filters_by_group_and_status) ... ok
+test_matches_are_public (matches.tests.MatchReadTests.test_matches_are_public) ... ok
+ok
+test_conversation_is_created_once_whoever_starts_it (messaging.tests.MessagingTests.test_conversation_is_created_once_whoever_starts_it) ... ok
+ok
+ok
+test_send_and_read_messages (messaging.tests.MessagingTests.test_send_and_read_messages) ... ok
+test_sender_own_messages_are_not_marked_read (messaging.tests.MessagingTests.test_sender_own_messages_are_not_marked_read) ... ok
+test_admin_can_delete (posts.tests.DeletePostTests.test_admin_can_delete) ... ok
+test_author_can_delete (posts.tests.DeletePostTests.test_author_can_delete) ... ok
+ok
+ok
+test_blocked_user_does_not_see_my_posts_either (posts.tests.FeedAndSearchTests.test_blocked_user_does_not_see_my_posts_either) ... ok
+test_feed_newest_first_without_blocked_users (posts.tests.FeedAndSearchTests.test_feed_newest_first_without_blocked_users) ... ok
+ok
+test_search_by_team_and_username (posts.tests.FeedAndSearchTests.test_search_by_team_and_username) ... ok
+test_search_needs_two_characters (posts.tests.FeedAndSearchTests.test_search_needs_two_characters) ... ok
+ok
+test_presign_returns_signed_upload_url_and_public_url (posts.tests.MediaPresignTests.test_presign_returns_signed_upload_url_and_public_url) ... ok
+test_posts_of_a_profile (posts.tests.PublishTests.test_posts_of_a_profile) ... ok
+test_publish_post_linked_to_match (posts.tests.PublishTests.test_publish_post_linked_to_match) ... ok
+ok
+ok
+test_insert_new_match (scraper.tests.ScraperServiceTest.test_insert_new_match) ... ok
+test_service_does_not_create_synclog (scraper.tests.ScraperServiceTest.test_service_does_not_create_synclog) ... ok
+test_skip_locked_match (scraper.tests.ScraperServiceTest.test_skip_locked_match) ... [2026-11-26 15:09:35,388] WARNING scraper.service : Match 99999 is locked - skipping FFF update
+ok
+test_update_unlocked_match (scraper.tests.ScraperServiceTest.test_update_unlocked_match) ... ok
+test_head_to_head_breaks_tie_before_goal_difference (standings.tests.StandingCalculationTests.test_head_to_head_breaks_tie_before_goal_difference) ... ok
+test_points_win_draw_loss (standings.tests.StandingCalculationTests.test_points_win_draw_loss) ... ok
+test_recalculation_updates_existing_lines_without_duplicates (standings.tests.StandingCalculationTests.test_recalculation_updates_existing_lines_without_duplicates) ... ok
+test_scheduled_matches_are_ignored (standings.tests.StandingCalculationTests.test_scheduled_matches_are_ignored) ... ok
+test_standings_endpoint_is_public_and_sorted (standings.tests.StandingCalculationTests.test_standings_endpoint_is_public_and_sorted) ... ok
+test_categories_and_groups (teams.tests.TeamTests.test_categories_and_groups) ... ok
+ok
+test_filter_teams_by_group (teams.tests.TeamTests.test_filter_teams_by_group) ... ok
+test_set_home_venue_fills_only_empty_venues (teams.tests.TeamTests.test_set_home_venue_fills_only_empty_venues) ... ok
+test_delete_account_removes_all_personal_data (users.tests.AccountTests.test_delete_account_removes_all_personal_data) ... ok
+test_forgot_password_same_answer_whether_email_exists_or_not (users.tests.AccountTests.test_forgot_password_same_answer_whether_email_exists_or_not) ... ok
+ok
+test_password_is_hashed_in_database (users.tests.AccountTests.test_password_is_hashed_in_database) ... ok
+test_public_profile_does_not_expose_email (users.tests.AccountTests.test_public_profile_does_not_expose_email) ... ok
+test_refresh_token_returns_new_access_token (users.tests.AccountTests.test_refresh_token_returns_new_access_token) ... ok
+ok
+ok
+test_reset_password_with_valid_code (users.tests.AccountTests.test_reset_password_with_valid_code) ... ok
+test_update_profile (users.tests.AccountTests.test_update_profile) ... ok
+test_user_cannot_promote_himself_admin (users.tests.AccountTests.test_user_cannot_promote_himself_admin) ... ok
+ok
+ok
+ok
+ok
+ok
+test_login (users.tests.AuthTests.test_login) ... ok
+test_me_authentifie (users.tests.AuthTests.test_me_authentifie) ... ok
+ok
+test_register (users.tests.AuthTests.test_register) ... ok
+test_activity_recorded_once_per_day (users.tests.StatsTests.test_activity_recorded_once_per_day) ... ok
+test_admin_activity_not_recorded (users.tests.StatsTests.test_admin_activity_not_recorded) ... ok
+ok
+test_stats_content (users.tests.StatsTests.test_stats_content) ... ok
+----------------------------------------------------------------------
+Ran 87 tests in 0.759s
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+ OK
+System check identified no issues (0 silenced).

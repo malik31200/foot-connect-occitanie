@@ -1,0 +1,69 @@
+flowchart LR
+    VIS(["Visiteur"])
+    USR(["Utilisateur<br/>parent · joueur · supporter"])
+    COA(["Coach / Dirigeant"])
+    ADMIN(["Administrateur"])
+
+    subgraph SYS["Foot Connect Occitanie"]
+        direction TB
+        subgraph C1["Compte"]
+            UC1(["S'inscrire (CGU)"])
+            UC2(["Vérifier son email (V1)"])
+            UC3(["Se connecter / se déconnecter"])
+            UC4(["Réinitialiser ou changer<br/>son mot de passe"])
+            UC5(["Modifier son profil"])
+            UC6(["Supprimer son compte"])
+        end
+        subgraph C2["Suivi sportif"]
+            UC7(["Consulter les matchs<br/>à venir et terminés"])
+            UC8(["Consulter classement<br/>et calendrier"])
+        end
+        subgraph C3["Réseau social"]
+            UC9(["Publier photos ou vidéo<br/>d'un match"])
+            UC10(["Liker, commenter, partager"])
+            UC11(["Suivre un utilisateur"])
+            UC12(["Envoyer un message privé"])
+            UC13(["Rechercher"])
+            UC14(["Signaler un contenu,<br/>bloquer un utilisateur"])
+            UC15(["Recevoir des notifications (V1)"])
+        end
+        subgraph C4["Administration"]
+            UC16(["Proposer le score<br/>de son match (V1)"])
+            UC17(["Gérer clubs, équipes, matchs<br/>et importer les calendriers"])
+            UC18(["Saisir ou corriger un score"])
+            UC19(["Modérer posts, commentaires<br/>et utilisateurs"])
+            UC20(["Consulter les statistiques"])
+            UC21(["Valider un score proposé (V1)"])
+        end
+    end
+
+    RES[["Resend<br/>(emails)"]]
+    R2[["Cloudflare R2<br/>(médias)"]]
+    PUSH[["Expo Push (V1)"]]
+
+    VIS --- UC1
+    VIS --- UC7
+    VIS --- UC8
+    USR --- UC2 & UC3 & UC4 & UC5 & UC6
+    USR --- UC7 & UC8
+    USR --- UC9 & UC10 & UC11 & UC12 & UC13 & UC14 & UC15
+    COA -. "est un" .-> USR
+    COA --- UC16
+    ADMIN --- UC17 & UC18 & UC19 & UC20 & UC21
+    UC16 -. "validé par" .-> UC21
+    UC2 --- RES
+    UC4 --- RES
+    UC9 --- R2
+    UC15 --- PUSH
+
+    classDef actor fill:#FFE8EC,stroke:#E4002B,color:#1A1614,font-weight:bold
+    classDef uc fill:#FFFFFF,stroke:#5C564F,color:#1A1614
+    classDef ext fill:#E7F1FB,stroke:#3B6EA8,color:#1A1614
+    class VIS,USR,COA,ADMIN actor
+    class UC1,UC2,UC3,UC4,UC5,UC6,UC7,UC8,UC9,UC10,UC11,UC12,UC13,UC14,UC15,UC16,UC17,UC18,UC19,UC20,UC21 uc
+    class RES,R2,PUSH ext
+    style SYS fill:#F6F3EE,stroke:#5C564F
+    style C1 fill:#FAFAFA,stroke:#CCCCCC
+    style C2 fill:#FAFAFA,stroke:#CCCCCC
+    style C3 fill:#FAFAFA,stroke:#CCCCCC
+    style C4 fill:#FAFAFA,stroke:#CCCCCC

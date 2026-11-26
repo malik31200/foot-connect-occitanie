@@ -1,0 +1,52 @@
+Couverture du code back-end par les tests — 26/11/2026
+Commande : coverage run manage.py test && coverage report
+
+Name                          Stmts   Miss  Cover
+-------------------------------------------------
+clubs/models.py                  10      1    90%
+clubs/serializers.py             11      3    73%
+clubs/urls.py                     6      0   100%
+clubs/views.py                   23      0   100%
+config/celery.py                  6      0   100%
+config/settings.py               40      0   100%
+config/urls.py                    6      0   100%
+interactions/models.py           67      7    90%
+interactions/serializers.py      32      1    97%
+interactions/urls.py              6      0   100%
+interactions/views.py           118      3    97%
+matches/models.py                23      1    96%
+matches/serializers.py           12      0   100%
+matches/urls.py                   6      0   100%
+matches/views.py                 81     11    86%
+messaging/models.py              19      0   100%
+messaging/serializers.py         25      0   100%
+messaging/urls.py                 3      0   100%
+messaging/views.py               50      1    98%
+posts/models.py                  23      2    91%
+posts/serializers.py             28      0   100%
+posts/urls.py                     6      0   100%
+posts/views.py                   75      0   100%
+scraper/client.py                33     26    21%
+scraper/models.py                15      1    93%
+scraper/parser.py                26      5    81%
+scraper/service.py               66      7    89%
+scraper/tasks.py                 23     17    26%
+scraper/urls.py                   3      0   100%
+scraper/views.py                 32     16    50%
+standings/models.py              22      1    95%
+standings/serializers.py          7      0   100%
+standings/tasks.py               66      1    98%
+standings/urls.py                 5      0   100%
+standings/views.py               18      0   100%
+teams/models.py                  12      1    92%
+teams/serializers.py             21      3    86%
+teams/urls.py                     6      0   100%
+teams/views.py                   70     12    83%
+users/authentication.py          28      4    86%
+users/models.py                  31      3    90%
+users/serializers.py             30      0   100%
+users/stats_views.py             53      2    96%
+users/urls.py                     4      0   100%
+users/views.py                  151     25    83%
+-------------------------------------------------
+TOTAL                          1398    154    89%
