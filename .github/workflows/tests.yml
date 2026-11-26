@@ -1,0 +1,66 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Tests back-end (Django)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: footconnect_test
+          POSTGRES_USER: footconnect
+          POSTGRES_PASSWORD: footconnect
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      SECRET_KEY: ci-secret-key-only-used-for-tests-0123456789
+      DEBUG: "False"
+      DATABASE_URL: postgresql://footconnect:footconnect@localhost:5432/footconnect_test
+      R2_ACCOUNT_ID: test
+      R2_ACCESS_KEY_ID: test
+      R2_SECRET_ACCESS_KEY: test
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt coverage
+      - name: Vérifier qu'aucune migration ne manque
+        run: python manage.py makemigrations --check --dry-run
+      - name: Lancer les tests avec la couverture
+        run: |
+          coverage run --source=. --omit='*/migrations/*,*/tests.py,config/test_helpers.py,manage.py,config/asgi.py,config/wsgi.py,*/management/*,*/__init__.py,*/apps.py,*/admin.py' manage.py test -v 2
+          coverage report --fail-under=80
+
+  admin-panel:
+    name: Build du back-office (React)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin-panel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: admin-panel/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - name: Lint (informatif, 25 erreurs existantes à corriger)
+        run: npm run lint
+        continue-on-error: true
