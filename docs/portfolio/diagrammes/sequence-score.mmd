@@ -1,0 +1,31 @@
+sequenceDiagram
+    autonumber
+    actor A as Administrateur (back-office)
+    participant API as API Django
+    participant DB as PostgreSQL
+    participant Q as Redis
+    participant C as Celery (worker)
+    actor U as Supporter (appli mobile)
+
+    A->>API: PATCH /api/matches/{id}/result/<br/>{home_score: 2, away_score: 1, status: "finished"} + JWT
+    API->>API: vérifie le jeton JWT et le rôle admin
+    alt pas administrateur
+        API-->>A: 403 « Accès réservé aux administrateurs »
+    else administrateur
+        API->>DB: SELECT du match {id}
+        alt match introuvable
+            API-->>A: 404
+        else match trouvé
+            API->>DB: UPDATE score, statut « finished », is_locked = true
+            API->>Q: recalcul_standing(catégorie, saison, poule)
+            API-->>A: 200 — match mis à jour (JSON)
+            Note over A: le back-office affiche le nouveau score
+            Q->>C: le worker récupère la tâche
+            C->>DB: SELECT des matchs terminés de la poule
+            C->>C: calcule points, V/N/D, buts, différence,<br/>départage par confrontation directe
+            C->>DB: UPDATE des lignes du classement (rang, points…)
+        end
+    end
+    U->>API: GET /api/standings/?category=…&season=…&group_name=…
+    API->>DB: SELECT du classement trié par rang
+    API-->>U: 200 — classement à jour

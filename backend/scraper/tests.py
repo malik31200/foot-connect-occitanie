@@ -39,6 +39,14 @@ RAW_MATCH = {
 
 class ScraperServiceTest(TestCase):
 
+    def setUp(self):
+        # Le service attend 1 s entre deux appels à la FFF : inutile dans les tests.
+        # Pas de Redis pendant les tests : l'envoi de la tâche de classement est simulé.
+        for target in ('scraper.service.time.sleep', 'scraper.service.recalcul_standing.delay'):
+            patcher = patch(target)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
     @patch('scraper.service.client.get_matches', return_value=[RAW_MATCH])
     @patch('scraper.service.client.get_competitions', return_value=FAKE_COMP)
     def test_insert_new_match(self, mock_comps, mock_matches):

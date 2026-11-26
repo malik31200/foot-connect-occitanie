@@ -1,0 +1,99 @@
+classDiagram
+    direction LR
+    class User {
+        +email
+        +username
+        +role : user | admin
+        +sport_role : joueur | coach | supporter | club | partenaire
+        +avatar_url
+        +is_active
+    }
+    class PasswordResetToken {
+        +code
+        +created_at
+        +is_valid() bool
+    }
+    class DailyActivity {
+        +date
+    }
+    class Club {
+        +name
+        +city
+        +stadium
+        +logo_url
+    }
+    class Team {
+        +name
+        +category
+        +group_name
+        +season
+    }
+    class Match {
+        +matchday
+        +date_time
+        +venue
+        +status : scheduled | finished | postponed
+        +home_score
+        +away_score
+        +source : fff | manual
+        +is_locked
+    }
+    class Standing {
+        +played, won, draw, lost
+        +goals_for, goals_against, goal_diff
+        +points
+        +rank
+    }
+    class Post {
+        +caption
+        +likes_count
+        +created_at
+    }
+    class PostMedia {
+        +media_type : photo | video
+        +media_url
+        +order
+    }
+    class Comment {
+        +content
+        +is_edited
+    }
+    class Like
+    class CommentLike
+    class Follow
+    class Block
+    class Report {
+        +reason
+    }
+    class CommentReport {
+        +reason
+    }
+    class Conversation {
+        +other_user(user) User
+    }
+    class Message {
+        +content
+        +is_read
+    }
+
+    Club "1" --> "*" Team : possède
+    Team "1" --> "*" Match : domicile / extérieur
+    Team "1" --> "*" Standing : classement
+    Match "0..1" --> "*" Post : illustre
+    User "1" --> "*" Post : publie
+    Post "1" *-- "1..*" PostMedia : contient
+    Post "1" *-- "*" Comment : reçoit
+    Comment "0..1" --> "*" Comment : réponses
+    User "1" --> "*" Comment : écrit
+    Post "1" *-- "*" Like
+    User "1" --> "*" Like
+    Comment "1" *-- "*" CommentLike
+    User "1" --> "*" Follow : suit / est suivi
+    User "1" --> "*" Block : bloque / est bloqué
+    Post "1" *-- "*" Report : signalé
+    Comment "1" *-- "*" CommentReport : signalé
+    User "2" --> "*" Conversation : participe
+    Conversation "1" *-- "*" Message : contient
+    User "1" --> "*" Message : envoie
+    User "1" *-- "*" PasswordResetToken
+    User "1" *-- "*" DailyActivity : actif le

@@ -18,3 +18,7 @@ dist/
 # OS
 .DS_Store
 holbertonschool-smiling-school-javascript/
+
+# Couverture des tests
+.coverage
+htmlcov/

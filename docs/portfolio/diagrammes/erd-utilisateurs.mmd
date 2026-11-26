@@ -1,0 +1,60 @@
+erDiagram
+    USER ||--o{ POST : "publie"
+    USER ||--o{ FOLLOW : "suit (follower)"
+    USER ||--o{ FOLLOW : "est suivi (following)"
+    USER ||--o{ BLOCK : "bloque / est bloqué"
+    USER ||--o{ CONVERSATION : "participe (user1 / user2)"
+    USER ||--o{ MESSAGE : "envoie"
+    USER ||--o{ PASSWORD_RESET_TOKEN : "demande"
+    USER ||--o{ DAILY_ACTIVITY : "actif le"
+    CONVERSATION ||--o{ MESSAGE : "contient"
+    USER {
+        bigint id PK
+        varchar email UK
+        varchar username UK
+        varchar password "haché PBKDF2"
+        varchar role "user | admin"
+        varchar sport_role "joueur | coach | supporter | club | partenaire"
+        varchar avatar_url
+        varchar club_name
+        bool is_active
+        timestamp date_joined
+    }
+    FOLLOW {
+        bigint id PK
+        bigint follower_id FK "UK avec following_id"
+        bigint following_id FK
+    }
+    BLOCK {
+        bigint id PK
+        bigint blocker_id FK "UK avec blocked_id"
+        bigint blocked_id FK
+    }
+    CONVERSATION {
+        bigint id PK
+        bigint user1_id FK
+        bigint user2_id FK
+        timestamp updated_at
+    }
+    MESSAGE {
+        bigint id PK
+        bigint conversation_id FK
+        bigint sender_id FK
+        text content
+        bool is_read
+        timestamp created_at
+    }
+    PASSWORD_RESET_TOKEN {
+        bigint id PK
+        bigint user_id FK
+        varchar code "6 chiffres"
+        timestamp created_at
+    }
+    DAILY_ACTIVITY {
+        bigint id PK
+        bigint user_id FK "UK avec date"
+        date date
+    }
+    POST {
+        bigint id PK
+    }
