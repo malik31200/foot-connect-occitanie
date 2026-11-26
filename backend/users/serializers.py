@@ -31,7 +31,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'sport_role', 'avatar_url', 'club_name',
+        # Pas d'email : ce profil est visible par tous les utilisateurs connectés
+        fields = ['id', 'username', 'role', 'sport_role', 'avatar_url', 'club_name',
                   'followers_count', 'following_count']
 
     def get_followers_count(self, obj):

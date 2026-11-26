@@ -45,6 +45,13 @@ class CommentViewSet(viewsets.ModelViewSet):
             parent = get_object_or_404(Comment, id=parent_id, post=post)
         serializer.save(author=self.request.user, post=post, parent=parent)
 
+    def update(self, request, *args, **kwargs):
+        comment = self.get_object()
+        if comment.author != request.user:
+            return Response({'detail': 'Vous ne pouvez modifier que vos propres commentaires.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
     def perform_update(self, serializer):
         serializer.save(is_edited=True)
 
