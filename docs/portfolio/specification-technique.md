@@ -1063,3 +1063,83 @@ Couverture mesurée avec `coverage.py` : **89 % des lignes du back-end** sont ex
 | B11 | Heures des matchs décalées de 1 à 2 h quand elles étaient saisies dans le back-office | Test manuel par l'administrateur (octobre 2026) | **Corrigé** (conversion heure de Paris / UTC) et 33 matchs rectifiés en base |
 
 Les bugs B03 et B04 sont corrigés dans la branche `test/tests-api`. Ils ne touchent que le serveur : aucune nouvelle version de l'appli n'est nécessaire.
+
+## 8. Maquettes de l'application
+
+**Lien vers les maquettes (prototype cliquable inclus) :** https://claude.ai/artifact/BGmZp8yweQxSDkWRN4f4o9
+
+Les maquettes ont été réalisées **avant le développement des écrans** : elles ont été ajoutées au dépôt le 18/06/2026 (commit `fee96fd`, dossier `Design/`), alors que les écrans Fil et Publier ont été codés le 08/07/2026 (commit `c845569`). Elles ont été faites avec Claude Design, un outil de maquettage qui produit des maquettes haute fidélité et un prototype cliquable. En novembre 2026, elles ont été complétées par les écrans du back-office et les états vides et d'erreur, absents de la première version.
+
+### 8.1 Guide de style
+
+![Guide de style](maquettes/guide-de-style.png)
+
+| Élément | Choix | Usage |
+| --- | --- | --- |
+| Police des titres | **Anton** (Google Fonts), toujours en majuscules | Titres d'écran, scores, logo, chiffres |
+| Police de l'interface | **Plus Jakarta Sans** (Google Fonts), graisses 400 à 800 | Textes, boutons, libellés |
+| Couleur primaire | Rouge occitan `#E4002B`, dégradé bouton `#E4002B → #FF5A1F` | Boutons principaux, onglet actif, liens |
+| Couleur d'accent | Or `#F5C518` | Croix occitane, bouton central « Publier » |
+| Fonds | Crème `#F6F3EE` (écrans), `#F4F1EC` (champs), blanc (cartes) | |
+| Texte | Encre `#1A1614`, secondaire `#5C564F` | Contraste conforme aux recommandations d'accessibilité |
+| Succès | Vert `#22A05A` | Match terminé, 1er du classement |
+
+**Composants homogènes :** boutons principaux de 54 px de haut à coins arrondis (15 px) ; boutons secondaires en pilule bordée de rouge ; champs de 50 px sur fond `#F4F1EC` ; cartes blanches arrondies (18 à 20 px) ; pilules de filtre (active en dégradé rouge, inactive bordée de gris) ; badges de catégorie (or) et de poule (bleu) ; barre de navigation basse à 5 onglets identique sur tous les écrans. Le back-office réutilise les mêmes couleurs et polices. Aucune bibliothèque CSS n'est utilisée : les styles sont écrits avec `StyleSheet` de React Native et du CSS simple dans le back-office, ce qui permet de reproduire exactement la maquette.
+
+### 8.2 Écrans de l'application mobile
+
+![Les 13 écrans de la maquette](maquettes/planche-ecrans.png)
+
+| # | Écran | Rôle | User stories |
+| --- | --- | --- | --- |
+| 1 | Connexion | Entrée dans l'appli | US3, US4 |
+| 2 | Inscription | Créer un compte avec acceptation des CGU | US1 |
+| 3 | Fil d'actualité | Photos et vidéos de match, like, partage | US9 |
+| 4 | Commentaires | Lire et écrire des commentaires | US9 |
+| 5 à 8 | Matchs : à venir, terminés, classement, calendrier | Suivre sa catégorie et sa poule | US6, US7 |
+| 9 | Publier | Publier des photos ou une vidéo liées à un match | US8 |
+| 10, 11 | Messages et conversation | Messagerie privée | US11 |
+| 12, 13 | Profil et modification | Profil, abonnés, réglages | US5, US10 |
+
+Les 13 écrans sont visibles dans le lien ci-dessus et dans le dossier `docs/portfolio/maquettes/` du dépôt (`sprint4-01-connexion.png` à `sprint4-13-modifier-profil.png`).
+
+### 8.3 Compléments : back-office (desktop) et états particuliers (mobile)
+
+**Back-office — saisie des scores**
+
+![Back-office : matchs](maquettes/admin-matchs.png)
+
+**Back-office — modération, avec son état vide**
+
+![Back-office : modération](maquettes/admin-moderation.png)
+
+**Mobile — fil vide, erreur réseau, vérification de l'email (V1), publication sans match refusée (V1)**
+
+![États mobiles](maquettes/etats-mobile.png)
+
+Le back-office est une application web adaptée aux écrans d'ordinateur, de tablette et de téléphone (menu qui passe à la ligne, tableaux qui défilent horizontalement).
+
+### 8.4 Parcours utilisateurs principaux
+
+1. **Un parent publie les photos du match de son enfant :** Inscription → Fil → bouton « + » → Publier (choix du match, photos, légende) → le post apparaît en tête du fil → les autres familles likent et commentent → un coach lui écrit en message privé.
+2. **Un supporter suit sa poule :** Matchs → choix de la catégorie et de la poule → À venir (date, heure, stade) → Terminés (score) → Classement.
+3. **L'administrateur met à jour les résultats :** connexion au back-office → Matchs → saisie du score → le match est verrouillé et le classement recalculé → Modération → Stats.
+
+Le prototype cliquable (lien ci-dessus, cadre « Prototype cliquable ») permet de parcourir les écrans mobiles : connexion, inscription, fil, like, commentaires, matchs avec filtres et onglets, publication, messages, conversation, profil et modification.
+
+### 8.5 De la maquette à l'application réelle
+
+![Comparaison maquette et application publiée](maquettes/comparaison-maquette-reel.png)
+
+L'identité visuelle a été conservée (couleurs, polices, barre de navigation, bouton « Publier » doré). Plusieurs écrans ont évolué pendant le développement :
+
+| Écran | Dans la maquette | Dans l'appli | Pourquoi |
+| --- | --- | --- | --- |
+| Connexion | Bouton « Continuer en mode démo » | Supprimé ; ajout de « Mot de passe oublié » et de l'affichage du mot de passe | Pas de contenu sans compte ; demandes des utilisateurs |
+| Inscription | Prénom, nom, pseudo, email, mot de passe, club favori | Pseudo, email, mot de passe, rôle sportif (joueur, coach, supporter…), CGU | Inscription plus rapide ; le rôle sert à adapter l'appli (coachs en V1) |
+| Fil | Badge « LIVE », légende avec le match | Loupe de recherche ajoutée, badge LIVE retiré | Pas de direct dans le périmètre ; la recherche est devenue nécessaire avec le nombre de posts |
+| Matchs | Catégories U16 / U17 / U18 | Toutes les catégories importées (U14 à Seniors, Régional 1 à 3, féminines), logos des clubs, adresse du stade | Les vrais calendriers FFF couvrent bien plus de compétitions |
+| Publier | Liste de matchs unique, une zone photo et une zone vidéo | Choix de la catégorie puis de la poule, plusieurs photos (carrousel), saisie manuelle des équipes si le match n'est pas dans la liste | Plus de 5 000 matchs : la liste unique était inutilisable ; certains matchs manquent dans les calendriers |
+| Profil | Bio, compteurs, photos et vidéos | Rôle et club affichés, abonnés cliquables, bouton « Se déconnecter » et « Supprimer mon compte » | Exigences d'Apple (suppression du compte) ; consultation des abonnés |
+| Signaler / bloquer | Absent | Menu « … » sur chaque post et chaque profil | Exigence d'Apple pour les contenus publiés par les utilisateurs |
+| Back-office | Non maquetté au départ | Conçu directement en code, maquetté en novembre 2026 | Outil interne d'un seul administrateur ; priorité donnée à l'appli publique |
