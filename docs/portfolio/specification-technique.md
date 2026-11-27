@@ -444,7 +444,9 @@ La base est une base **PostgreSQL 18** de **19 tables métier** (hors tables int
 
 ### 5.1 ERD — vue d'ensemble
 
-![ERD complet](diagrammes/erd.png)
+![ERD : vue d'ensemble des 19 tables et de leurs relations](diagrammes/erd-simple.png)
+
+Cette vue montre uniquement les tables et leurs relations. Les colonnes de chaque table sont détaillées dans les trois zooms ci-dessous ; le schéma complet en un seul bloc est dans le dépôt (`docs/portfolio/diagrammes/erd.png`).
 
 Pour la lisibilité, le même schéma est découpé en trois zooms. Une table réduite à son `id` est détaillée dans un autre zoom.
 
