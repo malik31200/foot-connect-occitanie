@@ -54,6 +54,7 @@ Comme le projet existe déjà, chaque fonctionnalité indique son statut : **Liv
 | Espace club vérifié : un dirigeant gère la page de son club | Futur |
 | Repost interne d'une publication dans son fil | Futur |
 | Statistiques détaillées par équipe (buts, séries de victoires) | Futur |
+| Compression des vidéos sur le téléphone avant l'envoi (envoi plus rapide en 4G, moins de stockage) | Futur |
 
 ### Won't Have for now — exclu de cette version
 
@@ -282,7 +283,7 @@ Chaque exigence indique comment elle est mise en œuvre, son statut (**En place*
 
 - L'API répond en moins de 500 ms pour le fil d'actualité et la liste des matchs d'une poule, mesuré depuis la France.
 - Aujourd'hui, le fil d'actualité et les listes de matchs sont renvoyés en une seule réponse ; en V1, le fil sera paginé par 20 posts (chargement de la suite en faisant défiler) et les listes de matchs par 50.
-- Les photos sont légèrement compressées avant l'envoi (qualité 80 %) et chaque vidéo est limitée à 100 Mo, avec un message clair si elle dépasse cette taille. La durée des vidéos n'est pas limitée aujourd'hui ; en V1, les vidéos seront compressées sur le téléphone avant l'envoi pour réduire le temps d'envoi en 4G et le coût de stockage.
+- Les photos sont légèrement compressées avant l'envoi (qualité 80 %) et chaque vidéo est limitée à 100 Mo, avec un message clair si elle dépasse cette taille. La durée des vidéos n'est pas limitée aujourd'hui ; en amélioration prévue (Could Have), les vidéos seront compressées sur le téléphone avant l'envoi pour réduire le temps d'envoi en 4G et le coût de stockage.
 - Les fichiers médias sont servis directement par Cloudflare R2, sans passer par le serveur de l'API.
 
 ### 2.4 Responsive design
