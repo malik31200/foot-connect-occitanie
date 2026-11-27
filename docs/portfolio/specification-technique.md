@@ -42,6 +42,7 @@ Comme le projet existe déjà, chaque fonctionnalité indique son statut : **Liv
 | Saisie du score d'un match par les coachs et dirigeants, validée par l'admin | V1 |
 | Tests automatiques du back-end complets et intégration continue sur GitHub | V1 |
 | Sauvegarde quotidienne de la base de données hors du serveur | V1 |
+| Session prolongée : rester connecté tant que l'appli est utilisée au moins une fois tous les 7 jours (renouvellement automatique du jeton de rafraîchissement) | V1 |
 
 ### Could Have — souhaitable si le temps le permet
 
@@ -267,6 +268,7 @@ Chaque exigence indique comment elle est mise en œuvre, son statut (**En place*
 | Mesure | Mise en œuvre | Statut |
 | --- | --- | --- |
 | Authentification | JWT : jeton d'accès de 8 h gardé en mémoire, jeton de rafraîchissement de 7 jours stocké de façon chiffrée sur le téléphone (SecureStore d'Expo, qui s'appuie sur le trousseau iOS et le Keystore Android) | En place |
+| Durée de session | Aujourd'hui, l'utilisateur doit se reconnecter 7 jours après sa dernière connexion avec mot de passe, même s'il utilise l'appli chaque jour. En V1 : rotation du jeton de rafraîchissement (`ROTATE_REFRESH_TOKENS` de SimpleJWT, ancien jeton mis sur liste noire) et enregistrement du nouveau jeton par l'appli : la session n'expire qu'après 7 jours sans utilisation | V1 |
 | Autorisation | Toutes les routes exigent d'être connecté, sauf l'inscription, la connexion et la consultation des matchs, classements et posts. Les routes d'administration vérifient le rôle `admin` (réponse 403 sinon). Un utilisateur ne peut supprimer que ses propres posts et commentaires | En place |
 | Autorisation (correctifs) | Modification d'un commentaire réservée à son auteur ; email retiré du profil public (bugs B03 et B04, section 7.11) | Corrigé, testé |
 | Envoi de fichiers | Le téléphone envoie les médias directement sur Cloudflare R2 grâce à une URL signée valable 1 heure, générée par l'API. Les clés R2 ne quittent jamais le serveur | En place |
