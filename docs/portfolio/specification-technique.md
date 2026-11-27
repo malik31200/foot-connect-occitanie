@@ -282,7 +282,7 @@ Chaque exigence indique comment elle est mise en œuvre, son statut (**En place*
 
 - L'API répond en moins de 500 ms pour le fil d'actualité et la liste des matchs d'une poule, mesuré depuis la France.
 - Aujourd'hui, le fil d'actualité et les listes de matchs sont renvoyés en une seule réponse ; en V1, le fil sera paginé par 20 posts (chargement de la suite en faisant défiler) et les listes de matchs par 50.
-- Les vidéos sont limitées à 60 secondes et les photos compressées avant l'envoi, pour un envoi en moins de 10 secondes en 4G.
+- Les photos sont légèrement compressées avant l'envoi (qualité 80 %) et chaque vidéo est limitée à 100 Mo, avec un message clair si elle dépasse cette taille. La durée des vidéos n'est pas limitée aujourd'hui ; en V1, les vidéos seront compressées sur le téléphone avant l'envoi pour réduire le temps d'envoi en 4G et le coût de stockage.
 - Les fichiers médias sont servis directement par Cloudflare R2, sans passer par le serveur de l'API.
 
 ### 2.4 Responsive design
